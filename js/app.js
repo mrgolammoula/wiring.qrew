@@ -22,6 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
     currentMemberId: 'usr_nusrat'
   };
 
+  // Tenant Subdomain Mapping Helper (e.g. ctg.sst.com per hierarchy)
+  const getTenantDomain = (tenantId) => {
+    switch (tenantId) {
+      case 'ten_ctg': return 'ctg.sst.com';
+      case 'ten_dhaka': return 'dhaka.sst.com';
+      case 'ten_meridian': return 'meridian.sst.com';
+      default: return tenantId ? `${tenantId}.sst.com` : 'tenant.sst.com';
+    }
+  };
+
   // DOM Elements
   const DOM = {
     mainContent: document.getElementById('main-content'),
@@ -69,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return { workspace: 'landing', view: 'landing', path: 'landing', params };
     }
 
+    if (pathPart === 'tenant-landing' || pathPart.startsWith('tenant-landing/')) {
+      return { workspace: 'tenant-landing', view: 'landing', path: 'tenant-landing', params };
+    }
+
     let workspace = 'platform';
     let view = 'overview';
 
@@ -102,6 +116,21 @@ document.addEventListener('DOMContentLoaded', () => {
         view = 'members';
       } else if (pathPart === 'tenant-roles') {
         view = 'roles';
+      }
+    } else if (pathPart.startsWith('office-admin/') || pathPart === 'office-admin' || pathPart === 'office-admin-overview' || pathPart === 'office-admin-staff' || pathPart === 'office-admin-departments' || pathPart === 'office-admin-roles' || pathPart === 'office-admin-activity') {
+      workspace = 'office-admin';
+      if (pathPart.startsWith('office-admin/')) {
+        view = pathPart.replace('office-admin/', '') || 'overview';
+      } else if (pathPart === 'office-admin-staff') {
+        view = 'staff';
+      } else if (pathPart === 'office-admin-departments') {
+        view = 'departments';
+      } else if (pathPart === 'office-admin-roles') {
+        view = 'roles';
+      } else if (pathPart === 'office-admin-activity') {
+        view = 'activity';
+      } else {
+        view = 'overview';
       }
     } else if (pathPart.startsWith('office/') || pathPart === 'office-details' || pathPart === 'office-overview' || pathPart === 'office-staff' || pathPart === 'office-roles' || pathPart === 'office-activity' || pathPart === 'office-departments') {
       workspace = 'office';
@@ -149,8 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
     AppState.currentRoute = route.path;
     AppState.routeParams = route.params;
 
-    if (route.workspace === 'landing') {
+    if (route.workspace === 'landing' || route.workspace === 'tenant-landing') {
       document.body.classList.add('landing-mode');
+      if (route.params.id) {
+        AppState.currentTenantId = route.params.id;
+      }
       dispatchView();
       return;
     } else {
@@ -196,6 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Re-render Dynamic Navigation Sidebar
     renderSidebar();
+
+    // Synchronize Topbar Landing Button (Platform vs. Tenant Landing)
+    syncTopbarLandingBtn();
 
     // Close mobile drawer on route change
     if (DOM.sidebar.classList.contains('mobile-open')) {
@@ -305,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
       DOM.sidebarBrandLogo.textContent = initial;
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-info)';
       DOM.sidebarBrandName.textContent = office ? office.name : 'Office';
-      DOM.sidebarBrandBadge.textContent = 'Office Workspace';
+      DOM.sidebarBrandBadge.textContent = 'Branch Facility Hub';
 
       // Office Context Picker
       DOM.sidebarContextPicker.style.display = 'flex';
@@ -316,7 +351,25 @@ document.addEventListener('DOMContentLoaded', () => {
       `).join('') : '<option disabled selected>No offices created</option>';
       DOM.sidebarContextSelect.onchange = (e) => {
         AppState.currentOfficeId = e.target.value;
-        navigateTo(`#office/${AppState.currentView}?tenantId=${tenant.id}&officeId=${AppState.currentOfficeId}`);
+        navigateTo(`#office/overview?tenantId=${tenant.id}&officeId=${AppState.currentOfficeId}`);
+      };
+    } else if (ws === 'office-admin') {
+      const initial = office ? office.name.charAt(0).toUpperCase() : 'O';
+      DOM.sidebarBrandLogo.textContent = initial;
+      DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
+      DOM.sidebarBrandName.textContent = office ? office.name : 'Office Admin';
+      DOM.sidebarBrandBadge.textContent = 'Office Administration';
+
+      // Office Context Picker
+      DOM.sidebarContextPicker.style.display = 'flex';
+      DOM.sidebarContextLabel.textContent = `Branch Admin (${tenant ? tenant.name : ''})`;
+      const officesInTenant = tenant ? QrewStore.getOfficesByTenant(tenant.id) : [];
+      DOM.sidebarContextSelect.innerHTML = officesInTenant.length > 0 ? officesInTenant.map(o => `
+        <option value="${o.id}" ${office && o.id === office.id ? 'selected' : ''}>${QrewUI.escapeHtml(o.name)}</option>
+      `).join('') : '<option disabled selected>No offices created</option>';
+      DOM.sidebarContextSelect.onchange = (e) => {
+        AppState.currentOfficeId = e.target.value;
+        navigateTo(`#office-admin/${AppState.currentView || 'overview'}?tenantId=${tenant.id}&officeId=${AppState.currentOfficeId}`);
       };
     }
 
@@ -395,8 +448,16 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     } else if (ws === 'tenant') {
       const tenantId = tenant ? tenant.id : AppState.currentTenantId;
+      const domain = getTenantDomain(tenantId);
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
+          <div class="nav-section-title">Tenant Portal</div>
+          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('arrowRight')}</span>
+            <span class="nav-label">← Back to Landing (${domain})</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
           <div class="nav-section-title">Tenant Workspace</div>
           <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#tenant/overview?id=${tenantId}">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
@@ -419,28 +480,74 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (ws === 'office') {
       const tenantId = tenant ? tenant.id : AppState.currentTenantId;
       const officeId = office ? office.id : AppState.currentOfficeId;
+      const domain = getTenantDomain(tenantId);
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Office Workspace</div>
-          <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
+          <div class="nav-section-title">Parent Tenant</div>
+          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">← ${tenant ? tenant.name : 'Tenant'} Landing</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Branch Facility Hub</div>
+          <a class="nav-item active" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
-            <span class="nav-label">Overview</span>
+            <span class="nav-label">Branch Hub</span>
           </a>
-          <a class="nav-item ${view === 'staff' ? 'active' : ''}" href="#office/staff?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('users')}</span>
-            <span class="nav-label">Staff</span>
-          </a>
-          <a class="nav-item ${view === 'departments' ? 'active' : ''}" href="#office/departments?tenantId=${tenantId}&officeId=${officeId}">
+          <a class="nav-item" href="#department/overview?deptId=${AppState.currentDeptId || 'dept_ctg_ops'}">
             <span class="nav-icon">${QrewUI.getIcon('department')}</span>
-            <span class="nav-label">Departments</span>
+            <span class="nav-label">Departments Hub</span>
           </a>
-          <a class="nav-item ${view === 'roles' ? 'active' : ''}" href="#office/roles?tenantId=${tenantId}&officeId=${officeId}">
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Management</div>
+          <a class="nav-item" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
+            <span class="nav-label">Office Admin Panel →</span>
+          </a>
+        </div>
+      `;
+    } else if (ws === 'office-admin') {
+      const tenantId = tenant ? tenant.id : AppState.currentTenantId;
+      const officeId = office ? office.id : AppState.currentOfficeId;
+      const domain = getTenantDomain(tenantId);
+      DOM.sidebarNav.innerHTML = `
+        <div class="nav-section">
+          <div class="nav-section-title">Parent Tenant</div>
+          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">← ${tenant ? tenant.name : 'Tenant'} Landing</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Office Administration</div>
+          <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
+            <span class="nav-label">Admin Overview</span>
+          </a>
+          <a class="nav-item ${view === 'staff' ? 'active' : ''}" href="#office-admin/staff?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('users')}</span>
+            <span class="nav-label">Staff Deployment</span>
+          </a>
+          <a class="nav-item ${view === 'departments' ? 'active' : ''}" href="#office-admin/departments?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('department')}</span>
+            <span class="nav-label">Departments Setup</span>
+          </a>
+          <a class="nav-item ${view === 'roles' ? 'active' : ''}" href="#office-admin/roles?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('roles')}</span>
             <span class="nav-label">Roles & Permissions</span>
           </a>
-          <a class="nav-item ${view === 'activity' ? 'active' : ''}" href="#office/activity?tenantId=${tenantId}&officeId=${officeId}">
+          <a class="nav-item ${view === 'activity' ? 'active' : ''}" href="#office-admin/activity?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('audit')}</span>
-            <span class="nav-label">Activity</span>
+            <span class="nav-label">Branch Audit</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Branch Workspace</div>
+          <a class="nav-item" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
+            <span class="nav-label">← Return to Branch Hub</span>
           </a>
         </div>
       `;
@@ -464,6 +571,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (emailEl) emailEl.textContent = user.email;
   };
 
+  // Synchronize Topbar Landing Button (Platform Landing vs. Dedicated Tenant Landing)
+  const syncTopbarLandingBtn = () => {
+    const btn = document.getElementById('topbar-landing-btn');
+    const labelEl = document.getElementById('topbar-landing-label');
+    if (!btn) return;
+
+    const ws = AppState.activeWorkspace;
+    if (ws === 'platform' || ws === 'landing') {
+      btn.href = '#landing';
+      btn.title = 'View Qrew Public Platform Landing';
+      if (labelEl) labelEl.textContent = 'Qrew.com';
+    } else {
+      const tenantId = AppState.currentTenantId || 'ten_ctg';
+      const tenant = QrewStore.getTenantById(tenantId);
+      const domain = getTenantDomain(tenantId);
+      btn.href = `#tenant-landing?id=${tenantId}`;
+      btn.title = `View ${tenant ? tenant.name : 'Tenant'} Dedicated Landing (${domain})`;
+      if (labelEl) labelEl.textContent = domain;
+    }
+  };
+
   // Dispatcher for View Rendering
   const dispatchView = () => {
     const ws = AppState.activeWorkspace;
@@ -471,6 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (ws === 'landing') {
       renderLandingPage();
+      return;
+    }
+
+    if (ws === 'tenant-landing') {
+      renderTenantLandingPage(AppState.currentTenantId);
       return;
     }
 
@@ -530,9 +663,13 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (ws === 'office') {
       const tenantId = AppState.currentTenantId;
       const officeId = AppState.currentOfficeId;
+      renderOfficeWorkspace(tenantId, officeId);
+    } else if (ws === 'office-admin') {
+      const tenantId = AppState.currentTenantId;
+      const officeId = AppState.currentOfficeId;
       switch (view) {
         case 'overview':
-          renderOfficeOverview(tenantId, officeId);
+          renderOfficeAdminOverview(tenantId, officeId);
           break;
         case 'staff':
           renderOfficeStaff(tenantId, officeId);
@@ -547,7 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
           renderOfficeActivity(tenantId, officeId);
           break;
         default:
-          renderOfficeOverview(tenantId, officeId);
+          renderOfficeAdminOverview(tenantId, officeId);
       }
     }
   };
@@ -651,13 +788,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="ws-tab-indicator platform"></span>
                 <span class="ws-tab-text">Platform</span>
               </a>
-              <a href="#tenant/overview?id=ten_ctg" class="workspace-tab" role="tab" title="Tenant Workspace">
+              <a href="#tenant-landing?id=ten_ctg" class="workspace-tab" role="tab" title="Tenant Landing (ctg.sst.com)">
                 <span class="ws-tab-indicator tenant"></span>
                 <span class="ws-tab-text">Tenant</span>
               </a>
               <a href="#office/overview?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Workspace">
                 <span class="ws-tab-indicator office"></span>
                 <span class="ws-tab-text">Office</span>
+              </a>
+              <a href="#office-admin/overview?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Admin Panel">
+                <span class="ws-tab-indicator" style="background-color:var(--color-accent);"></span>
+                <span class="ws-tab-text">Office Admin</span>
               </a>
               <a href="#office-config?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Configuration Centre">
                 <span class="ws-tab-indicator config"></span>
@@ -718,6 +859,162 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="hero-ribbon-val">Contextual RBAC</div>
                 <div class="hero-ribbon-label">Strict tier permission isolation</div>
               </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+  };
+
+  // ==========================================
+  // DEDICATED TENANT LANDING PAGE (ctg.sst.com / sst.com)
+  // ==========================================
+  const renderTenantLandingPage = (tenantId) => {
+    const tenant = QrewStore.getTenantById(tenantId) || QrewStore.getTenants()[0];
+    const allTenants = QrewStore.getTenants();
+    const domain = getTenantDomain(tenant.id);
+    const offices = QrewStore.getOfficesByTenant(tenant.id);
+    const members = QrewStore.getTenantMembers(tenant.id);
+
+    DOM.mainContent.innerHTML = `
+      <div class="landing-page">
+        <!-- Tenant Sticky Header -->
+        <header class="landing-navbar">
+          <div class="landing-container landing-navbar-inner">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <a href="#tenant-landing?id=${tenant.id}" class="landing-brand">
+                <div class="landing-brand-logo" style="background-color:var(--color-warning);">${tenant.name.charAt(0)}</div>
+                <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
+              </a>
+              <span class="tenant-domain-pill">${domain}</span>
+            </div>
+
+            <!-- Tenant Quick Switcher for Demo Evaluation -->
+            <div class="workspace-tabs" role="tablist" aria-label="Tenant Switcher">
+              ${allTenants.map(t => `
+                <a href="#tenant-landing?id=${t.id}" class="workspace-tab ${t.id === tenant.id ? 'active' : ''}" role="tab" title="Switch to ${t.name}">
+                  <span class="ws-tab-indicator tenant"></span>
+                  <span class="ws-tab-text">${QrewUI.escapeHtml(t.name)}</span>
+                </a>
+              `).join('')}
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;">
+              <a href="#landing" class="btn btn-secondary btn-sm" title="Return to Qrew Global SaaS Landing">
+                ← Qrew Platform
+              </a>
+              <a href="#tenant/overview?id=${tenant.id}" class="btn btn-primary btn-sm">
+                Tenant Admin Panel →
+              </a>
+            </div>
+          </div>
+        </header>
+
+        <!-- Tenant Hero Section -->
+        <section class="tenant-landing-hero">
+          <div class="landing-container">
+            <div class="landing-badge">
+              <span class="landing-badge-dot"></span>
+              <span>Tenant Namespace: ${domain} • Autonomous Organization Operations</span>
+            </div>
+            <h1 class="landing-hero-title">
+              ${QrewUI.escapeHtml(tenant.name)} Operations Portal
+            </h1>
+            <p class="landing-hero-subtitle">
+              Dedicated corporate organization portal for ${QrewUI.escapeHtml(tenant.name)}. Overseeing ${offices.length} physical branch facilities and ${members.length} verified organization members under the ${domain} namespace.
+            </p>
+
+            <div class="landing-cta-group">
+              <a href="#tenant/overview?id=${tenant.id}" class="btn btn-primary landing-btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+                <span>Open Tenant Admin Panel</span>
+                ${QrewUI.getIcon('arrowRight')}
+              </a>
+              <a href="#tenant/offices?id=${tenant.id}" class="btn btn-secondary landing-btn-lg">
+                Manage Offices Directory
+              </a>
+              <a href="#member/overview?userId=usr_nusrat" class="btn btn-secondary landing-btn-lg">
+                Staff Workspace
+              </a>
+            </div>
+
+            <!-- Organization Metrics Ribbon -->
+            <div class="hero-ribbon">
+              <div class="hero-ribbon-item">
+                <div class="hero-ribbon-val">${offices.length} Branches</div>
+                <div class="hero-ribbon-label">Physical Office Facilities</div>
+              </div>
+              <div class="hero-ribbon-item">
+                <div class="hero-ribbon-val">${members.length} Members</div>
+                <div class="hero-ribbon-label">Verified Personnel Pool</div>
+              </div>
+              <div class="hero-ribbon-item">
+                <div class="hero-ribbon-val">${tenant.status}</div>
+                <div class="hero-ribbon-label">Organization Lifecycle</div>
+              </div>
+              <div class="hero-ribbon-item">
+                <div class="hero-ribbon-val">Tier-3 Scoping</div>
+                <div class="hero-ribbon-label">Strict Multi-Tenant Isolation</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Branch Offices Showcase Section -->
+        <section style="padding:48px 0 64px;">
+          <div class="landing-container">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div class="landing-eyebrow" style="color:var(--color-accent);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;">Physical Deployment</div>
+                <h2 style="font-size:24px;font-weight:800;color:var(--color-text-primary);margin:4px 0 0;">Branch Office Facilities</h2>
+                <p style="font-size:13.5px;color:var(--color-text-muted);margin:4px 0 0;">Select a physical office branch below to access its operational workspace or management panel.</p>
+              </div>
+              <div>
+                <a href="#tenant/offices?id=${tenant.id}" class="btn btn-secondary btn-sm">
+                  ${QrewUI.getIcon('plus')} Provision New Office
+                </a>
+              </div>
+            </div>
+
+            <div class="tenant-branch-grid">
+              ${offices.map(o => {
+                const depts = QrewStore.getDepartments(o.id);
+                const staff = QrewStore.getOfficeStaff(o.id);
+                return `
+                  <div class="tenant-branch-card">
+                    <div class="tenant-branch-header">
+                      <div>
+                        <div class="tenant-branch-title">${QrewUI.escapeHtml(o.name)}</div>
+                        <div class="tenant-branch-location">${QrewUI.escapeHtml(o.location)}</div>
+                      </div>
+                      ${QrewUI.statusBadge(o.status)}
+                    </div>
+
+                    <div class="tenant-branch-stats">
+                      <div>
+                        <strong>${depts.length}</strong> <span style="color:var(--color-text-muted);">Departments</span>
+                      </div>
+                      <div>
+                        <strong>${staff.length}</strong> <span style="color:var(--color-text-muted);">Deployed Staff</span>
+                      </div>
+                      <div class="active-shift-badge">
+                        <span>●</span> Shift: Morning
+                      </div>
+                    </div>
+
+                    <div class="tenant-branch-actions">
+                      <a href="#office/overview?tenantId=${tenant.id}&officeId=${o.id}" class="btn btn-primary btn-sm" style="flex:1;text-align:center;">
+                        Office Workspace →
+                      </a>
+                      <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${o.id}" class="btn btn-secondary btn-sm" title="Office Admin Panel">
+                        Admin ⚙
+                      </a>
+                      <a href="#office-config?tenantId=${tenant.id}&officeId=${o.id}" class="btn btn-secondary btn-sm" title="Facility Specs & Shifts">
+                        Config
+                      </a>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
         </section>
@@ -1442,7 +1739,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
       { label: 'Overview', hash: `#tenant/overview?id=${tenant.id}` }
     ]);
 
@@ -1458,6 +1755,9 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; Back to Landing (${getTenantDomain(tenant.id)})
+          </a>
           <button class="btn btn-secondary" id="btn-edit-tenant-header">
             ${QrewUI.getIcon('edit')} Edit Tenant
           </button>
@@ -1470,6 +1770,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="meta-item">
             <span class="meta-label">Tenant ID</span>
             <span class="meta-value"><span class="id-badge">${tenant.id}</span></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Tenant Portal</span>
+            <span class="meta-value">
+              <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;text-decoration:none;">
+                ${getTenantDomain(tenant.id)} &rarr;
+              </a>
+            </span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Tenant Owner</span>
@@ -1604,7 +1912,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
       { label: 'Offices', hash: `#tenant/offices?id=${tenant.id}` }
     ]);
 
@@ -1617,6 +1925,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Offices operating under ${QrewUI.escapeHtml(tenant.name)}. Each office can have its own staff and operational roles.</p>
         </div>
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; Back to Landing
+          </a>
           <button class="btn btn-primary" id="btn-create-office">
             ${QrewUI.getIcon('plus')} Create Office
           </button>
@@ -1670,7 +1981,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="action-icon-btn danger delete-office-btn" data-id="${off.id}" data-name="${QrewUI.escapeHtml(off.name)}" title="Delete Office Branch">
                       ${QrewUI.getIcon('trash')}
                     </button>
-                    <a href="#office/overview?tenantId=${tenant.id}&officeId=${off.id}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 7px;margin-left:4px;" title="Open Office Admin">
+                    <a href="#office/overview?tenantId=${tenant.id}&officeId=${off.id}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 7px;margin-left:4px;" title="Open Branch Hub">
+                      Branch Hub &rarr;
+                    </a>
+                    <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${off.id}" class="btn btn-primary btn-sm" style="font-size:11px;padding:3px 7px;margin-left:2px;" title="Open Office Admin">
                       Admin &rarr;
                     </a>
                   </div>
@@ -1701,7 +2015,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
       { label: 'Members', hash: `#tenant/members?id=${tenant.id}` }
     ]);
 
@@ -1714,6 +2028,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Users verified with organization membership in ${QrewUI.escapeHtml(tenant.name)}.</p>
         </div>
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; Back to Landing
+          </a>
           <button class="btn btn-primary" id="btn-add-tenant-member">
             ${QrewUI.getIcon('plus')} Add Member
           </button>
@@ -1792,7 +2109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
       { label: 'Tenant Roles', hash: `#tenant/roles?id=${tenant.id}` }
     ]);
 
@@ -1804,6 +2121,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="page-title-group">
           <h1 class="page-title">Tenant Roles</h1>
           <p class="page-subtitle">Roles and permissions controlling organizational administration within ${QrewUI.escapeHtml(tenant.name)}.</p>
+        </div>
+        <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; Back to Landing
+          </a>
         </div>
       </div>
 
@@ -1940,9 +2262,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="page-header" style="margin-bottom:16px;">
         <div class="page-title-group">
           <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-            <a href="#platform/overview" style="color:var(--color-text-muted);text-decoration:none;">Platform</a>
+            <a href="#platform/overview" style="color:var(--color-text-muted);text-decoration:none;">Platform Standards</a>
             <span>/</span>
-            <a href="#tenant/offices?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+            <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
             <span>/</span>
             <span style="color:var(--color-text-primary);font-weight:600;">Office Configuration Centre</span>
           </div>
@@ -1953,16 +2275,47 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Configure physical plant specifications, access control tiers, operating shifts, and provision facility departments.</p>
         </div>
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
+          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            &larr; Branch Hub
+          </a>
           <button class="btn btn-secondary" id="btn-edit-office-specs">
             ${QrewUI.getIcon('settings')} Edit Facility Specs
           </button>
-          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-primary" id="btn-deploy-to-office">
+          <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-primary" id="btn-deploy-to-office">
             ${QrewUI.getIcon('arrowRight')} Deploy to Office Admin
           </a>
         </div>
       </div>
 
       <div class="config-layout">
+        <!-- Dual Governance Linkage Banner (Tier 2 Platform Blueprint <-> Tier 3 Tenant Branch Specs) -->
+        <div class="card" style="margin-bottom:14px;background:var(--color-surface);border:1px solid var(--color-border);padding:14px 18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);">Dual Governance:</span>
+              <div style="display:inline-flex;align-items:center;gap:6px;background:var(--color-bg);padding:4px 10px;border-radius:4px;border:1px solid var(--color-border);font-size:12px;">
+                <span class="ws-tab-indicator platform" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#9E5334;"></span>
+                <span style="color:var(--color-text-muted);">Tier 2 Platform Standard:</span>
+                <a href="#platform/overview" style="color:var(--color-accent);font-weight:600;text-decoration:none;">Infrastructure Blueprint</a>
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:6px;background:var(--color-bg);padding:4px 10px;border-radius:4px;border:1px solid var(--color-border);font-size:12px;">
+                <span class="ws-tab-indicator tenant" style="display:inline-block;width:7px;height:7px;border-radius:50%;background:#B45309;"></span>
+                <span style="color:var(--color-text-muted);">Tier 3 Tenant Owner:</span>
+                <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;text-decoration:none;">${QrewUI.escapeHtml(tenant.name)} (${getTenantDomain(tenant.id)})</a>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11.5px;color:var(--color-text-muted);">Configuration feeds into:</span>
+              <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm" style="font-size:11.5px;padding:3px 9px;">
+                Office Admin Panel &rarr;
+              </a>
+            </div>
+          </div>
+        </div>
+
         <!-- Target Facility Quick Switcher Buttons -->
         <div class="config-banner-card" style="padding:12px 18px;">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
@@ -2440,131 +2793,148 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ==========================================
-  // 3. OFFICE WORKSPACE VIEWS
+  // 3. OFFICE WORKSPACE VIEWS (Branch Facility Hub)
   // ==========================================
 
-  // --- Office: Overview ---
-  const renderOfficeOverview = (tenantId, officeId) => {
-    const office = QrewStore.getOfficeById(officeId);
-    if (!office) return renderOfficeNotFound(officeId);
+  // --- Office: Workspace (Branch Facility Hub - Interface 5a) ---
+  const renderOfficeWorkspace = (tenantId, officeId) => {
+    let office = QrewStore.getOfficeById(officeId);
+    if (!office) {
+      const allOffices = tenantId ? QrewStore.getOfficesByTenant(tenantId) : [];
+      if (allOffices.length > 0) office = allOffices[0];
+      else return renderOfficeNotFound(officeId);
+    }
 
-    const tenant = office.tenant || QrewStore.getTenantById(tenantId);
+    const tenant = office.tenant || QrewStore.getTenantById(tenantId) || { name: 'Tenant Organization', id: tenantId };
     const departments = QrewStore.getDepartments(office.id);
+    const config = QrewStore.getOfficeConfig(office.id);
+    const activeShift = (config && config.shifts && config.shifts.length > 0) ? config.shifts[0] : { name: 'Morning', hours: '08:00 - 16:00', status: 'Active' };
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
       { label: office.name, hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` },
-      { label: 'Overview', hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` }
+      { label: 'Branch Hub', hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` }
     ]);
 
     DOM.mainContent.innerHTML = `
-      <!-- Office Overview Header Card -->
+      <!-- Office Facility Overview Card -->
       <div class="detail-header-card">
-        <div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
-            <h1 class="page-title" style="margin:0;">${QrewUI.escapeHtml(office.name)}</h1>
-            ${QrewUI.statusBadge(office.status)}
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+              <h1 class="page-title" style="margin:0;">${QrewUI.escapeHtml(office.name)}</h1>
+              ${QrewUI.statusBadge(office.status)}
+              <span class="active-shift-badge">
+                <span class="shift-live-dot"></span>
+                Active Shift: ${activeShift.name} (${activeShift.hours})
+              </span>
+            </div>
+            <p class="page-subtitle">On-site branch facility operated by <strong>${QrewUI.escapeHtml(tenant.name)}</strong> (${getTenantDomain(tenant.id)})</p>
           </div>
-          <p class="page-subtitle">Branch office facility operated by <strong>${QrewUI.escapeHtml(tenant.name)}</strong></p>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+              &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+            </a>
+            <a href="#office-config?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+              ${QrewUI.getIcon('settings')} Facility Specs
+            </a>
+            <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-primary" style="font-weight:600;">
+              Office Admin Panel ⚙
+            </a>
+          </div>
         </div>
 
-        <div class="detail-meta-grid">
+        <div class="detail-meta-grid" style="margin-top:16px;">
           <div class="meta-item">
-            <span class="meta-label">Office ID</span>
+            <span class="meta-label">Branch Facility ID</span>
             <span class="meta-value"><span class="id-badge">${office.id}</span></span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">Parent Tenant</span>
+            <span class="meta-label">Governing Organization</span>
             <span class="meta-value">
-              <a href="#tenant/overview?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;">
+              <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;text-decoration:none;">
                 ${QrewUI.escapeHtml(tenant.name)}
               </a>
             </span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">Location / Address</span>
+            <span class="meta-label">Physical Location</span>
             <span class="meta-value">${QrewUI.escapeHtml(office.location)}</span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">Staff Count</span>
-            <span class="meta-value">${office.staffCount}</span>
+            <span class="meta-label">Security Tier</span>
+            <span class="meta-value"><span class="governance-tier-pill">${config.tier || 'Tier 2'}</span></span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">Departments</span>
-            <span class="meta-value">${departments.length}</span>
+            <span class="meta-label">On-Duty Personnel</span>
+            <span class="meta-value">${office.staff.length} Deployed</span>
           </div>
           <div class="meta-item">
-            <span class="meta-label">Facility Specs</span>
-            <span class="meta-value">
-              <a href="#office-config?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-accent);font-size:12px;text-decoration:none;font-weight:600;">
-                Configure ⚙
-              </a>
-            </span>
+            <span class="meta-label">Operating Units</span>
+            <span class="meta-value">${departments.length} Departments</span>
           </div>
         </div>
       </div>
 
-      <!-- Scoping Notice -->
-      <div class="notice-box" style="margin-bottom:20px;">
-        ${QrewUI.getIcon('info')}
-        <div>
-          <strong>Strict Hierarchical Scoping:</strong> Branch office lifecycle, location configuration, and operational status are governed exclusively by <strong>${QrewUI.escapeHtml(tenant.name)}</strong> in the Tenant Workspace.
-          Within this Office Workspace, administration is strictly focused on branch staff rosters, departments, and on-site operational permissions.
-        </div>
-      </div>
-
-      <!-- Metrics -->
+      <!-- Quick Operational Metrics -->
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-header">
-            <span class="metric-label">Assigned Staff</span>
+            <span class="metric-label">Current Shift</span>
+            <div class="metric-icon-wrap" style="color:var(--color-accent);">${QrewUI.getIcon('activity')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value" style="font-size:18px;">${activeShift.name}</div>
+            <div class="metric-subtext">${activeShift.hours}</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Active Departments</span>
+            <div class="metric-icon-wrap">${QrewUI.getIcon('department')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value">${departments.length}</div>
+            <div class="metric-subtext">Operational units</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Staff On-Site</span>
             <div class="metric-icon-wrap">${QrewUI.getIcon('users')}</div>
           </div>
           <div class="metric-value-row">
             <div class="metric-value">${office.staff.length}</div>
-            <div class="metric-subtext">On-site personnel</div>
+            <div class="metric-subtext">Verified personnel</div>
           </div>
         </div>
 
         <div class="metric-card">
           <div class="metric-header">
-            <span class="metric-label">Operational Status</span>
+            <span class="metric-label">Branch Governance</span>
             <div class="metric-icon-wrap" style="color:var(--color-success);">${QrewUI.getIcon('check')}</div>
           </div>
           <div class="metric-value-row">
-            <div class="metric-value">${office.status}</div>
-            <div class="metric-subtext">Branch facility</div>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Parent Organization</span>
-            <div class="metric-icon-wrap">${QrewUI.getIcon('tenants')}</div>
-          </div>
-          <div class="metric-value-row">
-            <div style="font-size:16px;font-weight:700;">${QrewUI.escapeHtml(tenant.name)}</div>
-            <div class="metric-subtext">Governing tenant</div>
+            <div class="metric-value" style="font-size:16px;">Compliant</div>
+            <div class="metric-subtext">Mesh synchronized</div>
           </div>
         </div>
       </div>
 
-      <!-- Department Overview Summary Card (Interface 5 -> 6 Link) -->
+      <!-- Branch Operational Departments Directory (Interface 5a -> 6 Link) -->
       <div class="card" style="margin-bottom:20px;">
         <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
           <div>
             <h2 class="card-title">Branch Operational Departments</h2>
-            <p class="card-subtitle">Active departments and units operating at this branch facility</p>
+            <p class="card-subtitle">Active operational units deployed at this facility — select a department to open its task workspace</p>
           </div>
-          <div style="display:flex;gap:8px;">
-            <a href="#office-config?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
-              ${QrewUI.getIcon('settings')} Facility Specs &amp; Config
-            </a>
-            <a href="#office/departments?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
-              View All Departments &rarr;
-            </a>
-          </div>
+          <a href="#office-admin/departments?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
+            Manage Departments in Admin &rarr;
+          </a>
         </div>
         <div class="table-wrapper" style="border:none;">
           <table class="data-table">
@@ -2572,8 +2942,8 @@ document.addEventListener('DOMContentLoaded', () => {
               <tr>
                 <th>Department</th>
                 <th>Code</th>
-                <th>Department Supervisor</th>
-                <th>Assigned Roster</th>
+                <th>Supervisor / Lead</th>
+                <th>Staffing Level</th>
                 <th>Status</th>
                 <th style="text-align:right;">Department Workspace</th>
               </tr>
@@ -2591,9 +2961,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><span style="font-weight:600;">${dMembers.length}</span> / ${d.capacity} staff</td>
                     <td>${QrewUI.statusBadge(d.status)}</td>
                     <td style="text-align:right;">
-                      <a href="#department/overview?deptId=${d.id}" class="btn btn-secondary btn-sm" style="font-size:11.5px;padding:3px 8px;gap:5px;display:inline-flex;align-items:center;">
+                      <a href="#department/overview?deptId=${d.id}" class="btn btn-primary btn-sm" style="font-size:12px;padding:4px 10px;gap:6px;display:inline-flex;align-items:center;">
                         <span>Open Workspace</span>
-                        <span style="font-size:10px;">&rarr;</span>
+                        <span>&rarr;</span>
                       </a>
                     </td>
                   </tr>
@@ -2604,15 +2974,15 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
 
-      <!-- Quick Staff Preview Card -->
+      <!-- On-Site Staff Directory (Read-only operational directory) -->
       <div class="card">
-        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
           <div>
-            <h2 class="card-title">Branch Staff Roster</h2>
-            <p class="card-subtitle">Personnel deployed to this branch office location</p>
+            <h2 class="card-title">On-Site Staff Directory</h2>
+            <p class="card-subtitle">Active personnel deployed to this facility from parent organization</p>
           </div>
-          <a href="#office/staff?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
-            Manage Staff &rarr;
+          <a href="#office-admin/staff?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
+            ${QrewUI.getIcon('settings')} Staff Deployment &rarr;
           </a>
         </div>
         <div class="table-wrapper" style="border:none;">
@@ -2621,7 +2991,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <tr>
                 <th>Staff Name</th>
                 <th>Email</th>
-                <th>Office Role</th>
+                <th>Branch Role</th>
                 <th>Status</th>
                 <th>Assigned Date</th>
                 <th style="text-align:right;">Member Workspace</th>
@@ -2636,8 +3006,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   <td>${QrewUI.statusBadge(s.status)}</td>
                   <td>${s.assignedAt}</td>
                   <td style="text-align:right;">
-                    <a href="#member/overview?userId=${s.user.id}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px;" title="View Personal Member Workspace">
-                      Workspace &rarr;
+                    <a href="#member/overview?userId=${s.user.id}" class="btn btn-secondary btn-sm" style="font-size:11.5px;padding:3px 8px;" title="View Personal Member Workspace">
+                      Member View &rarr;
                     </a>
                   </td>
                 </tr>
@@ -2648,6 +3018,258 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   };
+
+  // --- Office: Admin Overview (Interface 5b) ---
+  const renderOfficeAdminOverview = (tenantId, officeId) => {
+    let office = QrewStore.getOfficeById(officeId);
+    if (!office) {
+      const allOffices = tenantId ? QrewStore.getOfficesByTenant(tenantId) : [];
+      if (allOffices.length > 0) office = allOffices[0];
+      else return renderOfficeNotFound(officeId);
+    }
+
+    const tenant = office.tenant || QrewStore.getTenantById(tenantId) || { name: 'Tenant Organization', id: tenantId };
+    const departments = QrewStore.getDepartments(office.id);
+    const tenantMembers = QrewStore.getTenantMembers(tenant.id);
+    const assignedUserIds = new Set(office.staff.map(s => s.user.id));
+    const availablePool = tenantMembers.filter(m => !assignedUserIds.has(m.user.id));
+
+    updateBreadcrumbs([
+      { label: 'Platform', hash: '#platform/overview' },
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
+      { label: office.name, hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` },
+      { label: 'Office Admin', hash: `#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}` }
+    ]);
+
+    DOM.mainContent.innerHTML = `
+      <!-- Office Admin Header Card -->
+      <div class="detail-header-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+              <h1 class="page-title" style="margin:0;">Office Admin: ${QrewUI.escapeHtml(office.name)}</h1>
+              <span class="badge" style="background:var(--color-accent);color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;">Administration</span>
+            </div>
+            <p class="page-subtitle">Managerial governance, staff deployment, and department provisioning for <strong>${QrewUI.escapeHtml(tenant.name)}</strong></p>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+              &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+            </a>
+            <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+              &larr; Return to Branch Hub
+            </a>
+            <a href="#office-config?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+              ${QrewUI.getIcon('settings')} Facility Specs
+            </a>
+          </div>
+        </div>
+
+        <div class="detail-meta-grid" style="margin-top:16px;">
+          <div class="meta-item">
+            <span class="meta-label">Branch Office ID</span>
+            <span class="meta-value"><span class="id-badge">${office.id}</span></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Parent Organization</span>
+            <span class="meta-value">
+              <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;text-decoration:none;">
+                ${QrewUI.escapeHtml(tenant.name)}
+              </a>
+            </span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Assigned Staff</span>
+            <span class="meta-value">${office.staff.length} Personnel</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Available Tenant Pool</span>
+            <span class="meta-value"><strong style="color:var(--color-accent);">${availablePool.length}</strong> verified candidates</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Departments</span>
+            <span class="meta-value">${departments.length} Units</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Operational Status</span>
+            <span class="meta-value">${QrewUI.statusBadge(office.status)}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strict Scoping Notice -->
+      <div class="notice-box" style="margin-bottom:20px;">
+        ${QrewUI.getIcon('info')}
+        <div>
+          <strong>Strict Tenant Pool Scoping:</strong> Branch managers can only deploy staff who are already verified members of <strong>${QrewUI.escapeHtml(tenant.name)}</strong>.
+          Recruiting unverified external individuals at the branch office level is prohibited by platform governance.
+        </div>
+      </div>
+
+      <!-- Admin Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Assigned Branch Staff</span>
+            <div class="metric-icon-wrap">${QrewUI.getIcon('users')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value">${office.staff.length}</div>
+            <div class="metric-subtext">On-site deployed</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Verified Pool Available</span>
+            <div class="metric-icon-wrap" style="color:var(--color-accent);">${QrewUI.getIcon('plus')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value">${availablePool.length}</div>
+            <div class="metric-subtext">Ready for deployment</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Provisioned Departments</span>
+            <div class="metric-icon-wrap">${QrewUI.getIcon('department')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value">${departments.length}</div>
+            <div class="metric-subtext">Operational units</div>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span class="metric-label">Admin Role Perms</span>
+            <div class="metric-icon-wrap">${QrewUI.getIcon('roles')}</div>
+          </div>
+          <div class="metric-value-row">
+            <div class="metric-value">3 Roles</div>
+            <div class="metric-subtext">Manager, Supv, Staff</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Deployment Section -->
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 class="card-title">Staff Deployment from Verified Tenant Pool</h2>
+            <p class="card-subtitle">Deploy verified members of ${QrewUI.escapeHtml(tenant.name)} to on-site roles at this branch facility</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" id="btn-admin-deploy-staff">
+              ${QrewUI.getIcon('plus')} Deploy Staff from Pool
+            </button>
+            <a href="#office-admin/staff?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
+              Full Staff Management &rarr;
+            </a>
+          </div>
+        </div>
+        <div class="table-wrapper" style="border:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Personnel</th>
+                <th>Email</th>
+                <th>Branch Role</th>
+                <th>Assigned Date</th>
+                <th>Status</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${office.staff.slice(0, 5).map(s => `
+                <tr>
+                  <td><strong>${QrewUI.escapeHtml(s.user.name)}</strong></td>
+                  <td>${QrewUI.escapeHtml(s.user.email)}</td>
+                  <td>${QrewUI.roleBadge(s.officeRole, 'office')}</td>
+                  <td>${s.assignedAt}</td>
+                  <td>${QrewUI.statusBadge(s.status)}</td>
+                  <td style="text-align:right;">
+                    <a href="#member/overview?userId=${s.user.id}" class="btn btn-secondary btn-sm" style="font-size:11px;padding:3px 8px;">
+                      View Member &rarr;
+                    </a>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Department Setup Section -->
+      <div class="card">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h2 class="card-title">Department Setup & Provisioning</h2>
+            <p class="card-subtitle">Manage branch operational departments, leadership assignments, and capacity limits</p>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" id="btn-admin-add-dept">
+              ${QrewUI.getIcon('plus')} Add Department
+            </button>
+            <a href="#office-admin/departments?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary btn-sm">
+              All Departments &rarr;
+            </a>
+          </div>
+        </div>
+        <div class="table-wrapper" style="border:none;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Department Name</th>
+                <th>Code</th>
+                <th>Lead / Supervisor</th>
+                <th>Capacity</th>
+                <th>Status</th>
+                <th style="text-align:right;">Manage</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${departments.slice(0, 4).map(d => `
+                <tr>
+                  <td><strong>${QrewUI.escapeHtml(d.name)}</strong></td>
+                  <td><span class="id-badge">${QrewUI.escapeHtml(d.code)}</span></td>
+                  <td>${QrewUI.escapeHtml(d.leadName)}</td>
+                  <td>${d.capacity} Personnel</td>
+                  <td>${QrewUI.statusBadge(d.status)}</td>
+                  <td style="text-align:right;">
+                    <a href="#department/overview?deptId=${d.id}" class="btn btn-secondary btn-sm" style="font-size:11.5px;padding:3px 8px;">
+                      Workspace &rarr;
+                    </a>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    // Bind Deploy Staff modal button
+    const deployBtn = document.getElementById('btn-admin-deploy-staff');
+    if (deployBtn) {
+      deployBtn.addEventListener('click', () => {
+        openAddOfficeStaffModal(office.id);
+      });
+    }
+
+    // Bind Add Department modal button
+    const addDeptBtn = document.getElementById('btn-admin-add-dept');
+    if (addDeptBtn) {
+      addDeptBtn.addEventListener('click', () => {
+        openCreateDepartmentModal(office.id);
+      });
+    }
+  };
+
+  // Backward compatibility alias
+  const renderOfficeOverview = renderOfficeWorkspace;
 
   // --- Office: Departments (Interface 5) ---
   const renderOfficeDepartments = (tenantId, officeId) => {
@@ -2661,16 +3283,22 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="page-header">
         <div class="page-title-group">
           <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
-            <a href="#tenant/overview?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+            <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
             <span>/</span>
-            <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)}</a>
+            <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)} (Admin)</a>
             <span>/</span>
-            <span style="color:var(--color-text-primary);font-weight:600;">Departments</span>
+            <span style="color:var(--color-text-primary);font-weight:600;">Departments Setup</span>
           </div>
           <h1 class="page-title">Branch Operational Departments</h1>
           <p class="page-subtitle">Departments established at ${QrewUI.escapeHtml(office.name)}. Staff allocations and daily task queues run within these units.</p>
         </div>
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
+          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            &larr; Branch Hub
+          </a>
           <a href="#office-config?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
             ${QrewUI.getIcon('settings')} Facility Specs &amp; Config
           </a>
@@ -2773,20 +3401,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
-      { label: office.name, hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` },
-      { label: 'Staff', hash: `#office/staff?tenantId=${tenant.id}&officeId=${office.id}` }
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
+      { label: office.name, hash: `#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}` },
+      { label: 'Staff Deployment', hash: `#office-admin/staff?tenantId=${tenant.id}&officeId=${office.id}` }
     ]);
 
     DOM.mainContent.innerHTML = `
       <div class="page-header">
         <div class="page-title-group">
+          <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+            <span>/</span>
+            <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)} (Admin)</a>
+            <span>/</span>
+            <span style="color:var(--color-text-primary);font-weight:600;">Staff Deployment</span>
+          </div>
           <h1 class="page-title">Assigned Office Staff</h1>
-          <p class="page-subtitle">Operational personnel deployed on-site at ${QrewUI.escapeHtml(office.name)}.</p>
+          <p class="page-subtitle">Operational personnel deployed on-site at ${QrewUI.escapeHtml(office.name)} from the verified tenant pool.</p>
         </div>
         <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
+          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            &larr; Branch Hub
+          </a>
           <button class="btn btn-primary" id="btn-add-office-staff">
-            ${QrewUI.getIcon('plus')} Add Office Staff
+            ${QrewUI.getIcon('plus')} Deploy Staff from Pool
           </button>
         </div>
       </div>
@@ -2865,9 +3506,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
-      { label: office.name, hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` },
-      { label: 'Roles & Permissions', hash: `#office/roles?tenantId=${tenant.id}&officeId=${office.id}` }
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
+      { label: office.name, hash: `#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}` },
+      { label: 'Roles & Permissions', hash: `#office-admin/roles?tenantId=${tenant.id}&officeId=${office.id}` }
     ]);
 
     const officeRoles = QrewStore.getRoles('office');
@@ -2876,8 +3517,26 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.mainContent.innerHTML = `
       <div class="page-header">
         <div class="page-title-group">
+          <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+            <span>/</span>
+            <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)} (Admin)</a>
+            <span>/</span>
+            <span style="color:var(--color-text-primary);font-weight:600;">Roles & Permissions</span>
+          </div>
           <h1 class="page-title">Office Roles & Permissions</h1>
           <p class="page-subtitle">Roles and permissions controlling physical facility operations for ${QrewUI.escapeHtml(office.name)}.</p>
+        </div>
+        <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
+          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            &larr; Branch Hub
+          </a>
+          <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            Office Admin &rarr;
+          </a>
         </div>
       </div>
 
@@ -2989,9 +3648,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateBreadcrumbs([
       { label: 'Platform', hash: '#platform/overview' },
-      { label: tenant.name, hash: `#tenant/overview?id=${tenant.id}` },
-      { label: office.name, hash: `#office/overview?tenantId=${tenant.id}&officeId=${office.id}` },
-      { label: 'Activity', hash: `#office/activity?tenantId=${tenant.id}&officeId=${office.id}` }
+      { label: tenant.name, hash: `#tenant-landing?id=${tenant.id}` },
+      { label: office.name, hash: `#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}` },
+      { label: 'Activity', hash: `#office-admin/activity?tenantId=${tenant.id}&officeId=${office.id}` }
     ]);
 
     const officeLogs = QrewStore.getAuditLogsByOffice(officeId);
@@ -2999,8 +3658,26 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.mainContent.innerHTML = `
       <div class="page-header">
         <div class="page-title-group">
+          <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:flex;align-items:center;gap:6px;">
+            <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+            <span>/</span>
+            <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)} (Admin)</a>
+            <span>/</span>
+            <span style="color:var(--color-text-primary);font-weight:600;">Activity Audit</span>
+          </div>
           <h1 class="page-title">Office Activity Trail</h1>
           <p class="page-subtitle">Chronological log of staff assignments, roster updates, and status modifications for ${QrewUI.escapeHtml(office.name)}.</p>
+        </div>
+        <div class="page-actions">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
+          <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            &larr; Branch Hub
+          </a>
+          <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-secondary">
+            Office Admin &rarr;
+          </a>
         </div>
       </div>
 
@@ -3100,7 +3777,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="dept-badge-icon">${QrewUI.escapeHtml(dept.code)}</div>
           <div class="dept-title-group">
             <div class="dept-breadcrumb">
-              <a href="#tenant/overview?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+              <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
               <span>/</span>
               <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)}</a>
               <span>/</span>
@@ -3114,6 +3791,9 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary btn-sm">
+            &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+          </a>
           <button class="btn btn-secondary btn-sm" id="btn-add-dept-task">
             ${QrewUI.getIcon('plus')} Add Task to Queue
           </button>
@@ -3463,7 +4143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="member-large-avatar">${user.name.charAt(0)}</div>
             <div class="member-identity-info">
               <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:3px;display:flex;align-items:center;gap:6px;">
-                <a href="#tenant/overview?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
+                <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(tenant.name)}</a>
                 <span>/</span>
                 <a href="#office/overview?tenantId=${tenant.id}&officeId=${office.id}" style="color:var(--color-text-muted);text-decoration:none;">${QrewUI.escapeHtml(office.name)}</a>
                 <span>/</span>
@@ -3499,6 +4179,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('')}
           </div>
           <div style="display:flex;align-items:center;gap:10px;">
+            <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary btn-sm">
+              &larr; ${QrewUI.escapeHtml(tenant.name)} Landing
+            </a>
             <a href="#department/overview?deptId=${dept.id}" class="btn btn-secondary btn-sm">
               &larr; Return to Department Hub
             </a>
@@ -4122,20 +4805,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const office = QrewStore.getOfficeById(officeId);
     if (!office) return;
 
+    const tenant = office.tenant || QrewStore.getTenantById(office.tenantId) || { name: 'Parent Tenant' };
     const tenantMembers = QrewStore.getTenantMembers(office.tenantId);
+    const assignedUserIds = new Set(office.staff.map(s => s.user.id));
+    const availableMembers = tenantMembers.filter(m => !assignedUserIds.has(m.user.id));
 
     QrewUI.openModal({
-      title: `Assign Staff to ${office.name}`,
+      title: `Deploy Staff from Tenant Pool (${office.name})`,
       bodyHtml: `
         <form id="add-office-staff-form" onsubmit="return false;">
+          <div class="notice-box" style="margin-bottom:14px;padding:8px 12px;font-size:12px;">
+            ${QrewUI.getIcon('info')}
+            <div>
+              <strong>Strict Scoping:</strong> Candidates are strictly constrained to verified members of 
+              <strong>${QrewUI.escapeHtml(tenant.name)}</strong>.
+            </div>
+          </div>
+
           <div class="form-group">
-            <label class="form-label">Staff Name <span class="required">*</span></label>
-            <input type="text" class="form-input" id="assign-staff-name" placeholder="e.g. Sarah Jenkins" list="tenant-members-datalist" required autofocus autocomplete="off">
-            ${tenantMembers.length > 0 ? `
-              <datalist id="tenant-members-datalist">
-                ${tenantMembers.map(m => `<option value="${QrewUI.escapeHtml(m.user.name)}">${QrewUI.escapeHtml(m.user.email)}</option>`).join('')}
-              </datalist>
-            ` : ''}
+            <label class="form-label">Select Verified Member <span class="required">*</span></label>
+            ${availableMembers.length === 0 ? `
+              <div style="padding:10px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:4px;font-size:12.5px;color:var(--color-text-muted);">
+                All verified members of ${QrewUI.escapeHtml(tenant.name)} are already deployed to this branch. <a href="#tenant/members?id=${office.tenantId}">Onboard more members in Tenant Workspace &rarr;</a>
+              </div>
+            ` : `
+              <select class="form-select" id="assign-staff-member-select" required>
+                <option value="">-- Choose verified member from tenant pool --</option>
+                ${availableMembers.map(m => `
+                  <option value="${m.user.id}">
+                    ${QrewUI.escapeHtml(m.user.name)} (${QrewUI.escapeHtml(m.user.email)}) — ${m.tenantRole}
+                  </option>
+                `).join('')}
+              </select>
+            `}
           </div>
 
           <div class="form-group" style="margin-top:14px;">
@@ -4151,30 +4853,39 @@ document.addEventListener('DOMContentLoaded', () => {
       `,
       footerHtml: `
         <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="btn-submit-add-staff">Assign Staff</button>
+        <button class="btn btn-primary" id="btn-submit-add-staff" ${availableMembers.length === 0 ? 'disabled' : ''}>Deploy to Office</button>
       `,
       onOpen: (modalEl) => {
-        const nameInput = modalEl.querySelector('#assign-staff-name');
-        if (nameInput) nameInput.focus();
+        const selectEl = modalEl.querySelector('#assign-staff-member-select');
+        if (selectEl) selectEl.focus();
 
-        modalEl.querySelector('#btn-submit-add-staff').onclick = () => {
-          const name = modalEl.querySelector('#assign-staff-name').value.trim();
-          const officeRole = modalEl.querySelector('#assign-staff-role').value;
+        const submitBtn = modalEl.querySelector('#btn-submit-add-staff');
+        if (submitBtn) {
+          submitBtn.onclick = () => {
+            if (availableMembers.length === 0) return;
+            const selectEl = modalEl.querySelector('#assign-staff-member-select');
+            const userId = selectEl ? selectEl.value : null;
+            const officeRole = modalEl.querySelector('#assign-staff-role').value;
 
-          if (!name) {
-            QrewUI.showToast('Please enter the staff member name.', 'error');
-            return;
-          }
+            if (!userId) {
+              QrewUI.showToast('Please select a verified member from the tenant pool.', 'error');
+              return;
+            }
 
-          try {
-            const result = QrewStore.addOfficeStaff(officeId, { name, officeRole });
-            QrewUI.closeModal();
-            QrewUI.showToast(`"${result.user ? result.user.name : name}" assigned as ${officeRole}!`, 'success');
-            handleRouteChange();
-          } catch (e) {
-            QrewUI.showToast(e.message, 'error');
-          }
-        };
+            const selectedMember = availableMembers.find(m => m.user.id === userId);
+            const name = selectedMember ? selectedMember.user.name : '';
+            const email = selectedMember ? selectedMember.user.email : '';
+
+            try {
+              const result = QrewStore.addOfficeStaff(officeId, { userId, name, email, officeRole });
+              QrewUI.closeModal();
+              QrewUI.showToast(`"${result.user ? result.user.name : name}" deployed as ${officeRole}!`, 'success');
+              handleRouteChange();
+            } catch (e) {
+              QrewUI.showToast(e.message, 'error');
+            }
+          };
+        }
       }
     });
   };
@@ -4552,7 +5263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Allow clicking brand logo to expand if sidebar is collapsed
+  // Brand logo click navigation (Tenant and Office go back to Tenant Landing page)
   const brandWrapper = document.getElementById('brand-wrapper');
   if (brandWrapper) {
     brandWrapper.onclick = (e) => {
@@ -4562,10 +5273,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         if (AppState.activeWorkspace === 'platform') {
           navigateTo('#platform/overview');
-        } else if (AppState.activeWorkspace === 'tenant') {
-          navigateTo(`#tenant/overview?id=${AppState.currentTenantId}`);
-        } else if (AppState.activeWorkspace === 'office') {
-          navigateTo(`#office/overview?tenantId=${AppState.currentTenantId}&officeId=${AppState.currentOfficeId}`);
+        } else if (AppState.activeWorkspace === 'tenant' || AppState.activeWorkspace === 'office' || AppState.activeWorkspace === 'office-admin' || AppState.activeWorkspace === 'office-config' || AppState.activeWorkspace === 'department' || AppState.activeWorkspace === 'member') {
+          navigateTo(`#tenant-landing?id=${AppState.currentTenantId}`);
         }
       }
     };
