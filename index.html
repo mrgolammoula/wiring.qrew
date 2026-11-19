@@ -12,7 +12,7 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header" id="sidebar-header">
-        <div class="brand-wrapper" id="brand-wrapper">
+        <div class="brand-wrapper" id="brand-wrapper" title="Go to Platform Landing Page">
           <div class="brand-logo" id="sidebar-brand-logo">Q</div>
           <div class="brand-info" id="sidebar-brand-info">
             <span class="brand-name" id="sidebar-brand-name">Qrew</span>
@@ -50,12 +50,14 @@
           </button>
         </div>
 
-        <div class="topbar-right">
-          <a href="#landing" class="btn btn-secondary btn-sm" id="topbar-landing-btn" title="View Public Landing Page" style="font-size:12px;padding:4px 9px;gap:6px;display:inline-flex;align-items:center;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/><circle cx="12" cy="12" r="4"/></svg>
-            <span id="topbar-landing-label">Qrew.com</span>
-          </a>
+        <div class="topbar-center" id="topbar-center">
+          <div class="topbar-domain-badge">
+            <span class="topbar-domain-dot"></span>
+            <span id="topbar-domain-text">App.Qrew.com/Admin</span>
+          </div>
+        </div>
 
+        <div class="topbar-right">
           <div class="topbar-actions">
             <!-- Notifications Trigger -->
             <button class="icon-btn" id="notifications-trigger" title="Recent Activity Notifications" aria-label="Notifications">

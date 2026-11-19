@@ -16,20 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarCollapsed: false,
     selectedRoleLevel: 'platform',
     selectedRoleId: 'role_plt_owner',
-    currentTenantId: 'ten_ctg',
+    currentTenantId: 'ten_sst',
     currentOfficeId: 'off_ctg_port',
     currentDeptId: 'dept_ctg_ops',
     currentMemberId: 'usr_nusrat'
   };
 
-  // Tenant Subdomain Mapping Helper (e.g. ctg.sst.com per hierarchy)
+  // Tenant Domain Helper
   const getTenantDomain = (tenantId) => {
-    switch (tenantId) {
-      case 'ten_ctg': return 'ctg.sst.com';
-      case 'ten_dhaka': return 'dhaka.sst.com';
-      case 'ten_meridian': return 'meridian.sst.com';
-      default: return tenantId ? `${tenantId}.sst.com` : 'tenant.sst.com';
-    }
+    return 'sst.com';
   };
 
   // DOM Elements
@@ -226,6 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Topbar Workspace Pills
     updateWorkspaceTabsUI();
 
+    // Update Topbar Domain Badge (Platform vs. Tenant Panel)
+    updateTopbarDomainBadge();
+
     // Re-render Dynamic Navigation Sidebar
     renderSidebar();
 
@@ -262,17 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const office = QrewStore.getOfficeById(AppState.currentOfficeId) || (tenant ? QrewStore.getOfficesByTenant(tenant.id)[0] : null);
 
     // 1. Sidebar Header (Brand Monogram & Titles)
+    const brandWrapperEl = document.getElementById('brand-wrapper');
     if (ws === 'platform') {
       DOM.sidebarBrandLogo.textContent = 'Q';
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
       DOM.sidebarBrandName.textContent = 'Qrew';
       DOM.sidebarBrandBadge.textContent = 'Platform Level';
       DOM.sidebarContextPicker.style.display = 'none';
+      if (brandWrapperEl) brandWrapperEl.title = 'Go to Platform Landing Page (qrew.com)';
     } else if (ws === 'office-config') {
       DOM.sidebarBrandLogo.textContent = '⚙';
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
       DOM.sidebarBrandName.textContent = office ? office.name : 'Office Config';
       DOM.sidebarBrandBadge.textContent = 'Configuration Centre';
+      if (brandWrapperEl) brandWrapperEl.title = 'Go to Platform Landing Page (qrew.com)';
 
       DOM.sidebarContextPicker.style.display = 'flex';
       DOM.sidebarContextLabel.textContent = 'Configure Office Branch';
@@ -321,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-warning)';
       DOM.sidebarBrandName.textContent = tenant ? tenant.name : 'Tenant';
       DOM.sidebarBrandBadge.textContent = 'Tenant Workspace';
+      if (brandWrapperEl) brandWrapperEl.title = `Go to ${tenant ? tenant.name : 'Tenant'} Landing Page (${getTenantDomain(AppState.currentTenantId)})`;
 
       // Tenant Context Picker
       DOM.sidebarContextPicker.style.display = 'flex';
@@ -336,11 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateTo(`#tenant/${AppState.currentView}?id=${AppState.currentTenantId}`);
       };
     } else if (ws === 'office') {
-      const initial = office ? office.name.charAt(0).toUpperCase() : 'O';
+      const initial = tenant ? tenant.name.charAt(0).toUpperCase() : 'S';
       DOM.sidebarBrandLogo.textContent = initial;
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-info)';
-      DOM.sidebarBrandName.textContent = office ? office.name : 'Office';
-      DOM.sidebarBrandBadge.textContent = 'Branch Facility Hub';
+      DOM.sidebarBrandName.textContent = tenant ? tenant.name : 'SST';
+      DOM.sidebarBrandBadge.textContent = office ? office.name : 'Chittagong Port Office';
+      if (brandWrapperEl) brandWrapperEl.title = `Go to ${tenant ? tenant.name : 'Tenant'} Landing Page (${getTenantDomain(AppState.currentTenantId)})`;
 
       // Office Context Picker
       DOM.sidebarContextPicker.style.display = 'flex';
@@ -354,11 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateTo(`#office/overview?tenantId=${tenant.id}&officeId=${AppState.currentOfficeId}`);
       };
     } else if (ws === 'office-admin') {
-      const initial = office ? office.name.charAt(0).toUpperCase() : 'O';
+      const initial = tenant ? tenant.name.charAt(0).toUpperCase() : 'S';
       DOM.sidebarBrandLogo.textContent = initial;
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
-      DOM.sidebarBrandName.textContent = office ? office.name : 'Office Admin';
-      DOM.sidebarBrandBadge.textContent = 'Office Administration';
+      DOM.sidebarBrandName.textContent = tenant ? tenant.name : 'SST';
+      DOM.sidebarBrandBadge.textContent = office ? office.name : 'Chittagong Port Office';
+      if (brandWrapperEl) brandWrapperEl.title = `Go to ${tenant ? tenant.name : 'Tenant'} Landing Page (${getTenantDomain(AppState.currentTenantId)})`;
 
       // Office Context Picker
       DOM.sidebarContextPicker.style.display = 'flex';
@@ -554,6 +558,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Synchronize Topbar Domain Badge (Platform vs. Office Config vs. Tenant vs. Office Workspace)
+  const updateTopbarDomainBadge = () => {
+    const domainTextEl = document.getElementById('topbar-domain-text');
+    const domainDotEl = document.querySelector('.topbar-domain-dot');
+    if (!domainTextEl) return;
+
+    if (AppState.activeWorkspace === 'platform') {
+      domainTextEl.textContent = 'App.Qrew.com/Admin';
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--color-accent)';
+    } else if (AppState.activeWorkspace === 'office-config') {
+      domainTextEl.textContent = 'App.Qrew.com/office config';
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--color-accent)';
+    } else if (AppState.activeWorkspace === 'tenant') {
+      const tenant = QrewStore.getTenantById(AppState.currentTenantId) || QrewStore.getTenants()[0];
+      const tenantName = (tenant && tenant.name) ? tenant.name : 'SST';
+      domainTextEl.textContent = `App.${tenantName}.com`;
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--color-warning)';
+    } else {
+      // Branch Office Workspaces (Facility Hub vs. Office Administration)
+      const office = QrewStore.getOfficeById(AppState.currentOfficeId);
+      const isMongla = office && (office.id === 'off_mgl_port' || (office.name && office.name.toLowerCase().includes('mongla')));
+      const baseDomain = isMongla ? 'SST.MGL.com' : 'SST.CTG.com';
+
+      if (AppState.activeWorkspace === 'office-admin') {
+        domainTextEl.textContent = `${baseDomain}/Admin`;
+      } else {
+        domainTextEl.textContent = baseDomain;
+      }
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--color-info)';
+    }
+  };
+
   // Breadcrumbs Updater (removed from topbar per design specification)
   const updateBreadcrumbs = () => {};
 
@@ -571,26 +607,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (emailEl) emailEl.textContent = user.email;
   };
 
-  // Synchronize Topbar Landing Button (Platform Landing vs. Dedicated Tenant Landing)
-  const syncTopbarLandingBtn = () => {
-    const btn = document.getElementById('topbar-landing-btn');
-    const labelEl = document.getElementById('topbar-landing-label');
-    if (!btn) return;
-
-    const ws = AppState.activeWorkspace;
-    if (ws === 'platform' || ws === 'landing') {
-      btn.href = '#landing';
-      btn.title = 'View Qrew Public Platform Landing';
-      if (labelEl) labelEl.textContent = 'Qrew.com';
-    } else {
-      const tenantId = AppState.currentTenantId || 'ten_ctg';
-      const tenant = QrewStore.getTenantById(tenantId);
-      const domain = getTenantDomain(tenantId);
-      btn.href = `#tenant-landing?id=${tenantId}`;
-      btn.title = `View ${tenant ? tenant.name : 'Tenant'} Dedicated Landing (${domain})`;
-      if (labelEl) labelEl.textContent = domain;
-    }
-  };
+  // Synchronize Topbar Landing Button (Removed per UI design)
+  const syncTopbarLandingBtn = () => {};
 
   // Dispatcher for View Rendering
   const dispatchView = () => {
@@ -724,8 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="persona-role-badge badge-role tenant" style="font-size:10px;">Tenant Admin</span>
               </div>
             </div>
-            <p style="font-size:12px;color:var(--color-text-muted);margin:0;line-height:1.4;">CTG Logistics organization, branch offices CRUD, member pool.</p>
-            <button class="btn btn-primary btn-sm" onclick="QrewStore.setCurrentUser('usr_rafiqul');QrewUI.closeModal();location.hash='#tenant/overview?id=ten_ctg';" style="margin-top:auto;width:100%;">
+            <p style="font-size:12px;color:var(--color-text-muted);margin:0;line-height:1.4;">SST organization, branch offices CRUD, member pool.</p>
+            <button class="btn btn-primary btn-sm" onclick="QrewStore.setCurrentUser('usr_rafiqul');QrewUI.closeModal();location.hash='#tenant/overview?id=ten_sst';" style="margin-top:auto;width:100%;">
               Enter as Tenant Admin
             </button>
           </div>
@@ -740,7 +758,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
             <p style="font-size:12px;color:var(--color-text-muted);margin:0;line-height:1.4;">Chittagong Port Office, departments, and on-site staff deployment.</p>
-            <button class="btn btn-primary btn-sm" onclick="QrewStore.setCurrentUser('usr_jack');QrewUI.closeModal();location.hash='#office/overview?tenantId=ten_ctg&officeId=off_ctg_port';" style="margin-top:auto;width:100%;">
+            <button class="btn btn-primary btn-sm" onclick="QrewStore.setCurrentUser('usr_jack');QrewUI.closeModal();location.hash='#office/overview?tenantId=ten_sst&officeId=off_ctg_port';" style="margin-top:auto;width:100%;">
               Enter as Office Admin
             </button>
           </div>
@@ -782,35 +800,29 @@ document.addEventListener('DOMContentLoaded', () => {
               <span class="badge" style="background:var(--color-surface);border:1px solid var(--color-border);font-size:10.5px;color:var(--color-text-muted);">Mesh v2.0</span>
             </a>
 
-            <!-- Workspace Context Tabs Transferred to Landing Header -->
+            <!-- Central Platform Domain -->
+            <div class="landing-domain-badge">
+              <span class="landing-domain-dot"></span>
+              <span>App.Qrew.com</span>
+            </div>
+
+            <!-- Workspace Context Tabs on Main Landing Header -->
             <div class="workspace-tabs" role="tablist" aria-label="Workspaces">
-              <a href="#platform/overview" class="workspace-tab" role="tab" title="Platform Level">
+              <a href="#platform/overview" class="workspace-tab" role="tab" title="Platform Admin">
                 <span class="ws-tab-indicator platform"></span>
-                <span class="ws-tab-text">Platform</span>
+                <span class="ws-tab-text">Platform Admin</span>
               </a>
-              <a href="#tenant-landing?id=ten_ctg" class="workspace-tab" role="tab" title="Tenant Landing (ctg.sst.com)">
+              <a href="#tenant/overview?id=ten_sst" class="workspace-tab" role="tab" title="Tenant Admin Panel">
                 <span class="ws-tab-indicator tenant"></span>
                 <span class="ws-tab-text">Tenant</span>
               </a>
-              <a href="#office/overview?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Workspace">
+              <a href="#office/overview?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Workspace">
                 <span class="ws-tab-indicator office"></span>
                 <span class="ws-tab-text">Office</span>
               </a>
-              <a href="#office-admin/overview?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Admin Panel">
-                <span class="ws-tab-indicator" style="background-color:var(--color-accent);"></span>
-                <span class="ws-tab-text">Office Admin</span>
-              </a>
-              <a href="#office-config?tenantId=ten_ctg&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Configuration Centre">
+              <a href="#office-config?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Configuration Centre">
                 <span class="ws-tab-indicator config"></span>
                 <span class="ws-tab-text">Office Config</span>
-              </a>
-              <a href="#department/overview?deptId=dept_ctg_ops" class="workspace-tab" role="tab" title="Department Workspace">
-                <span class="ws-tab-indicator department"></span>
-                <span class="ws-tab-text">Department</span>
-              </a>
-              <a href="#member/overview?userId=usr_nusrat" class="workspace-tab" role="tab" title="Office Member Workspace">
-                <span class="ws-tab-indicator member"></span>
-                <span class="ws-tab-text">Member</span>
               </a>
             </div>
           </div>
@@ -871,7 +883,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   const renderTenantLandingPage = (tenantId) => {
     const tenant = QrewStore.getTenantById(tenantId) || QrewStore.getTenants()[0];
-    const allTenants = QrewStore.getTenants();
     const domain = getTenantDomain(tenant.id);
     const offices = QrewStore.getOfficesByTenant(tenant.id);
     const members = QrewStore.getTenantMembers(tenant.id);
@@ -887,16 +898,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
               </a>
               <span class="tenant-domain-pill">${domain}</span>
-            </div>
-
-            <!-- Tenant Quick Switcher for Demo Evaluation -->
-            <div class="workspace-tabs" role="tablist" aria-label="Tenant Switcher">
-              ${allTenants.map(t => `
-                <a href="#tenant-landing?id=${t.id}" class="workspace-tab ${t.id === tenant.id ? 'active' : ''}" role="tab" title="Switch to ${t.name}">
-                  <span class="ws-tab-indicator tenant"></span>
-                  <span class="ws-tab-text">${QrewUI.escapeHtml(t.name)}</span>
-                </a>
-              `).join('')}
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
@@ -1044,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Central oversight of all tenants, offices, and platform-wide governance.</p>
         </div>
         <div class="page-actions">
-          <a href="#office-config?tenantId=ten_ctg&officeId=off_ctg_port" class="btn btn-secondary">
+          <a href="#office-config?tenantId=ten_sst&officeId=off_ctg_port" class="btn btn-secondary">
             ${QrewUI.getIcon('settings')} Office Config Centre
           </a>
           <button class="btn btn-primary" id="btn-quick-create-tenant">
@@ -2248,7 +2249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="empty-state">
           <div class="empty-title">No Facility Available</div>
           <div class="empty-desc">Create an office branch under a tenant to configure its facility parameters.</div>
-          <a href="#tenant/offices?id=${tenantId || 'ten_ctg'}" class="btn btn-primary" style="margin-top:12px;">Create Branch Office</a>
+          <a href="#tenant/offices?id=${tenantId || 'ten_sst'}" class="btn btn-primary" style="margin-top:12px;">Create Branch Office</a>
         </div>
       `;
       return;
@@ -2876,6 +2877,24 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="meta-value">${departments.length} Departments</span>
           </div>
         </div>
+      </div>
+
+      <!-- Direct Office Admin Gateway Callout -->
+      <div class="card" style="margin-bottom:20px;background:var(--color-surface);border:1px solid var(--color-border);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:40px;height:40px;border-radius:6px;background:var(--color-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 4px rgba(158,83,52,0.25);">⚙</div>
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--color-text-primary);display:flex;align-items:center;gap:8px;">
+              <span>Branch Office Administration</span>
+              <span class="badge" style="background:var(--color-accent);color:#fff;font-size:10px;padding:2px 6px;">Managerial Panel</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--color-text-muted);margin-top:2px;">Deploy verified staff from tenant pool, provision operating departments, configure branch roles, and review audit trail.</div>
+          </div>
+        </div>
+        <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${office.id}" class="btn btn-primary" style="font-weight:600;display:inline-flex;align-items:center;gap:8px;padding:8px 16px;">
+          <span>Enter Office Admin Page</span>
+          <span>&rarr;</span>
+        </a>
       </div>
 
       <!-- Quick Operational Metrics -->
@@ -4122,11 +4141,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Find the member's office and department affiliations
     const officeStaffEntry = (QrewStore.data.officeStaff || []).find(os => os.userId === user.id) || {
       officeId: 'off_ctg_port',
-      tenantId: 'ten_ctg',
+      tenantId: 'ten_sst',
       officeRole: 'Office Staff'
     };
     const office = QrewStore.getOfficeById(officeStaffEntry.officeId) || { name: 'Chittagong Port Office', id: 'off_ctg_port' };
-    const tenant = QrewStore.getTenantById(officeStaffEntry.tenantId) || { name: 'CTG Logistics', id: 'ten_ctg' };
+    const tenant = QrewStore.getTenantById(officeStaffEntry.tenantId) || { name: 'SST', id: 'ten_sst' };
 
     const deptMemberEntry = (QrewStore.data.departmentMembers || []).find(dm => dm.userId === user.id);
     const dept = deptMemberEntry ? QrewStore.getDepartmentById(deptMemberEntry.deptId) : QrewStore.getDepartments(office.id)[0] || { name: 'Port Operations', code: 'OPS', id: 'dept_ctg_ops' };
@@ -5217,7 +5236,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (DOM.wsTabConfig) {
     DOM.wsTabConfig.onclick = () => {
       AppState.activeWorkspace = 'office-config';
-      const tenantId = AppState.currentTenantId || (QrewStore.getTenants()[0] ? QrewStore.getTenants()[0].id : 'ten_ctg');
+      const tenantId = AppState.currentTenantId || (QrewStore.getTenants()[0] ? QrewStore.getTenants()[0].id : 'ten_sst');
       const offices = QrewStore.getOfficesByTenant(tenantId);
       const officeId = AppState.currentOfficeId || (offices[0] ? offices[0].id : 'off_ctg_port');
       navigateTo(`#office-config?tenantId=${tenantId}&officeId=${officeId}`);
@@ -5263,21 +5282,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Brand logo click navigation (Tenant and Office go back to Tenant Landing page)
+  // Brand logo click navigation:
+  // - Clicking 'Q' (Platform level) or '⚙' (Office Config) navigates to Platform Landing page (#landing)
+  // - Clicking 'S' (Tenant/Office level) navigates to Tenant Landing page (#tenant-landing)
+  const navigateBrandHome = (e) => {
+    if (e) e.stopPropagation();
+    if (AppState.activeWorkspace === 'platform' || AppState.activeWorkspace === 'office-config') {
+      navigateTo('#landing');
+    } else {
+      const tenantId = AppState.currentTenantId || (QrewStore.getTenants()[0] ? QrewStore.getTenants()[0].id : 'ten_sst');
+      navigateTo(`#tenant-landing?id=${tenantId}`);
+    }
+  };
+
+  const sidebarBrandLogo = document.getElementById('sidebar-brand-logo');
+  if (sidebarBrandLogo) {
+    sidebarBrandLogo.onclick = navigateBrandHome;
+  }
+
   const brandWrapper = document.getElementById('brand-wrapper');
   if (brandWrapper) {
-    brandWrapper.onclick = (e) => {
-      if (AppState.sidebarCollapsed) {
-        e.stopPropagation();
-        toggleSidebar();
-      } else {
-        if (AppState.activeWorkspace === 'platform') {
-          navigateTo('#platform/overview');
-        } else if (AppState.activeWorkspace === 'tenant' || AppState.activeWorkspace === 'office' || AppState.activeWorkspace === 'office-admin' || AppState.activeWorkspace === 'office-config' || AppState.activeWorkspace === 'department' || AppState.activeWorkspace === 'member') {
-          navigateTo(`#tenant-landing?id=${AppState.currentTenantId}`);
-        }
-      }
-    };
+    brandWrapper.onclick = navigateBrandHome;
   }
 
   // Keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar
@@ -5334,7 +5359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.userDropdownMenu.classList.remove('show');
     QrewUI.confirmDialog({
       title: 'Reset Demo Database',
-      message: 'This will reset all localStorage state back to the initial sample seed data (CTG Logistics, Dhaka Trading, Meridian Corporation).',
+      message: 'This will reset all localStorage state back to the initial sample seed data (SST organization).',
       confirmText: 'Reset to Defaults',
       confirmClass: 'btn-danger',
       onConfirm: () => {

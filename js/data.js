@@ -3,7 +3,7 @@
  * Hierarchical Multi-Tenant Access Control: Platform -> Tenants -> Offices -> Office Members
  */
 
-const STORAGE_KEY = 'qrew_platform_state_v2';
+const STORAGE_KEY = 'qrew_platform_state_v4';
 
 const DEFAULT_DATA = {
   currentUser: {
@@ -24,121 +24,58 @@ const DEFAULT_DATA = {
   ],
   tenants: [
     {
-      id: 'ten_ctg',
-      name: 'CTG Logistics',
+      id: 'ten_sst',
+      name: 'SST',
       ownerName: 'Rafiqul Islam',
-      ownerEmail: 'rafiq@qrew.io',
+      ownerEmail: 'rafiq@sst.com',
       status: 'Active',
       createdAt: '2026-09-12'
-    },
-    {
-      id: 'ten_dhaka',
-      name: 'Dhaka Trading',
-      ownerName: 'Mina Chowdhury',
-      ownerEmail: 'mina@qrew.io',
-      status: 'Active',
-      createdAt: '2026-10-05'
-    },
-    {
-      id: 'ten_meridian',
-      name: 'Meridian Corporation',
-      ownerName: 'Jack Rahman',
-      ownerEmail: 'jack@qrew.io',
-      status: 'Active',
-      createdAt: '2026-10-20'
     }
   ],
   offices: [
     {
       id: 'off_ctg_port',
-      tenantId: 'ten_ctg',
+      tenantId: 'ten_sst',
       name: 'Chittagong Port Office',
       location: 'Port Access Road, Chittagong',
       status: 'Active',
       createdAt: '2026-09-15'
     },
     {
-      id: 'off_ctg_agr',
-      tenantId: 'ten_ctg',
-      name: 'Agrabad Corporate Branch',
-      location: 'Agrabad C/A, Chittagong',
+      id: 'off_mgl_port',
+      tenantId: 'ten_sst',
+      name: 'Mongla Port Office',
+      location: 'Mongla Port Area, Bagerhat, Khulna',
       status: 'Active',
       createdAt: '2026-09-18'
-    },
-    {
-      id: 'off_dhk_gul',
-      tenantId: 'ten_dhaka',
-      name: 'Dhaka Gulshan HQ',
-      location: 'Gulshan Avenue, Dhaka',
-      status: 'Active',
-      createdAt: '2026-10-08'
-    },
-    {
-      id: 'off_dhk_mot',
-      tenantId: 'ten_dhaka',
-      name: 'Motijheel Commercial Branch',
-      location: 'Motijheel C/A, Dhaka',
-      status: 'Active',
-      createdAt: '2026-10-12'
-    },
-    {
-      id: 'off_raj_cen',
-      tenantId: 'ten_meridian',
-      name: 'Rajshahi Regional Hub',
-      location: 'Shaheb Bazar, Rajshahi',
-      status: 'Active',
-      createdAt: '2026-10-25'
     }
   ],
   tenantMembers: [
-    // CTG Logistics (Platform Owner Sakib cannot be Tenant Admin; Rafiqul Islam is Tenant Admin)
-    { id: 'tm_1', tenantId: 'ten_ctg', userId: 'usr_rafiq', tenantRole: 'Tenant Admin', status: 'Active', joinedAt: '2026-09-12' },
-    { id: 'tm_2', tenantId: 'ten_ctg', userId: 'usr_jack', tenantRole: 'Tenant Manager', status: 'Active', joinedAt: '2026-09-14' },
-    { id: 'tm_3', tenantId: 'ten_ctg', userId: 'usr_nusrat', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-09-25' },
-    { id: 'tm_4', tenantId: 'ten_ctg', userId: 'usr_tanvir', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-05' },
-
-    // Dhaka Trading
-    { id: 'tm_5', tenantId: 'ten_dhaka', userId: 'usr_mina', tenantRole: 'Tenant Admin', status: 'Active', joinedAt: '2026-10-05' },
-    { id: 'tm_6', tenantId: 'ten_dhaka', userId: 'usr_fahim', tenantRole: 'Tenant Manager', status: 'Active', joinedAt: '2026-10-10' },
-    { id: 'tm_7', tenantId: 'ten_dhaka', userId: 'usr_tanvir', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-20' },
-
-    // Meridian Corporation
-    { id: 'tm_8', tenantId: 'ten_meridian', userId: 'usr_jack', tenantRole: 'Tenant Admin', status: 'Active', joinedAt: '2026-10-20' },
-    { id: 'tm_9', tenantId: 'ten_meridian', userId: 'usr_nusrat', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-22' }
+    { id: 'tm_1', tenantId: 'ten_sst', userId: 'usr_rafiq', tenantRole: 'Tenant Admin', status: 'Active', joinedAt: '2026-09-12' },
+    { id: 'tm_2', tenantId: 'ten_sst', userId: 'usr_jack', tenantRole: 'Tenant Manager', status: 'Active', joinedAt: '2026-09-14' },
+    { id: 'tm_3', tenantId: 'ten_sst', userId: 'usr_nusrat', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-09-25' },
+    { id: 'tm_4', tenantId: 'ten_sst', userId: 'usr_tanvir', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-05' },
+    { id: 'tm_5', tenantId: 'ten_sst', userId: 'usr_mina', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-10' },
+    { id: 'tm_6', tenantId: 'ten_sst', userId: 'usr_fahim', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-12' }
   ],
   officeStaff: [
-    // Chittagong Port Office (members must belong to ten_ctg)
-    { id: 'os_1', officeId: 'off_ctg_port', tenantId: 'ten_ctg', userId: 'usr_rafiq', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-09-15' },
-    { id: 'os_2', officeId: 'off_ctg_port', tenantId: 'ten_ctg', userId: 'usr_jack', officeRole: 'Office Supervisor', status: 'Active', assignedAt: '2026-09-16' },
-    { id: 'os_3', officeId: 'off_ctg_port', tenantId: 'ten_ctg', userId: 'usr_nusrat', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-09-26' },
-
-    // Agrabad Branch
-    { id: 'os_4', officeId: 'off_ctg_agr', tenantId: 'ten_ctg', userId: 'usr_tanvir', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-10-06' },
-
-    // Dhaka Gulshan HQ (members must belong to ten_dhaka)
-    { id: 'os_5', officeId: 'off_dhk_gul', tenantId: 'ten_dhaka', userId: 'usr_mina', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-10-08' },
-    { id: 'os_6', officeId: 'off_dhk_gul', tenantId: 'ten_dhaka', userId: 'usr_fahim', officeRole: 'Office Supervisor', status: 'Active', assignedAt: '2026-10-11' },
-
-    // Rajshahi Regional Hub (members must belong to ten_meridian)
-    { id: 'os_7', officeId: 'off_raj_cen', tenantId: 'ten_meridian', userId: 'usr_jack', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-10-26' }
+    { id: 'os_1', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_rafiq', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-09-15' },
+    { id: 'os_2', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_jack', officeRole: 'Office Supervisor', status: 'Active', assignedAt: '2026-09-16' },
+    { id: 'os_3', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_nusrat', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-09-26' },
+    { id: 'os_4', officeId: 'off_mgl_port', tenantId: 'ten_sst', userId: 'usr_tanvir', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-10-06' }
   ],
   departments: [
     { id: 'dept_ctg_ops', officeId: 'off_ctg_port', name: 'Port Operations', code: 'OPS', leadName: 'Rafiqul Islam', capacity: 15, status: 'Active', description: 'Container terminal dispatch, berths, and vessel clearance' },
     { id: 'dept_ctg_log', officeId: 'off_ctg_port', name: 'Fleet & Logistics', code: 'LOG', leadName: 'Jack Rahman', capacity: 10, status: 'Active', description: 'Heavy transport logistics, truck fleets, and freight forwarding' },
     { id: 'dept_ctg_sec', officeId: 'off_ctg_port', name: 'Facility Security', code: 'SEC', leadName: 'Nusrat Jahan', capacity: 8, status: 'Active', description: 'CCTV surveillance, entry-exit gate control, and safety protocols' },
     { id: 'dept_ctg_cust', officeId: 'off_ctg_port', name: 'Customs & Compliance', code: 'CST', leadName: 'Tanvir Hasan', capacity: 6, status: 'Active', description: 'Tariff verification, regulatory filings, and inspection oversight' },
-    { id: 'dept_ctg_agr_sales', officeId: 'off_ctg_agr', name: 'Corporate Sales', code: 'SLS', leadName: 'Tanvir Hasan', capacity: 12, status: 'Active', description: 'Enterprise customer relations and account management' },
-    { id: 'dept_dhk_trade', officeId: 'off_dhk_gul', name: 'Commodities Trading', code: 'TRD', leadName: 'Mina Chowdhury', capacity: 20, status: 'Active', description: 'Capital markets, domestic commodities, and trade settlement' },
-    { id: 'dept_dhk_fin', officeId: 'off_dhk_gul', name: 'Corporate Finance', code: 'FIN', leadName: 'Fahim Karim', capacity: 12, status: 'Active', description: 'Treasury, accounts receivable, and financial auditing' },
-    { id: 'dept_raj_agri', officeId: 'off_raj_cen', name: 'Agri-Sourcing', code: 'AGR', leadName: 'Jack Rahman', capacity: 14, status: 'Active', description: 'Regional agricultural supply chain coordination' }
+    { id: 'dept_mgl_ops', officeId: 'off_mgl_port', name: 'Maritime Cargo & Dispatch', code: 'MCD', leadName: 'Tanvir Hasan', capacity: 12, status: 'Active', description: 'Mongla jetty cargo operations, lighter vessel coordination, and customs handling' }
   ],
   departmentMembers: [
     { id: 'dm_1', deptId: 'dept_ctg_ops', userId: 'usr_rafiq', deptRole: 'Department Lead', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' },
     { id: 'dm_2', deptId: 'dept_ctg_ops', userId: 'usr_nusrat', deptRole: 'Operations Specialist', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' },
     { id: 'dm_3', deptId: 'dept_ctg_log', userId: 'usr_jack', deptRole: 'Logistics Supervisor', shift: 'Evening (14:00 - 22:00)', status: 'Upcoming' },
-    { id: 'dm_4', deptId: 'dept_ctg_sec', userId: 'usr_tanvir', deptRole: 'Security Officer', shift: 'Night (22:00 - 06:00)', status: 'Off Duty' },
-    { id: 'dm_5', deptId: 'dept_dhk_trade', userId: 'usr_mina', deptRole: 'Trading Lead', shift: 'Day (09:00 - 17:00)', status: 'On Duty' },
-    { id: 'dm_6', deptId: 'dept_dhk_fin', userId: 'usr_fahim', deptRole: 'Finance Controller', shift: 'Day (09:00 - 17:00)', status: 'On Duty' }
+    { id: 'dm_4', deptId: 'dept_ctg_sec', userId: 'usr_tanvir', deptRole: 'Security Officer', shift: 'Night (22:00 - 06:00)', status: 'Off Duty' }
   ],
   officeConfigs: {
     'off_ctg_port': {
@@ -153,53 +90,17 @@ const DEFAULT_DATA = {
       checkInGrace: '15 mins',
       accessControlMode: 'Biometric + Smart Card'
     },
-    'off_ctg_agr': {
-      code: 'CTG-AGR-02',
-      tier: 'Tier 2 Corporate Office',
-      floorArea: '6,200 sq ft',
-      maxOccupancy: 45,
-      operatingHours: '09:00 - 18:00 (Standard)',
-      primaryContact: '+880 31 251000',
-      emergencyContact: '+880 31 251999',
-      shifts: ['Standard Day (09:00 - 18:00)'],
-      checkInGrace: '10 mins',
-      accessControlMode: 'Smart Card RFID'
-    },
-    'off_dhk_gul': {
-      code: 'DHK-GUL-01',
-      tier: 'Tier 1 Headquarters',
-      floorArea: '24,000 sq ft',
-      maxOccupancy: 200,
-      operatingHours: '08:30 - 19:30',
-      primaryContact: '+880 2 988000',
-      emergencyContact: '+880 2 988999',
-      shifts: ['Day Shift (08:30 - 17:30)', 'Extended Shift (10:30 - 19:30)'],
+    'off_mgl_port': {
+      code: 'MGL-PORT-02',
+      tier: 'Tier 2 Coastal Port Facility',
+      floorArea: '12,400 sq ft',
+      maxOccupancy: 80,
+      operatingHours: '24/7 Continuous Operations',
+      primaryContact: '+880 4662 75100',
+      emergencyContact: '+880 4662 75199',
+      shifts: ['Morning (08:00 - 16:00)', 'Evening (14:00 - 22:00)'],
       checkInGrace: '15 mins',
-      accessControlMode: 'Biometric Facial Recognition'
-    },
-    'off_dhk_mot': {
-      code: 'DHK-MOT-02',
-      tier: 'Tier 3 Satellite Office',
-      floorArea: '3,800 sq ft',
-      maxOccupancy: 25,
-      operatingHours: '09:00 - 17:00',
-      primaryContact: '+880 2 711000',
-      emergencyContact: '+880 2 711999',
-      shifts: ['Commercial Day (09:00 - 17:00)'],
-      checkInGrace: '10 mins',
-      accessControlMode: 'PIN Keypad + Keycard'
-    },
-    'off_raj_cen': {
-      code: 'RAJ-HUB-01',
-      tier: 'Tier 2 Regional Hub',
-      floorArea: '8,400 sq ft',
-      maxOccupancy: 60,
-      operatingHours: '08:00 - 20:00 (2 Shifts)',
-      primaryContact: '+880 721 77000',
-      emergencyContact: '+880 721 77999',
-      shifts: ['Morning (08:00 - 14:00)', 'Afternoon (14:00 - 20:00)'],
-      checkInGrace: '15 mins',
-      accessControlMode: 'Smart Card RFID'
+      accessControlMode: 'Biometric Smart Access'
     }
   },
   memberTasks: [
@@ -285,71 +186,53 @@ const DEFAULT_DATA = {
       actor: 'Sakib',
       action: 'ASSIGN_ROLE',
       resourceType: 'Office Staff',
-      resourceId: 'off_raj_cen',
-      description: 'Assigned Jack Rahman as Office Manager for Rajshahi Regional Hub',
-      timestamp: '2026-10-26 14:15:00'
+      resourceId: 'off_mgl_port',
+      description: 'Assigned Tanvir Hasan as Office Staff for Mongla Port Office',
+      timestamp: '2026-10-18 14:15:00'
     },
     {
       id: 'LOG-107',
       actor: 'Sakib',
       action: 'CREATE',
       resourceType: 'Office',
-      resourceId: 'off_raj_cen',
-      description: 'Created office Rajshahi Regional Hub under Meridian Corporation',
-      timestamp: '2026-10-25 11:30:00'
+      resourceId: 'off_mgl_port',
+      description: 'Created office Mongla Port Office under SST',
+      timestamp: '2026-09-18 11:30:00'
     },
     {
       id: 'LOG-106',
       actor: 'Sakib',
-      action: 'CREATE',
-      resourceType: 'Tenant',
-      resourceId: 'ten_meridian',
-      description: 'Provisioned new tenant Meridian Corporation for Jack Rahman',
-      timestamp: '2026-10-20 09:45:00'
+      action: 'ASSIGN_ROLE',
+      resourceType: 'Office Staff',
+      resourceId: 'off_ctg_port',
+      description: 'Assigned Jack Rahman as Office Supervisor for Chittagong Port Office',
+      timestamp: '2026-09-16 09:45:00'
     },
     {
       id: 'LOG-105',
-      actor: 'Mina Chowdhury',
-      action: 'CREATE',
-      resourceType: 'Office',
-      resourceId: 'off_dhk_gul',
-      description: 'Created office Dhaka Gulshan HQ under Dhaka Trading',
-      timestamp: '2026-10-08 16:20:00'
-    },
-    {
-      id: 'LOG-104',
-      actor: 'Sakib',
-      action: 'CREATE',
-      resourceType: 'Tenant',
-      resourceId: 'ten_dhaka',
-      description: 'Provisioned new tenant Dhaka Trading for Mina Chowdhury',
-      timestamp: '2026-10-05 10:00:00'
-    },
-    {
-      id: 'LOG-103',
-      actor: 'Sakib',
-      action: 'ADD_MEMBER',
-      resourceType: 'Tenant Member',
-      resourceId: 'ten_ctg',
-      description: 'Added Jack Rahman as Tenant Manager in CTG Logistics',
-      timestamp: '2026-09-14 15:10:00'
-    },
-    {
-      id: 'LOG-102',
       actor: 'Sakib',
       action: 'CREATE',
       resourceType: 'Office',
       resourceId: 'off_ctg_port',
-      description: 'Created office Chittagong Port Office under CTG Logistics',
+      description: 'Created office Chittagong Port Office under SST',
       timestamp: '2026-09-15 13:00:00'
+    },
+    {
+      id: 'LOG-104',
+      actor: 'Sakib',
+      action: 'ADD_MEMBER',
+      resourceType: 'Tenant Member',
+      resourceId: 'ten_sst',
+      description: 'Added Jack Rahman as Tenant Manager in SST',
+      timestamp: '2026-09-14 15:10:00'
     },
     {
       id: 'LOG-101',
       actor: 'Sakib',
       action: 'CREATE',
       resourceType: 'Tenant',
-      resourceId: 'ten_ctg',
-      description: 'Provisioned organization CTG Logistics for Rafiqul Islam',
+      resourceId: 'ten_sst',
+      description: 'Provisioned organization SST for Rafiqul Islam',
       timestamp: '2026-09-12 09:00:00'
     }
   ]
@@ -362,9 +245,18 @@ class DataStore {
 
   load() {
     try {
+      // Clear legacy storage keys if present
+      localStorage.removeItem('qrew_platform_state');
+      localStorage.removeItem('qrew_platform_state_v2');
+      localStorage.removeItem('qrew_platform_state_v3');
+
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
+        // Strict enforcement: only 1 tenant named SST and office includes Mongla Port Office
+        if (!parsed.tenants || parsed.tenants.length !== 1 || parsed.tenants[0].name !== 'SST' || parsed.tenants[0].id !== 'ten_sst' || !parsed.offices || !parsed.offices.some(o => o.name === 'Mongla Port Office')) {
+          return this.reset();
+        }
         // Backward-compatibility guarantee: ensure new properties exist
         if (!parsed.departments || parsed.departments.length === 0) parsed.departments = JSON.parse(JSON.stringify(DEFAULT_DATA.departments || []));
         if (!parsed.departmentMembers || parsed.departmentMembers.length === 0) parsed.departmentMembers = JSON.parse(JSON.stringify(DEFAULT_DATA.departmentMembers || []));
@@ -458,10 +350,14 @@ class DataStore {
   }
 
   getTenantById(id) {
-    const tenant = this.data.tenants.find(t => t.id === id);
+    let tenant = this.data.tenants.find(t => t.id === id);
+    // Graceful fallback for legacy ten_ctg or default single tenant
+    if (!tenant && (id === 'ten_ctg' || !id || this.data.tenants.length === 1)) {
+      tenant = this.data.tenants[0];
+    }
     if (!tenant) return null;
-    const offices = this.getOfficesByTenant(id);
-    const members = this.getTenantMembers(id);
+    const offices = this.getOfficesByTenant(tenant.id);
+    const members = this.getTenantMembers(tenant.id);
     return {
       ...tenant,
       offices,
@@ -583,8 +479,9 @@ class DataStore {
 
   // --- Offices ---
   getOfficesByTenant(tenantId) {
+    const targetId = (tenantId === 'ten_ctg' || !tenantId) ? 'ten_sst' : tenantId;
     return this.data.offices
-      .filter(o => o.tenantId === tenantId)
+      .filter(o => o.tenantId === targetId || o.tenantId === tenantId)
       .map(office => {
         const staffCount = this.data.officeStaff.filter(s => s.officeId === office.id).length;
         return {
@@ -595,10 +492,13 @@ class DataStore {
   }
 
   getOfficeById(officeId) {
-    const office = this.data.offices.find(o => o.id === officeId);
+    let office = this.data.offices.find(o => o.id === officeId);
+    if (!office && officeId === 'off_ctg_agr') {
+      office = this.data.offices.find(o => o.id === 'off_mgl_port');
+    }
     if (!office) return null;
     const tenant = this.data.tenants.find(t => t.id === office.tenantId);
-    const staff = this.getOfficeStaff(officeId);
+    const staff = this.getOfficeStaff(office.id);
     return {
       ...office,
       tenant,
@@ -703,8 +603,9 @@ class DataStore {
 
   // --- Tenant Members ---
   getTenantMembers(tenantId) {
+    const targetId = (tenantId === 'ten_ctg' || !tenantId) ? 'ten_sst' : tenantId;
     return this.data.tenantMembers
-      .filter(tm => tm.tenantId === tenantId)
+      .filter(tm => tm.tenantId === targetId || tm.tenantId === tenantId)
       .map(tm => {
         const user = this.data.users.find(u => u.id === tm.userId);
         return {
@@ -1126,8 +1027,9 @@ class DataStore {
   }
 
   getAuditLogsByTenant(tenantId) {
-    const tenantOffices = this.data.offices.filter(o => o.tenantId === tenantId).map(o => o.id);
-    return this.getAuditLogs().filter(log => log.resourceId === tenantId || tenantOffices.includes(log.resourceId));
+    const targetId = (tenantId === 'ten_ctg' || !tenantId) ? 'ten_sst' : tenantId;
+    const tenantOffices = this.data.offices.filter(o => o.tenantId === targetId).map(o => o.id);
+    return this.getAuditLogs().filter(log => log.resourceId === targetId || tenantOffices.includes(log.resourceId));
   }
 
   getAuditLogsByOffice(officeId) {
