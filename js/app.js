@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Tenant Domain Helper
   const getTenantDomain = (tenantId) => {
+    const targetId = (!tenantId || tenantId === 'ten_ctg') ? (AppState.currentTenantId || 'ten_sst') : tenantId;
+    const tenant = (typeof QrewStore !== 'undefined' && QrewStore.getTenantById) ? (QrewStore.getTenantById(targetId) || QrewStore.getTenants()[0]) : null;
+    if (tenant && tenant.domain) return tenant.domain;
     return 'sst.com';
   };
 
@@ -82,9 +85,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let view = 'overview';
 
     // Normalize legacy & new paths
-    if (pathPart === 'office-config' || pathPart.startsWith('office-config/')) {
+    if (pathPart === 'super-admin' || pathPart.startsWith('super-admin/')) {
+      workspace = 'super-admin';
+      if (pathPart.startsWith('super-admin/')) {
+        view = pathPart.replace('super-admin/', '') || 'permission-catalog';
+      } else {
+        view = 'permission-catalog';
+      }
+    } else if (pathPart === 'office-config' || pathPart.startsWith('office-config/')) {
       workspace = 'office-config';
-      view = 'overview';
+      if (pathPart.startsWith('office-config/')) {
+        view = pathPart.replace('office-config/', '') || 'invoice-templates';
+      } else {
+        view = 'invoice-templates';
+      }
     } else if (pathPart === 'department' || pathPart.startsWith('department/')) {
       workspace = 'department';
       if (pathPart.startsWith('department/')) {
@@ -99,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         view = 'overview';
       }
-    } else if (pathPart.startsWith('tenant/') || pathPart === 'tenant-details' || pathPart === 'tenant-overview' || pathPart === 'tenant-offices' || pathPart === 'tenant-members' || pathPart === 'tenant-roles') {
+    } else if (pathPart.startsWith('tenant/') || pathPart === 'tenant-details' || pathPart === 'tenant-overview' || pathPart === 'tenant-offices' || pathPart === 'tenant-members' || pathPart === 'tenant-roles' || pathPart === 'tenant-settings' || pathPart === 'tenant') {
       workspace = 'tenant';
       if (pathPart.startsWith('tenant/')) {
         view = pathPart.replace('tenant/', '') || 'overview';
@@ -111,36 +125,36 @@ document.addEventListener('DOMContentLoaded', () => {
         view = 'members';
       } else if (pathPart === 'tenant-roles') {
         view = 'roles';
-      }
-    } else if (pathPart.startsWith('office-admin/') || pathPart === 'office-admin' || pathPart === 'office-admin-overview' || pathPart === 'office-admin-staff' || pathPart === 'office-admin-departments' || pathPart === 'office-admin-roles' || pathPart === 'office-admin-activity') {
-      workspace = 'office-admin';
-      if (pathPart.startsWith('office-admin/')) {
-        view = pathPart.replace('office-admin/', '') || 'overview';
-      } else if (pathPart === 'office-admin-staff') {
-        view = 'staff';
-      } else if (pathPart === 'office-admin-departments') {
-        view = 'departments';
-      } else if (pathPart === 'office-admin-roles') {
-        view = 'roles';
-      } else if (pathPart === 'office-admin-activity') {
-        view = 'activity';
+      } else if (pathPart === 'tenant-settings') {
+        view = 'settings';
       } else {
         view = 'overview';
       }
-    } else if (pathPart.startsWith('office/') || pathPart === 'office-details' || pathPart === 'office-overview' || pathPart === 'office-staff' || pathPart === 'office-roles' || pathPart === 'office-activity' || pathPart === 'office-departments') {
+    } else if (pathPart.startsWith('office-admin/') || pathPart === 'office-admin' || pathPart === 'office-admin-overview' || pathPart === 'office-admin-staff' || pathPart === 'office-admin-departments' || pathPart === 'office-admin-roles' || pathPart === 'office-admin-activity' || pathPart === 'office-admin-invoice' || pathPart === 'office-admin-staffs-management') {
+      workspace = 'office-admin';
+      if (pathPart.startsWith('office-admin/')) {
+        view = pathPart.replace('office-admin/', '') || 'overview';
+      } else if (pathPart === 'office-admin-staff' || pathPart === 'office-admin-staffs-management') {
+        view = 'staffs-management';
+      } else if (pathPart === 'office-admin-invoice') {
+        view = 'invoice';
+      } else {
+        view = 'overview';
+      }
+    } else if (pathPart.startsWith('office/') || pathPart === 'office-details' || pathPart === 'office-overview' || pathPart === 'office-staff' || pathPart === 'office-roles' || pathPart === 'office-activity' || pathPart === 'office-departments' || pathPart === 'office' || pathPart === 'office-dashboard' || pathPart === 'office-clients' || pathPart === 'office-files' || pathPart === 'office-financials' || pathPart === 'office-staffs') {
       workspace = 'office';
       if (pathPart.startsWith('office/')) {
-        view = pathPart.replace('office/', '') || 'overview';
-      } else if (pathPart === 'office-details' || pathPart === 'office-overview') {
-        view = 'overview';
-      } else if (pathPart === 'office-staff') {
-        view = 'staff';
-      } else if (pathPart === 'office-roles') {
-        view = 'roles';
-      } else if (pathPart === 'office-activity') {
-        view = 'activity';
-      } else if (pathPart === 'office-departments') {
-        view = 'departments';
+        view = pathPart.replace('office/', '') || 'dashboard';
+      } else if (pathPart === 'office-clients') {
+        view = 'clients';
+      } else if (pathPart === 'office-files') {
+        view = 'files';
+      } else if (pathPart === 'office-financials') {
+        view = 'financials';
+      } else if (pathPart === 'office-staffs' || pathPart === 'office-staff') {
+        view = 'staffs';
+      } else {
+        view = 'dashboard';
       }
     } else {
       workspace = 'platform';
@@ -148,12 +162,24 @@ document.addEventListener('DOMContentLoaded', () => {
         view = pathPart.replace('platform/', '') || 'overview';
       } else if (pathPart === 'tenants') {
         view = 'tenants';
-      } else if (pathPart === 'platform-users') {
-        view = 'users';
-      } else if (pathPart === 'roles-permissions' || pathPart === 'platform-roles') {
-        view = 'roles';
-      } else if (pathPart === 'audit-logs') {
-        view = 'audit-logs';
+      } else if (pathPart === 'platform-users' || pathPart === 'platform-access') {
+        view = 'platform-access';
+      } else if (pathPart === 'roles-permissions' || pathPart === 'platform-roles' || pathPart === 'permission-access') {
+        view = 'permission-access';
+      } else if (pathPart === 'template-defaults' || pathPart === 'templates-defaults') {
+        view = 'template-defaults';
+      } else if (pathPart === 'plans-entitlements') {
+        view = 'plans-entitlements';
+      } else if (pathPart === 'usage-analytics') {
+        view = 'usage-analytics';
+      } else if (pathPart === 'audit-logs' || pathPart === 'audit-log') {
+        view = 'audit-log';
+      } else if (pathPart === 'support-access') {
+        view = 'support-access';
+      } else if (pathPart === 'system-health') {
+        view = 'system-health';
+      } else if (pathPart === 'platform-settings') {
+        view = 'platform-settings';
       } else {
         view = 'overview';
       }
@@ -265,7 +291,14 @@ document.addEventListener('DOMContentLoaded', () => {
       DOM.sidebarBrandLogo.textContent = 'Q';
       DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
       DOM.sidebarBrandName.textContent = 'Qrew';
-      DOM.sidebarBrandBadge.textContent = 'Platform Level';
+      DOM.sidebarBrandBadge.textContent = 'Platform Admin';
+      DOM.sidebarContextPicker.style.display = 'none';
+      if (brandWrapperEl) brandWrapperEl.title = 'Go to Platform Landing Page (qrew.com)';
+    } else if (ws === 'super-admin') {
+      DOM.sidebarBrandLogo.textContent = 'Q';
+      DOM.sidebarBrandLogo.style.backgroundColor = 'var(--color-accent)';
+      DOM.sidebarBrandName.textContent = 'Qrew';
+      DOM.sidebarBrandBadge.textContent = 'Super Admin';
       DOM.sidebarContextPicker.style.display = 'none';
       if (brandWrapperEl) brandWrapperEl.title = 'Go to Platform Landing Page (qrew.com)';
     } else if (ws === 'office-config') {
@@ -381,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (ws === 'platform') {
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Platform</div>
+          <div class="nav-section-title">Platform Admin</div>
           <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#platform/overview">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
             <span class="nav-label">Overview</span>
@@ -390,17 +423,68 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="nav-icon">${QrewUI.getIcon('tenants')}</span>
             <span class="nav-label">Tenants</span>
           </a>
-          <a class="nav-item ${view === 'users' ? 'active' : ''}" href="#platform/users">
+          <a class="nav-item ${view === 'platform-access' ? 'active' : ''}" href="#platform/platform-access">
             <span class="nav-icon">${QrewUI.getIcon('users')}</span>
-            <span class="nav-label">Platform Users</span>
+            <span class="nav-label">Platform Access</span>
           </a>
-          <a class="nav-item ${view === 'roles' ? 'active' : ''}" href="#platform/roles">
-            <span class="nav-icon">${QrewUI.getIcon('roles')}</span>
-            <span class="nav-label">Platform Roles</span>
+          <a class="nav-item ${view === 'permission-access' ? 'active' : ''}" href="#platform/permission-access">
+            <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
+            <span class="nav-label">Permission Access</span>
           </a>
-          <a class="nav-item ${view === 'audit-logs' ? 'active' : ''}" href="#platform/audit-logs">
+          <a class="nav-item ${view === 'template-defaults' ? 'active' : ''}" href="#platform/template-defaults">
+            <span class="nav-icon">${QrewUI.getIcon('layers')}</span>
+            <span class="nav-label">Template & Defaults</span>
+          </a>
+          <a class="nav-item ${view === 'plans-entitlements' ? 'active' : ''}" href="#platform/plans-entitlements">
+            <span class="nav-icon">${QrewUI.getIcon('dollar')}</span>
+            <span class="nav-label">Plans and Entitlements</span>
+          </a>
+          <a class="nav-item ${view === 'usage-analytics' ? 'active' : ''}" href="#platform/usage-analytics">
+            <span class="nav-icon">${QrewUI.getIcon('activity')}</span>
+            <span class="nav-label">Usage & Analytics</span>
+          </a>
+          <a class="nav-item ${view === 'audit-log' || view === 'audit-logs' ? 'active' : ''}" href="#platform/audit-log">
             <span class="nav-icon">${QrewUI.getIcon('audit')}</span>
-            <span class="nav-label">Audit Logs</span>
+            <span class="nav-label">Audit log</span>
+          </a>
+          <a class="nav-item ${view === 'support-access' ? 'active' : ''}" href="#platform/support-access">
+            <span class="nav-icon">${QrewUI.getIcon('users')}</span>
+            <span class="nav-label">Support Access</span>
+          </a>
+          <a class="nav-item ${view === 'system-health' ? 'active' : ''}" href="#platform/system-health">
+            <span class="nav-icon">${QrewUI.getIcon('activity')}</span>
+            <span class="nav-label">System Health and Incidents</span>
+          </a>
+          <a class="nav-item ${view === 'platform-settings' ? 'active' : ''}" href="#platform/platform-settings">
+            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
+            <span class="nav-label">Platform settings</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Super Administration</div>
+          <a class="nav-item" href="#super-admin/permission-catalog" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
+            <span class="nav-label">Super Admin &rarr;</span>
+          </a>
+        </div>
+      `;
+    } else if (ws === 'super-admin') {
+      DOM.sidebarNav.innerHTML = `
+        <div class="nav-section">
+          <div class="nav-section-title">Super Admin</div>
+          <a class="nav-item ${view === 'permission-catalog' ? 'active' : ''}" href="#super-admin/permission-catalog">
+            <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
+            <span class="nav-label">Permission Catalog</span>
+          </a>
+          <a class="nav-item ${view === 'platform-settings' || view === 'platform-setting' ? 'active' : ''}" href="#super-admin/platform-settings">
+            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
+            <span class="nav-label">Platform Setting</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <a class="nav-item" href="#platform/overview" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">&larr; Platform Admin</span>
           </a>
         </div>
       `;
@@ -409,14 +493,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const officeId = office ? office.id : AppState.currentOfficeId;
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Facility Setup</div>
-          <a class="nav-item active" href="#office-config?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
-            <span class="nav-label">Facility Specs & Shifts</span>
+          <div class="nav-section-title">Office Config</div>
+          <a class="nav-item ${view === 'invoice-templates' ? 'active' : ''}" href="#office-config/invoice-templates?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('invoice')}</span>
+            <span class="nav-label">Invoice Templates</span>
           </a>
-          <a class="nav-item" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('arrowRight')}</span>
-            <span class="nav-label">Deploy to Office Admin</span>
+          <a class="nav-item ${view === 'roles-permissions' || view === 'roles' ? 'active' : ''}" href="#office-config/roles-permissions?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
+            <span class="nav-label">Roles and Permissions</span>
+          </a>
+          <a class="nav-item ${view === 'customize-fields' ? 'active' : ''}" href="#office-config/customize-fields?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
+            <span class="nav-label">Customize fields</span>
+          </a>
+          <a class="nav-item ${view === 'plans-entitlements' || view === 'plans' ? 'active' : ''}" href="#office-config/plans-entitlements?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('layers')}</span>
+            <span class="nav-label">Plans and Entitlement</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Platform</div>
+          <a class="nav-item" href="#landing" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">&larr; Qrew Landing Page</span>
           </a>
         </div>
       `;
@@ -452,16 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     } else if (ws === 'tenant') {
       const tenantId = tenant ? tenant.id : AppState.currentTenantId;
-      const domain = getTenantDomain(tenantId);
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Tenant Portal</div>
-          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
-            <span class="nav-icon">${QrewUI.getIcon('arrowRight')}</span>
-            <span class="nav-label">← Back to Landing (${domain})</span>
-          </a>
-        </div>
-        <div class="nav-section" style="margin-top:16px;">
           <div class="nav-section-title">Tenant Workspace</div>
           <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#tenant/overview?id=${tenantId}">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
@@ -479,79 +570,78 @@ document.addEventListener('DOMContentLoaded', () => {
             <span class="nav-icon">${QrewUI.getIcon('roles')}</span>
             <span class="nav-label">Tenant Roles</span>
           </a>
+          <a class="nav-item ${view === 'settings' ? 'active' : ''}" href="#tenant/settings?id=${tenantId}">
+            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
+            <span class="nav-label">Settings</span>
+          </a>
         </div>
       `;
     } else if (ws === 'office') {
       const tenantId = tenant ? tenant.id : AppState.currentTenantId;
       const officeId = office ? office.id : AppState.currentOfficeId;
-      const domain = getTenantDomain(tenantId);
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Parent Tenant</div>
-          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
-            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
-            <span class="nav-label">← ${tenant ? tenant.name : 'Tenant'} Landing</span>
-          </a>
-        </div>
-        <div class="nav-section" style="margin-top:16px;">
-          <div class="nav-section-title">Branch Facility Hub</div>
-          <a class="nav-item active" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
+          <div class="nav-section-title">Office</div>
+          <a class="nav-item ${view === 'dashboard' || view === 'overview' ? 'active' : ''}" href="#office/dashboard?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
-            <span class="nav-label">Branch Hub</span>
+            <span class="nav-label">Dashboard</span>
           </a>
-          <a class="nav-item" href="#department/overview?deptId=${AppState.currentDeptId || 'dept_ctg_ops'}">
-            <span class="nav-icon">${QrewUI.getIcon('department')}</span>
-            <span class="nav-label">Departments Hub</span>
+          <a class="nav-item ${view === 'clients' ? 'active' : ''}" href="#office/clients?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('users')}</span>
+            <span class="nav-label">Clients</span>
+          </a>
+          <a class="nav-item ${view === 'files' ? 'active' : ''}" href="#office/files?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('file')}</span>
+            <span class="nav-label">Files</span>
+          </a>
+          <a class="nav-item ${view === 'financials' ? 'active' : ''}" href="#office/financials?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('dollar')}</span>
+            <span class="nav-label">Financials</span>
+          </a>
+          <a class="nav-item ${view === 'staffs' || view === 'staff' ? 'active' : ''}" href="#office/staffs?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('users')}</span>
+            <span class="nav-label">Staffs</span>
           </a>
         </div>
         <div class="nav-section" style="margin-top:16px;">
           <div class="nav-section-title">Management</div>
           <a class="nav-item" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}" style="color:var(--color-accent);font-weight:600;">
             <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
-            <span class="nav-label">Office Admin Panel →</span>
+            <span class="nav-label">Office Admin Panel &rarr;</span>
+          </a>
+        </div>
+        <div class="nav-section" style="margin-top:16px;">
+          <div class="nav-section-title">Platform</div>
+          <a class="nav-item" href="#landing" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">&larr; Qrew Landing Page</span>
           </a>
         </div>
       `;
     } else if (ws === 'office-admin') {
       const tenantId = tenant ? tenant.id : AppState.currentTenantId;
       const officeId = office ? office.id : AppState.currentOfficeId;
-      const domain = getTenantDomain(tenantId);
       DOM.sidebarNav.innerHTML = `
         <div class="nav-section">
-          <div class="nav-section-title">Parent Tenant</div>
-          <a class="nav-item" href="#tenant-landing?id=${tenantId}" style="color:var(--color-accent);font-weight:600;">
-            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
-            <span class="nav-label">← ${tenant ? tenant.name : 'Tenant'} Landing</span>
-          </a>
-        </div>
-        <div class="nav-section" style="margin-top:16px;">
-          <div class="nav-section-title">Office Administration</div>
+          <div class="nav-section-title">Office Admin</div>
           <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
-            <span class="nav-label">Admin Overview</span>
+            <span class="nav-label">Overview</span>
           </a>
-          <a class="nav-item ${view === 'staff' ? 'active' : ''}" href="#office-admin/staff?tenantId=${tenantId}&officeId=${officeId}">
+          <a class="nav-item ${view === 'invoice' ? 'active' : ''}" href="#office-admin/invoice?tenantId=${tenantId}&officeId=${officeId}">
+            <span class="nav-icon">${QrewUI.getIcon('invoice')}</span>
+            <span class="nav-label">Invoice</span>
+          </a>
+          <a class="nav-item ${view === 'staffs-management' || view === 'staff' ? 'active' : ''}" href="#office-admin/staffs-management?tenantId=${tenantId}&officeId=${officeId}">
             <span class="nav-icon">${QrewUI.getIcon('users')}</span>
-            <span class="nav-label">Staff Deployment</span>
-          </a>
-          <a class="nav-item ${view === 'departments' ? 'active' : ''}" href="#office-admin/departments?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('department')}</span>
-            <span class="nav-label">Departments Setup</span>
-          </a>
-          <a class="nav-item ${view === 'roles' ? 'active' : ''}" href="#office-admin/roles?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('roles')}</span>
-            <span class="nav-label">Roles & Permissions</span>
-          </a>
-          <a class="nav-item ${view === 'activity' ? 'active' : ''}" href="#office-admin/activity?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('audit')}</span>
-            <span class="nav-label">Branch Audit</span>
+            <span class="nav-label">Staffs Management</span>
           </a>
         </div>
         <div class="nav-section" style="margin-top:16px;">
-          <div class="nav-section-title">Branch Workspace</div>
-          <a class="nav-item" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}">
-            <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
-            <span class="nav-label">← Return to Branch Hub</span>
+          <div class="nav-section-title">Platform</div>
+          <a class="nav-item" href="#landing" style="color:var(--color-accent);font-weight:600;">
+            <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="nav-label">&larr; Qrew Landing Page</span>
           </a>
         </div>
       `;
@@ -564,7 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const domainDotEl = document.querySelector('.topbar-domain-dot');
     if (!domainTextEl) return;
 
-    if (AppState.activeWorkspace === 'platform') {
+    if (AppState.activeWorkspace === 'platform' || AppState.activeWorkspace === 'super-admin') {
       domainTextEl.textContent = 'App.Qrew.com/Admin';
       if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--color-accent)';
     } else if (AppState.activeWorkspace === 'office-config') {
@@ -610,6 +700,145 @@ document.addEventListener('DOMContentLoaded', () => {
   // Synchronize Topbar Landing Button (Removed per UI design)
   const syncTopbarLandingBtn = () => {};
 
+  // Blank Titled Page Renderer (Strictly displays title and keeps page blank per spec)
+  const renderBlankTitledPage = (title) => {
+    DOM.mainContent.innerHTML = `
+      <div class="page-header" style="margin-bottom: 24px;">
+        <div class="page-title-group">
+          <h1 class="page-title" style="font-size: 24px; font-weight: 700; color: var(--color-text-primary); margin: 0;">${QrewUI.escapeHtml(title)}</h1>
+        </div>
+      </div>
+    `;
+  };
+
+  // Tenant Settings View (Domain edit, Company name edit, Plan brought)
+  const renderTenantSettings = (tenantId) => {
+    const tenant = QrewStore.getTenantById(tenantId) || QrewStore.getTenants()[0];
+    const currentDomain = getTenantDomain(tenant.id);
+    const planName = tenant.plan || 'Enterprise Governance Mesh';
+    const planBroughtDate = tenant.createdAt || '2026-09-12';
+
+    DOM.mainContent.innerHTML = `
+      <div class="page-header" style="margin-bottom: 24px;">
+        <div class="page-title-group">
+          <h1 class="page-title" style="font-size: 24px; font-weight: 700; color: var(--color-text-primary); margin: 0;">Settings</h1>
+          <p class="page-subtitle" style="font-size: 14px; color: var(--color-text-muted); margin-top: 4px;">Manage organization profile, primary domain routing, and active subscription plan.</p>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 24px; max-width: 760px;">
+        <!-- Company Profile & Name Edit -->
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 24px;">
+          <h2 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin: 0 0 16px 0;">Company Profile</h2>
+          <form id="tenant-company-form" style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+              <label for="tenant-name-input" style="display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px;">Company Name</label>
+              <input type="text" id="tenant-name-input" class="form-input" value="${QrewUI.escapeHtml(tenant.name)}" required style="width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); color: var(--color-text-primary); font-size: 14px;">
+            </div>
+            <div>
+              <label for="tenant-owner-name" style="display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px;">Account Owner</label>
+              <input type="text" id="tenant-owner-name" class="form-input" value="${QrewUI.escapeHtml(tenant.ownerName || 'Rafiqul Islam')}" readonly style="width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-text-muted); font-size: 14px; cursor: not-allowed;">
+            </div>
+            <div>
+              <label for="tenant-owner-email" style="display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px;">Owner Email</label>
+              <input type="email" id="tenant-owner-email" class="form-input" value="${QrewUI.escapeHtml(tenant.ownerEmail || 'rafiq@sst.com')}" readonly style="width: 100%; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-surface); color: var(--color-text-muted); font-size: 14px; cursor: not-allowed;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="submit" class="btn btn-primary" style="background: var(--color-accent); color: #fff; padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Save Company Changes</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Domain Configuration -->
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 24px;">
+          <h2 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin: 0 0 16px 0;">Domain Configuration</h2>
+          <form id="tenant-domain-form" style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+              <label for="tenant-domain-input" style="display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px;">Custom Domain</label>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="text" id="tenant-domain-input" class="form-input" value="${QrewUI.escapeHtml(currentDomain)}" required style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); color: var(--color-text-primary); font-size: 14px;">
+                <span class="badge badge-active" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 4px; font-size: 12px;"><span class="badge-dot"></span>SSL Active</span>
+              </div>
+              <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 4px;">Tenant landing and workspace traffic will resolve to this domain.</p>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+              <button type="submit" class="btn btn-primary" style="background: var(--color-accent); color: #fff; padding: 8px 16px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer;">Save Domain Settings</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Plan Brought & Subscription Details -->
+        <div class="card" style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; padding: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div>
+              <h2 style="font-size: 16px; font-weight: 600; color: var(--color-text-primary); margin: 0 0 4px 0;">Plan Brought</h2>
+              <p style="font-size: 13px; color: var(--color-text-muted); margin: 0;">Subscription license and tier entitlement tier</p>
+            </div>
+            <span class="badge badge-active" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 4px; font-size: 12px;"><span class="badge-dot"></span>Active Subscription</span>
+          </div>
+
+          <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 6px; padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+            <div>
+              <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 2px;">Plan Name</div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(planName)}</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 2px;">Billing Frequency</div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Annual ($1,200/mo)</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 2px;">Provisioned On</div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(planBroughtDate)}</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 2px;">Offices Entitlement</div>
+              <div style="font-size: 15px; font-weight: 600; color: var(--color-text-primary);">Unlimited Branches</div>
+            </div>
+          </div>
+
+          <div style="font-size: 13px; color: var(--color-text-muted); line-height: 1.6;">
+            <div style="font-weight: 600; color: var(--color-text-primary); margin-bottom: 4px;">Included Entitlements:</div>
+            <ul style="margin: 0; padding-left: 20px;">
+              <li>Unlimited Branch Facilities & Department Hierarchies</li>
+              <li>Multi-tiered Role-Based Access Control (RBAC)</li>
+              <li>Real-time Operations Mesh & Facility Shift Handover</li>
+              <li>Complete Audit Trail Log Retention (365 Days)</li>
+              <li>Enterprise Priority Support & 99.99% Uptime Guarantee</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Hook up forms
+    const companyForm = document.getElementById('tenant-company-form');
+    if (companyForm) {
+      companyForm.onsubmit = (e) => {
+        e.preventDefault();
+        const newName = document.getElementById('tenant-name-input').value.trim();
+        if (!newName) return;
+        QrewStore.updateTenant(tenant.id, { name: newName });
+        QrewUI.showToast('Company name updated successfully', 'success');
+        renderSidebar();
+        renderTenantSettings(tenant.id);
+      };
+    }
+
+    const domainForm = document.getElementById('tenant-domain-form');
+    if (domainForm) {
+      domainForm.onsubmit = (e) => {
+        e.preventDefault();
+        const newDomain = document.getElementById('tenant-domain-input').value.trim();
+        if (!newDomain) return;
+        QrewStore.updateTenant(tenant.id, { domain: newDomain });
+        QrewUI.showToast('Custom domain updated successfully', 'success');
+        updateTopbarDomainBadge();
+        renderSidebar();
+        renderTenantSettings(tenant.id);
+      };
+    }
+  };
+
   // Dispatcher for View Rendering
   const dispatchView = () => {
     const ws = AppState.activeWorkspace;
@@ -625,8 +854,40 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    if (ws === 'super-admin') {
+      switch (view) {
+        case 'permission-catalog':
+          renderBlankTitledPage('Permission Catalog');
+          break;
+        case 'platform-settings':
+        case 'platform-setting':
+          renderBlankTitledPage('Platform Setting');
+          break;
+        default:
+          renderBlankTitledPage('Permission Catalog');
+      }
+      return;
+    }
+
     if (ws === 'office-config') {
-      renderOfficeConfigCentre(AppState.currentTenantId, AppState.currentOfficeId);
+      switch (view) {
+        case 'invoice-templates':
+          renderBlankTitledPage('Invoice Templates');
+          break;
+        case 'roles-permissions':
+        case 'roles':
+          renderBlankTitledPage('Roles and Permissions');
+          break;
+        case 'customize-fields':
+          renderBlankTitledPage('Customize fields');
+          break;
+        case 'plans-entitlements':
+        case 'plans':
+          renderBlankTitledPage('Plans and Entitlement');
+          break;
+        default:
+          renderBlankTitledPage('Invoice Templates');
+      }
       return;
     }
 
@@ -648,14 +909,34 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'tenants':
           renderPlatformTenants();
           break;
-        case 'users':
-          renderPlatformUsers();
+        case 'platform-access':
+          renderBlankTitledPage('Platform Access');
           break;
-        case 'roles':
-          renderPlatformRoles();
+        case 'permission-access':
+          renderBlankTitledPage('Permission Access');
           break;
+        case 'template-defaults':
+        case 'templates-defaults':
+          renderBlankTitledPage('Template & Defaults');
+          break;
+        case 'plans-entitlements':
+          renderBlankTitledPage('Plans and Entitlements');
+          break;
+        case 'usage-analytics':
+          renderBlankTitledPage('Usage & Analytics');
+          break;
+        case 'audit-log':
         case 'audit-logs':
-          renderPlatformAuditLogs();
+          renderBlankTitledPage('Audit log');
+          break;
+        case 'support-access':
+          renderBlankTitledPage('Support Access');
+          break;
+        case 'system-health':
+          renderBlankTitledPage('System Health and Incidents');
+          break;
+        case 'platform-settings':
+          renderBlankTitledPage('Platform settings');
           break;
         default:
           renderPlatformOverview();
@@ -675,34 +956,48 @@ document.addEventListener('DOMContentLoaded', () => {
         case 'roles':
           renderTenantRoles(tenantId);
           break;
+        case 'settings':
+          renderTenantSettings(tenantId);
+          break;
         default:
           renderTenantOverview(tenantId);
       }
     } else if (ws === 'office') {
-      const tenantId = AppState.currentTenantId;
-      const officeId = AppState.currentOfficeId;
-      renderOfficeWorkspace(tenantId, officeId);
-    } else if (ws === 'office-admin') {
-      const tenantId = AppState.currentTenantId;
-      const officeId = AppState.currentOfficeId;
       switch (view) {
+        case 'dashboard':
         case 'overview':
-          renderOfficeAdminOverview(tenantId, officeId);
+          renderBlankTitledPage('Dashboard');
           break;
+        case 'clients':
+          renderBlankTitledPage('Clients');
+          break;
+        case 'files':
+          renderBlankTitledPage('Files');
+          break;
+        case 'financials':
+          renderBlankTitledPage('Financials');
+          break;
+        case 'staffs':
         case 'staff':
-          renderOfficeStaff(tenantId, officeId);
-          break;
-        case 'departments':
-          renderOfficeDepartments(tenantId, officeId);
-          break;
-        case 'roles':
-          renderOfficeRoles(tenantId, officeId);
-          break;
-        case 'activity':
-          renderOfficeActivity(tenantId, officeId);
+          renderBlankTitledPage('Staffs');
           break;
         default:
-          renderOfficeAdminOverview(tenantId, officeId);
+          renderBlankTitledPage('Dashboard');
+      }
+    } else if (ws === 'office-admin') {
+      switch (view) {
+        case 'overview':
+          renderBlankTitledPage('Overview');
+          break;
+        case 'invoice':
+          renderBlankTitledPage('Invoice');
+          break;
+        case 'staffs-management':
+        case 'staff':
+          renderBlankTitledPage('Staffs Management');
+          break;
+        default:
+          renderBlankTitledPage('Overview');
       }
     }
   };
@@ -1029,150 +1324,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Platform: Overview ---
   const renderPlatformOverview = () => {
-    const stats = QrewStore.getStats();
-    const tenants = QrewStore.getTenants().slice(0, 5);
-    const recentLogs = QrewStore.getAuditLogs().slice(0, 6);
-
-    updateBreadcrumbs([
-      { label: 'Platform', hash: '#platform/overview' },
-      { label: 'Overview', hash: '#platform/overview' }
-    ]);
-
     DOM.mainContent.innerHTML = `
-      <div class="page-header">
+      <div class="page-header" style="margin-bottom: 24px;">
         <div class="page-title-group">
-          <h1 class="page-title">Platform Dashboard</h1>
-          <p class="page-subtitle">Central oversight of all tenants, offices, and platform-wide governance.</p>
-        </div>
-        <div class="page-actions">
-          <a href="#office-config?tenantId=ten_sst&officeId=off_ctg_port" class="btn btn-secondary">
-            ${QrewUI.getIcon('settings')} Office Config Centre
-          </a>
-          <button class="btn btn-primary" id="btn-quick-create-tenant">
-            ${QrewUI.getIcon('plus')} Create Tenant
-          </button>
-        </div>
-      </div>
-
-      <!-- Metrics Grid -->
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Total Tenants</span>
-            <div class="metric-icon-wrap">${QrewUI.getIcon('tenants')}</div>
-          </div>
-          <div class="metric-value-row">
-            <div class="metric-value">${stats.totalTenants}</div>
-            <div class="metric-subtext">${stats.activeTenants} active</div>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Active Tenants</span>
-            <div class="metric-icon-wrap" style="color:var(--color-success);">${QrewUI.getIcon('check')}</div>
-          </div>
-          <div class="metric-value-row">
-            <div class="metric-value">${stats.activeTenants}</div>
-            <div class="metric-subtext">100% operational</div>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Total Offices</span>
-            <div class="metric-icon-wrap">${QrewUI.getIcon('offices')}</div>
-          </div>
-          <div class="metric-value-row">
-            <div class="metric-value">${stats.totalOffices}</div>
-            <div class="metric-subtext">Across ${stats.totalTenants} organizations</div>
-          </div>
-        </div>
-
-        <div class="metric-card">
-          <div class="metric-header">
-            <span class="metric-label">Platform Users</span>
-            <div class="metric-icon-wrap">${QrewUI.getIcon('users')}</div>
-          </div>
-          <div class="metric-value-row">
-            <div class="metric-value">${stats.totalUsers}</div>
-            <div class="metric-subtext">Managed accounts</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Main Dashboard Content -->
-      <div class="dashboard-grid">
-        <!-- Recent Tenants -->
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h2 class="card-title">Recent Tenants</h2>
-              <p class="card-subtitle">Organizations onboarded onto Qrew. Click tenant name to open its workspace.</p>
-            </div>
-          </div>
-          <div class="table-wrapper" style="border:none;box-shadow:none;">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Tenant Name</th>
-                  <th>Owner</th>
-                  <th>Offices</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${tenants.map(t => `
-                  <tr>
-                    <td>
-                      <a href="#tenant/overview?id=${t.id}" class="table-row-link">
-                        <strong>${QrewUI.escapeHtml(t.name)}</strong>
-                      </a>
-                    </td>
-                    <td>${QrewUI.escapeHtml(t.ownerName)}</td>
-                    <td>${t.officeCount} offices</td>
-                    <td>${QrewUI.statusBadge(t.status)}</td>
-                    <td>${t.createdAt}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Recent Activities Feed -->
-        <div class="card">
-          <div class="card-header">
-            <div>
-              <h2 class="card-title">Recent Platform Activities</h2>
-              <p class="card-subtitle">Latest immutable audit trail occurrences across all organizations</p>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="activity-feed">
-              ${recentLogs.map(log => `
-                <div class="activity-item">
-                  <div class="activity-avatar">${log.actor ? log.actor.charAt(0) : 'S'}</div>
-                  <div class="activity-content">
-                    <div class="activity-text">
-                      <strong>${QrewUI.escapeHtml(log.actor)}</strong>: ${QrewUI.escapeHtml(log.description)}
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;margin-top:2px;">
-                      ${QrewUI.actionBadge(log.action)}
-                      <span class="activity-time">${log.timestamp}</span>
-                    </div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
+          <h1 class="page-title" style="font-size: 24px; font-weight: 700; color: var(--color-text-primary); margin: 0;">Platform Dashboard</h1>
         </div>
       </div>
     `;
-
-    const quickCreateBtn = document.getElementById('btn-quick-create-tenant');
-    if (quickCreateBtn) quickCreateBtn.onclick = openCreateTenantModal;
   };
 
   // --- Platform: Tenants ---
@@ -1756,9 +1914,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <div class="page-actions">
-          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
-            &larr; Back to Landing (${getTenantDomain(tenant.id)})
-          </a>
           <button class="btn btn-secondary" id="btn-edit-tenant-header">
             ${QrewUI.getIcon('edit')} Edit Tenant
           </button>
@@ -1771,14 +1926,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="meta-item">
             <span class="meta-label">Tenant ID</span>
             <span class="meta-value"><span class="id-badge">${tenant.id}</span></span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Tenant Portal</span>
-            <span class="meta-value">
-              <a href="#tenant-landing?id=${tenant.id}" style="color:var(--color-accent);font-weight:600;text-decoration:none;">
-                ${getTenantDomain(tenant.id)} &rarr;
-              </a>
-            </span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Tenant Owner</span>
@@ -1926,9 +2073,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Offices operating under ${QrewUI.escapeHtml(tenant.name)}. Each office can have its own staff and operational roles.</p>
         </div>
         <div class="page-actions">
-          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
-            &larr; Back to Landing
-          </a>
           <button class="btn btn-primary" id="btn-create-office">
             ${QrewUI.getIcon('plus')} Create Office
           </button>
@@ -2029,9 +2173,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <p class="page-subtitle">Users verified with organization membership in ${QrewUI.escapeHtml(tenant.name)}.</p>
         </div>
         <div class="page-actions">
-          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
-            &larr; Back to Landing
-          </a>
           <button class="btn btn-primary" id="btn-add-tenant-member">
             ${QrewUI.getIcon('plus')} Add Member
           </button>
@@ -2122,11 +2263,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="page-title-group">
           <h1 class="page-title">Tenant Roles</h1>
           <p class="page-subtitle">Roles and permissions controlling organizational administration within ${QrewUI.escapeHtml(tenant.name)}.</p>
-        </div>
-        <div class="page-actions">
-          <a href="#tenant-landing?id=${tenant.id}" class="btn btn-secondary">
-            &larr; Back to Landing
-          </a>
         </div>
       </div>
 
@@ -5287,7 +5423,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // - Clicking 'S' (Tenant/Office level) navigates to Tenant Landing page (#tenant-landing)
   const navigateBrandHome = (e) => {
     if (e) e.stopPropagation();
-    if (AppState.activeWorkspace === 'platform' || AppState.activeWorkspace === 'office-config') {
+    if (AppState.activeWorkspace === 'platform' || AppState.activeWorkspace === 'super-admin' || AppState.activeWorkspace === 'office-config') {
       navigateTo('#landing');
     } else {
       const tenantId = AppState.currentTenantId || (QrewStore.getTenants()[0] ? QrewStore.getTenants()[0].id : 'ten_sst');
@@ -5355,21 +5491,24 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dropdownHeaderBtn) dropdownHeaderBtn.onclick = openEditProfileModal;
 
   // Reset Demo Data
-  document.getElementById('action-reset-data').onclick = () => {
-    DOM.userDropdownMenu.classList.remove('show');
-    QrewUI.confirmDialog({
-      title: 'Reset Demo Database',
-      message: 'This will reset all localStorage state back to the initial sample seed data (SST organization).',
-      confirmText: 'Reset to Defaults',
-      confirmClass: 'btn-danger',
-      onConfirm: () => {
-        QrewStore.reset();
-        syncHeaderUserProfile();
-        QrewUI.showToast('Demo data restored to initial state.', 'success');
-        handleRouteChange();
-      }
-    });
-  };
+  const resetDemoBtn = document.getElementById('action-reset-data');
+  if (resetDemoBtn) {
+    resetDemoBtn.onclick = () => {
+      DOM.userDropdownMenu.classList.remove('show');
+      QrewUI.confirmDialog({
+        title: 'Reset Demo Database',
+        message: 'This will reset all localStorage state back to the initial sample seed data (SST organization).',
+        confirmText: 'Reset to Defaults',
+        confirmClass: 'btn-danger',
+        onConfirm: () => {
+          QrewStore.reset();
+          syncHeaderUserProfile();
+          QrewUI.showToast('Demo data restored to initial state.', 'success');
+          handleRouteChange();
+        }
+      });
+    };
+  }
 
   // Close dropdowns when clicking outside
   document.addEventListener('click', () => {
