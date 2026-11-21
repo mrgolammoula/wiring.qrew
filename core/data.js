@@ -295,6 +295,20 @@ class DataStore {
     return this.data.currentUser;
   }
 
+  setCurrentUser(userId) {
+    const user = this.data.users.find(u => u.id === userId);
+    if (!user) return null;
+    this.data.currentUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      platformRole: user.platformRole,
+      avatar: user.name.trim().charAt(0).toUpperCase()
+    };
+    this.save();
+    return this.data.currentUser;
+  }
+
   updateCurrentUser({ name, email }) {
     if (!name || !email) throw new Error('Name and email are required.');
 
