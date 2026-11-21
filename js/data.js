@@ -253,8 +253,8 @@ class DataStore {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Strict enforcement: only 1 tenant named SST and office includes Mongla Port Office
-        if (!parsed.tenants || parsed.tenants.length !== 1 || parsed.tenants[0].name !== 'SST' || parsed.tenants[0].id !== 'ten_sst' || !parsed.offices || !parsed.offices.some(o => o.name === 'Mongla Port Office')) {
+        // Reset only if the stored shape is unusable (bump STORAGE_KEY when the seed changes)
+        if (!Array.isArray(parsed.tenants) || !Array.isArray(parsed.offices) || !Array.isArray(parsed.users)) {
           return this.reset();
         }
         // Backward-compatibility guarantee: ensure new properties exist
