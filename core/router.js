@@ -40,17 +40,21 @@
       pathPart === 'super-admin' ||
       pathPart.startsWith('super-admin/') ||
       pathPart === 'permission-catalog' ||
-      pathPart === 'platform-settings'
+      pathPart === 'platform-settings' ||
+      pathPart === 'platform-access'
     ) {
       workspace = 'super-admin';
       if (pathPart.startsWith('super-admin/')) {
-        view = pathPart.replace('super-admin/', '') || 'overview';
+        const sub = pathPart.replace('super-admin/', '') || 'platform-access';
+        view = sub === 'overview' ? 'platform-access' : sub;
       } else if (pathPart === 'platform-settings') {
         view = 'platform-settings';
+      } else if (pathPart === 'platform-access') {
+        view = 'platform-access';
       } else if (pathPart === 'permission-catalog') {
         view = 'permission-catalog';
       } else {
-        view = 'overview';
+        view = 'platform-access';
       }
     } else if (pathPart === 'office-config' || pathPart.startsWith('office-config/')) {
       workspace = 'office-config';
