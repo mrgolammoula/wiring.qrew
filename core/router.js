@@ -25,7 +25,10 @@
     }
 
     if (pathPart === 'profile' || pathPart.startsWith('profile/')) {
-      const activeWs = (Qrew.state && Qrew.state.activeWorkspace) ? Qrew.state.activeWorkspace : 'platform';
+      const paramWs = params.ws || params.workspace || params.from;
+      const activeWs = paramWs || ((Qrew.state && Qrew.state.activeWorkspace)
+        ? Qrew.state.activeWorkspace
+        : (sessionStorage.getItem('qrew_active_workspace') || 'platform'));
       return { workspace: activeWs, view: 'profile', path: pathPart, params };
     }
 
@@ -41,11 +44,13 @@
     ) {
       workspace = 'super-admin';
       if (pathPart.startsWith('super-admin/')) {
-        view = pathPart.replace('super-admin/', '') || 'permission-catalog';
+        view = pathPart.replace('super-admin/', '') || 'overview';
       } else if (pathPart === 'platform-settings') {
         view = 'platform-settings';
-      } else {
+      } else if (pathPart === 'permission-catalog') {
         view = 'permission-catalog';
+      } else {
+        view = 'overview';
       }
     } else if (pathPart === 'office-config' || pathPart.startsWith('office-config/')) {
       workspace = 'office-config';
@@ -67,6 +72,16 @@
         view = pathPart.replace('member/', '') || 'overview';
       } else {
         view = 'overview';
+      }
+    } else if (
+      pathPart === 'tenant-super-admin' ||
+      pathPart.startsWith('tenant-super-admin/')
+    ) {
+      workspace = 'tenant-super-admin';
+      if (pathPart.startsWith('tenant-super-admin/')) {
+        view = pathPart.replace('tenant-super-admin/', '') || 'plan-and-entitlement';
+      } else {
+        view = 'plan-and-entitlement';
       }
     } else if (
       pathPart.startsWith('tenant/') ||
@@ -198,6 +213,9 @@
     const state = Qrew.state;
     const route = Qrew.parseHash();
     state.activeWorkspace = route.workspace;
+    if (route.workspace && route.workspace !== 'landing' && route.workspace !== 'tenant-landing') {
+      try { sessionStorage.setItem('qrew_active_workspace', route.workspace); } catch(e) {}
+    }
     state.currentView = route.view;
     state.currentRoute = route.path;
     state.routeParams = route.params;

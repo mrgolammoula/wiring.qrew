@@ -9,7 +9,7 @@
   let currentAvatarBg = null;
 
   const renderProfileTab = (user, ctx) => {
-    const avatarBg = currentAvatarBg || user.avatarBg || 'var(--panel-accent, #9E5334)';
+    const avatarBg = currentAvatarBg || user.avatarBg || 'var(--panel-accent, #0D9488)';
     return `
       <div class="settings-card-header">
         <h2 class="settings-card-title">Profile Settings</h2>
@@ -27,11 +27,11 @@
             </div>
             <div class="color-swatch-list">
               <span style="font-size:11.5px;color:var(--color-text-muted);margin-right:4px;">Avatar Color:</span>
-              <button type="button" class="color-swatch-btn ${avatarBg === '#9E5334' ? 'active' : ''}" data-color="#9E5334" style="background-color:#9E5334;" title="Terracotta"></button>
-              <button type="button" class="color-swatch-btn ${avatarBg === '#713B2B' ? 'active' : ''}" data-color="#713B2B" style="background-color:#713B2B;" title="Mahogany"></button>
-              <button type="button" class="color-swatch-btn ${avatarBg === '#B77942' ? 'active' : ''}" data-color="#B77942" style="background-color:#B77942;" title="Warm Ochre"></button>
-              <button type="button" class="color-swatch-btn ${avatarBg === '#65734B' ? 'active' : ''}" data-color="#65734B" style="background-color:#65734B;" title="Olive Forest"></button>
-              <button type="button" class="color-swatch-btn ${avatarBg === '#26201D' ? 'active' : ''}" data-color="#26201D" style="background-color:#26201D;" title="Dark Espresso"></button>
+              <button type="button" class="color-swatch-btn ${avatarBg === '#0D9488' ? 'active' : ''}" data-color="#0D9488" style="background-color:#0D9488;" title="Teal (Brand)"></button>
+              <button type="button" class="color-swatch-btn ${avatarBg === '#2563EB' ? 'active' : ''}" data-color="#2563EB" style="background-color:#2563EB;" title="Blue (Platform)"></button>
+              <button type="button" class="color-swatch-btn ${avatarBg === '#7C3AED' ? 'active' : ''}" data-color="#7C3AED" style="background-color:#7C3AED;" title="Purple (Tenant)"></button>
+              <button type="button" class="color-swatch-btn ${avatarBg === '#F97316' ? 'active' : ''}" data-color="#F97316" style="background-color:#F97316;" title="Orange (Config)"></button>
+              <button type="button" class="color-swatch-btn ${avatarBg === '#1E293B' ? 'active' : ''}" data-color="#1E293B" style="background-color:#1E293B;" title="Dark Slate"></button>
             </div>
           </div>
         </div>
@@ -89,8 +89,7 @@
 
   const renderAppearanceTab = (user) => {
     const savedTheme = localStorage.getItem('qrew_ui_theme') || 'system';
-    const savedAccent = localStorage.getItem('qrew_ui_accent') || '#9E5334';
-    const savedDensity = localStorage.getItem('qrew_ui_density') || 'comfortable';
+    const savedAccent = localStorage.getItem('qrew_ui_accent') || '#0D9488';
 
     return `
       <div class="settings-card-header">
@@ -170,46 +169,30 @@
         <div>
           <label class="form-label" style="font-size:14px;font-weight:600;margin-bottom:12px;display:block;">Accent Color</label>
           <div class="accent-swatch-row">
-            <button type="button" class="accent-swatch-item ${savedAccent === '#9E5334' ? 'active' : ''}" data-accent="#9E5334" title="Terracotta (Default)">
-              <span class="swatch-circle" style="background:#9E5334;"></span>
-              <span class="swatch-label">Terracotta</span>
+            <button type="button" class="accent-swatch-item ${savedAccent === '#0D9488' ? 'active' : ''}" data-accent="#0D9488" title="Teal (Brand Default)">
+              <span class="swatch-circle" style="background:#0D9488;"></span>
+              <span class="swatch-label">Teal</span>
             </button>
-            <button type="button" class="accent-swatch-item ${savedAccent === '#713B2B' ? 'active' : ''}" data-accent="#713B2B" title="Mahogany">
-              <span class="swatch-circle" style="background:#713B2B;"></span>
-              <span class="swatch-label">Mahogany</span>
+            <button type="button" class="accent-swatch-item ${savedAccent === '#2563EB' ? 'active' : ''}" data-accent="#2563EB" title="Blue (Platform)">
+              <span class="swatch-circle" style="background:#2563EB;"></span>
+              <span class="swatch-label">Blue</span>
             </button>
-            <button type="button" class="accent-swatch-item ${savedAccent === '#B77942' ? 'active' : ''}" data-accent="#B77942" title="Warm Ochre">
-              <span class="swatch-circle" style="background:#B77942;"></span>
-              <span class="swatch-label">Ochre</span>
+            <button type="button" class="accent-swatch-item ${savedAccent === '#7C3AED' ? 'active' : ''}" data-accent="#7C3AED" title="Purple (Tenant)">
+              <span class="swatch-circle" style="background:#7C3AED;"></span>
+              <span class="swatch-label">Purple</span>
             </button>
-            <button type="button" class="accent-swatch-item ${savedAccent === '#536B46' ? 'active' : ''}" data-accent="#536B46" title="Forest Green">
-              <span class="swatch-circle" style="background:#536B46;"></span>
-              <span class="swatch-label">Forest</span>
+            <button type="button" class="accent-swatch-item ${savedAccent === '#F97316' ? 'active' : ''}" data-accent="#F97316" title="Orange (Config)">
+              <span class="swatch-circle" style="background:#F97316;"></span>
+              <span class="swatch-label">Orange</span>
             </button>
-            <button type="button" class="accent-swatch-item ${savedAccent === '#26201D' ? 'active' : ''}" data-accent="#26201D" title="Espresso">
-              <span class="swatch-circle" style="background:#26201D;"></span>
-              <span class="swatch-label">Espresso</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="settings-section-divider"></div>
-
-        <div>
-          <label class="form-label" style="font-size:14px;font-weight:600;margin-bottom:12px;display:block;">Interface Density</label>
-          <div class="density-segmented-group">
-            <button type="button" class="density-seg-btn ${savedDensity === 'comfortable' ? 'active' : ''}" data-density="comfortable">
-              <span class="density-icon">${QrewUI.getIcon('layers')}</span>
-              <span>Comfortable</span>
-            </button>
-            <button type="button" class="density-seg-btn ${savedDensity === 'compact' ? 'active' : ''}" data-density="compact">
-              <span class="density-icon">${QrewUI.getIcon('table')}</span>
-              <span>Compact</span>
+            <button type="button" class="accent-swatch-item ${savedAccent === '#059669' ? 'active' : ''}" data-accent="#059669" title="Emerald Green">
+              <span class="swatch-circle" style="background:#059669;"></span>
+              <span class="swatch-label">Emerald</span>
             </button>
           </div>
         </div>
 
-        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+        <div style="display:flex;justify-content:flex-end;margin-top:24px;">
           <button type="button" class="btn btn-primary" id="btn-save-appearance">
             ${QrewUI.getIcon('check')} Save Preferences
           </button>
@@ -287,7 +270,7 @@
               overrides = JSON.parse(localStorage.getItem('qrew_panel_user_overrides') || '{}');
             } catch (err) {}
 
-            const avatarBg = currentAvatarBg || user.avatarBg || 'var(--panel-accent, #9E5334)';
+            const avatarBg = currentAvatarBg || user.avatarBg || 'var(--panel-accent, #0D9488)';
             overrides[ws] = {
               name,
               email,
@@ -341,20 +324,6 @@
         };
       });
 
-      const densityBtns = document.querySelectorAll('.density-seg-btn');
-      densityBtns.forEach(btn => {
-        btn.onclick = () => {
-          densityBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          const chosenDensity = btn.dataset.density;
-          localStorage.setItem('qrew_ui_density', chosenDensity);
-          if (Qrew.shell.applyAppearanceSettings) {
-            Qrew.shell.applyAppearanceSettings();
-          }
-          QrewUI.showToast(`Density set to ${chosenDensity === 'compact' ? 'Compact' : 'Comfortable'}.`, 'info');
-        };
-      });
-
       const btnSaveApp = document.getElementById('btn-save-appearance');
       if (btnSaveApp) {
         btnSaveApp.onclick = () => {
@@ -401,7 +370,7 @@
     let workspaceTitle = 'Platform Admin';
 
     if (ws === 'super-admin') {
-      backHref = '#super-admin/permission-catalog';
+      backHref = '#super-admin/overview';
       workspaceTitle = 'Super Admin';
     } else if (ws === 'tenant') {
       const tid = Qrew.state.currentTenantId || 'ten_sst';

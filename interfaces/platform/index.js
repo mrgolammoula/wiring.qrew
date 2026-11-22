@@ -40,8 +40,9 @@
     },
 
     getSidebarConfig: ({ view }) => ({
+      logoImg: 'assets/logo.png',
       logoText: 'Q',
-      logoBg: 'var(--panel-accent, var(--color-accent))',
+      logoBg: 'transparent',
       brandName: 'Qrew',
       brandBadge: 'Platform Admin',
       brandTitle: 'Go to Platform Landing Page (qrew.com)',
@@ -103,7 +104,7 @@
         </div>
       `,
       footerHtml: `
-        <a class="footer-action-link" href="#super-admin/permission-catalog" title="Super Admin Panel" data-tooltip="Super Admin">
+        <a class="footer-action-link" href="#super-admin/overview" onclick="Qrew.actions.confirmSwitchToSuperAdmin(event)" title="Super Admin Panel" data-tooltip="Super Admin">
           <span class="footer-action-icon">${QrewUI.getIcon('shield')}</span>
           <span class="footer-action-label">Super Admin &rarr;</span>
         </a>

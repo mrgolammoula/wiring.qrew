@@ -63,7 +63,7 @@
               <div class="persona-avatar" style="background-color:var(--color-text-muted);width:38px;height:38px;font-size:15px;">N</div>
               <div>
                 <div style="font-weight:700;font-size:14px;color:var(--color-text-primary);">Nusrat Jahan</div>
-                <span class="persona-role-badge" style="background:#EFECE6;color:var(--color-text-primary);border:1px solid var(--color-border);font-size:10px;">Office Staff</span>
+                <span class="persona-role-badge" style="background:var(--color-surface);color:var(--color-text-primary);border:1px solid var(--color-border);font-size:10px;">Office Staff</span>
               </div>
             </div>
             <p style="font-size:12px;color:var(--color-text-muted);margin:0;line-height:1.4;">Chittagong Port member, daily operational duties & personal tasks.</p>

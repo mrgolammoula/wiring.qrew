@@ -71,7 +71,7 @@
           </div>
         `,
         footerHtml: `
-          <a class="footer-action-link" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}" title="Office Admin Panel" data-tooltip="Office Admin">
+          <a class="footer-action-link" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}" onclick="Qrew.actions.confirmSwitchToOfficeAdmin(event, '${tenantId}', '${officeId}')" title="Office Admin Panel" data-tooltip="Office Admin">
             <span class="footer-action-icon">${QrewUI.getIcon('settings')}</span>
             <span class="footer-action-label">Office Admin Panel &rarr;</span>
           </a>

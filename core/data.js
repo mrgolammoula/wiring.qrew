@@ -29,6 +29,7 @@ const DEFAULT_DATA = {
       ownerName: 'Rafiqul Islam',
       ownerEmail: 'rafiq@sst.com',
       status: 'Active',
+      plan: 'Enterprise',
       createdAt: '2026-09-12'
     }
   ],
@@ -381,7 +382,7 @@ class DataStore {
     };
   }
 
-  createTenant({ name, ownerName, ownerEmail }) {
+  createTenant({ name, ownerName, ownerEmail, plan, status }) {
     const id = 'ten_' + name.toLowerCase().replace(/[^a-z0-9]/g, '_').substring(0, 16) + '_' + Math.floor(Math.random() * 1000);
     const date = new Date().toISOString().split('T')[0];
     
@@ -410,7 +411,8 @@ class DataStore {
       name,
       ownerName: user.name,
       ownerEmail: user.email,
-      status: 'Active',
+      status: status || 'Active',
+      plan: plan || 'Enterprise',
       createdAt: date
     };
 

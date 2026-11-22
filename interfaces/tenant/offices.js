@@ -226,7 +226,7 @@
                     <a href="#office/overview?tenantId=${tenant.id}&officeId=${off.id}" class="tree-action-item" title="Open Branch Hub">
                       ${QrewUI.getIcon('building')} <span>Open Branch Hub</span>
                     </a>
-                    <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${off.id}" class="tree-action-item" title="Open Office Administration">
+                    <a href="#office-admin/overview?tenantId=${tenant.id}&officeId=${off.id}" onclick="Qrew.actions.confirmSwitchToOfficeAdmin(event, '${tenant.id}', '${off.id}')" class="tree-action-item" title="Open Office Administration">
                       ${QrewUI.getIcon('shield')} <span>Office Admin</span>
                     </a>
                     <a href="#office-config?tenantId=${tenant.id}&officeId=${off.id}" class="tree-action-item" title="Configure Facility Specs, Shift Templates & Custom Fields">
@@ -251,6 +251,14 @@
       `;
 
       // Wire Event Handlers
+      const closeOpenMenus = () => {
+        document.querySelectorAll('.tree-action-menu.show').forEach(m => {
+          m.classList.remove('show');
+          const item = m.closest('.tree-office-item');
+          if (item) item.style.zIndex = '';
+        });
+      };
+
       listEl.querySelectorAll('.tree-dropdown-trigger').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
@@ -258,17 +266,15 @@
           const targetMenu = document.getElementById(targetMenuId);
           const wasOpen = targetMenu && targetMenu.classList.contains('show');
 
-          document.querySelectorAll('.tree-action-menu.show').forEach(m => m.classList.remove('show'));
+          closeOpenMenus();
 
           if (!wasOpen && targetMenu) {
             targetMenu.classList.add('show');
+            const item = targetMenu.closest('.tree-office-item');
+            if (item) item.style.zIndex = '50';
           }
         };
       });
-
-      const closeOpenMenus = () => {
-        document.querySelectorAll('.tree-action-menu.show').forEach(m => m.classList.remove('show'));
-      };
 
       listEl.querySelectorAll('.edit-office-btn').forEach(btn => {
         btn.onclick = (e) => {

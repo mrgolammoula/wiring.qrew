@@ -7,7 +7,7 @@
   const renderTenantSettings = (tenantId) => {
     const tenant = QrewStore.getTenantById(tenantId) || QrewStore.getTenants()[0];
     const currentDomain = Qrew.getTenantDomain(tenant.id);
-    const planName = tenant.plan || 'Enterprise Governance Mesh';
+    const planName = tenant.plan || 'Enterprise';
     const planBroughtDate = tenant.createdAt || '2026-09-12';
 
     Qrew.dom.mainContent.innerHTML = `

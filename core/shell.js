@@ -14,12 +14,24 @@
     const brandWrapperEl = document.getElementById('brand-wrapper');
 
     if (DOM.sidebarBrandLogo) {
-      DOM.sidebarBrandLogo.textContent = cfg.logoText || 'Q';
-      DOM.sidebarBrandLogo.style.backgroundColor = cfg.logoBg || 'var(--panel-accent, var(--color-accent))';
+      const logoImg = cfg.logoImg || (iface.id === 'platform' || iface.id === 'super-admin' ? 'assets/logo.png' : null);
+      if (logoImg) {
+        DOM.sidebarBrandLogo.classList.add('has-img');
+        DOM.sidebarBrandLogo.innerHTML = `<img src="${logoImg}" alt="${QrewUI.escapeHtml(cfg.brandName || 'Qrew')}" class="brand-logo-img">`;
+        DOM.sidebarBrandLogo.style.backgroundColor = 'transparent';
+      } else {
+        DOM.sidebarBrandLogo.classList.remove('has-img');
+        DOM.sidebarBrandLogo.textContent = cfg.logoText || 'Q';
+        DOM.sidebarBrandLogo.style.backgroundColor = cfg.logoBg || 'var(--panel-accent, var(--color-accent))';
+      }
     }
     if (DOM.sidebarBrandName) DOM.sidebarBrandName.textContent = cfg.brandName || 'Qrew';
     if (DOM.sidebarBrandBadge) DOM.sidebarBrandBadge.textContent = cfg.brandBadge || '';
     if (brandWrapperEl && cfg.brandTitle) brandWrapperEl.title = cfg.brandTitle;
+
+    if (Qrew.shell.updateTopbarProfileBrand) {
+      Qrew.shell.updateTopbarProfileBrand();
+    }
 
     if (DOM.sidebarContextPicker) {
       if (cfg.picker) {
@@ -70,14 +82,87 @@
         const text = link.getAttribute('data-tooltip') || link.getAttribute('title') || 'Super Admin';
         link.setAttribute('data-tooltip', text);
         link.setAttribute('title', text);
+
+        const href = link.getAttribute('href') || '';
+        if (href.includes('#super-admin')) {
+          link.onclick = (e) => Qrew.actions.confirmSwitchToSuperAdmin(e);
+        } else if (href.includes('#tenant-super-admin')) {
+          link.onclick = (e) => Qrew.actions.confirmSwitchToTenantSuperAdmin(e, Qrew.state.currentTenantId);
+        } else if (href.includes('#office-admin')) {
+          link.onclick = (e) => Qrew.actions.confirmSwitchToOfficeAdmin(e, Qrew.state.currentTenantId, Qrew.state.currentOfficeId);
+        }
       });
     }
+  };
+
+  Qrew.shell.updateTopbarProfileBrand = () => {
+    const profileBrandEl = document.getElementById('topbar-profile-brand');
+    if (!profileBrandEl) return;
+
+    const ctx = Qrew.buildContext();
+    const ws = Qrew.state.activeWorkspace || 'platform';
+    const iface = Qrew.interfaces[ws] || Qrew.interfaces.platform;
+    const cfg = (iface && iface.getSidebarConfig) ? iface.getSidebarConfig(ctx) : null;
+
+    if (!cfg) return;
+
+    const logoImg = cfg.logoImg || (ws === 'platform' || ws === 'super-admin' ? 'assets/logo.png' : null);
+
+    let logoHtml = '';
+    if (logoImg) {
+      logoHtml = `<div class="brand-logo has-img" style="width:28px;height:28px;border-radius:6px;overflow:hidden;flex-shrink:0;background:transparent;">
+        <img src="${logoImg}" alt="${QrewUI.escapeHtml(cfg.brandName || 'Qrew')}" class="brand-logo-img" style="width:100%;height:100%;object-fit:contain;">
+      </div>`;
+    } else {
+      const logoBg = cfg.logoBg || 'var(--panel-accent, var(--color-accent))';
+      const logoText = cfg.logoText || 'Q';
+      logoHtml = `<div class="brand-logo" style="width:28px;height:28px;font-size:13px;border-radius:6px;background:${logoBg};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">
+        ${QrewUI.escapeHtml(logoText)}
+      </div>`;
+    }
+
+    const brandName = cfg.brandName || 'Qrew';
+    const brandBadge = cfg.brandBadge
+      ? `<span style="font-size:10px;font-weight:600;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.5px;">${QrewUI.escapeHtml(cfg.brandBadge)}</span>`
+      : '';
+
+    let backHref = '#platform/overview';
+    if (ws === 'super-admin') backHref = '#super-admin/overview';
+    else if (ws === 'tenant') backHref = `#tenant/overview?id=${Qrew.state.currentTenantId || 'ten_sst'}`;
+    else if (ws === 'office') backHref = `#office/dashboard?tenantId=${Qrew.state.currentTenantId || 'ten_sst'}&officeId=${Qrew.state.currentOfficeId || 'off_ctg_port'}`;
+    else if (ws === 'office-admin') backHref = `#office-admin/overview?tenantId=${Qrew.state.currentTenantId || 'ten_sst'}&officeId=${Qrew.state.currentOfficeId || 'off_ctg_port'}`;
+    else if (ws === 'office-config') backHref = '#office-config';
+    else if (ws === 'department') backHref = `#department/overview?deptId=${Qrew.state.currentDeptId || 'dept_customs'}`;
+    else if (ws === 'member') backHref = `#member/overview?userId=${Qrew.state.currentMemberId || 'usr_nusrat'}`;
+
+    profileBrandEl.innerHTML = `
+      <a href="${backHref}" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;" title="Return to ${QrewUI.escapeHtml(brandName)}">
+        ${logoHtml}
+        <div class="brand-info" style="display:flex;flex-direction:column;line-height:1.2;">
+          <span style="font-weight:700;font-size:14px;color:var(--color-text-primary);">${QrewUI.escapeHtml(brandName)}</span>
+          ${brandBadge}
+        </div>
+      </a>
+    `;
   };
 
   Qrew.shell.updateTopbarDomainBadge = () => {
     const domainTextEl = document.getElementById('topbar-domain-text');
     const domainDotEl = document.querySelector('.topbar-domain-dot');
     if (!domainTextEl) return;
+
+    if (Qrew.shell.updateTopbarProfileBrand) {
+      Qrew.shell.updateTopbarProfileBrand();
+    }
+
+    // Update Topbar Landing Page Button
+    const landingBtn = document.getElementById('topbar-landing-btn');
+    if (landingBtn) {
+      const isProfile = Qrew.state.currentView === 'profile';
+      const ws = Qrew.state.activeWorkspace;
+      const showLandingBtn = !isProfile && ws !== 'landing' && ws !== 'tenant-landing';
+      landingBtn.style.display = showLandingBtn ? 'inline-flex' : 'none';
+    }
 
     if (Qrew.state.currentView === 'profile') {
       const ws = Qrew.state.activeWorkspace || 'platform';
@@ -109,8 +194,9 @@
         domainText = `${officeDomain}/member/setting/${activeTab}`;
       }
 
-      domainTextEl.textContent = domainText;
-      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--panel-accent, #9E5334)';
+      const cleanProfileUrl = domainText.replace(/^url:\s*/i, '');
+      domainTextEl.textContent = `url: ${cleanProfileUrl}`;
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--panel-accent, #0D9488)';
       return;
     }
 
@@ -120,21 +206,14 @@
       ? iface.getDomainBadge(ctx)
       : { text: 'app.qrew.com/admin', dotColor: 'var(--panel-accent)' };
 
-    domainTextEl.textContent = badge.text;
+    const cleanBadgeText = (badge.text || '').replace(/^url:\s*/i, '');
+    domainTextEl.textContent = `url: ${cleanBadgeText}`;
     if (domainDotEl) domainDotEl.style.backgroundColor = badge.dotColor || 'var(--panel-accent)';
-
-    // Update Topbar Platform Button (Dashed box button for Tenant/Office panels)
-    const platformBtn = document.getElementById('topbar-platform-btn');
-    if (platformBtn) {
-      const ws = Qrew.state.activeWorkspace;
-      const isProfile = Qrew.state.currentView === 'profile';
-      const showPlatformBtn = !isProfile && (ws === 'tenant' || ws === 'office' || ws === 'office-admin' || ws === 'office-config' || ws === 'department' || ws === 'member');
-      platformBtn.style.display = showPlatformBtn ? 'inline-flex' : 'none';
-    }
   };
 
   Qrew.shell.applyAppearanceSettings = () => {
-    const theme = localStorage.getItem('qrew_ui_theme') || 'system';
+    const urlTheme = new URLSearchParams(window.location.search).get('theme');
+    const theme = urlTheme || localStorage.getItem('qrew_ui_theme') || 'system';
     const accent = localStorage.getItem('qrew_ui_accent');
     const density = localStorage.getItem('qrew_ui_density') || 'comfortable';
 
@@ -150,6 +229,10 @@
       } else {
         document.documentElement.removeAttribute('data-theme');
       }
+    }
+
+    if (Qrew.applyPanelTheme && Qrew.state.activeWorkspace) {
+      Qrew.applyPanelTheme(Qrew.state.activeWorkspace);
     }
 
     // 2. Accent
@@ -178,7 +261,7 @@
     let overrides = {};
     try {
       overrides = JSON.parse(localStorage.getItem('qrew_panel_user_overrides') || '{}');
-    } catch (e) {}
+    } catch (e) { }
 
     let defaultInfo;
     if (ws === 'platform') {
@@ -358,12 +441,12 @@
             let overrides = {};
             try {
               overrides = JSON.parse(localStorage.getItem('qrew_panel_user_overrides') || '{}');
-            } catch (e) {}
+            } catch (e) { }
             overrides[ws] = { name, email, avatar: name.charAt(0).toUpperCase() };
             localStorage.setItem('qrew_panel_user_overrides', JSON.stringify(overrides));
 
             if (ws === 'platform' || ws === 'super-admin') {
-              try { QrewStore.updateCurrentUser({ name, email }); } catch (e) {}
+              try { QrewStore.updateCurrentUser({ name, email }); } catch (e) { }
             }
 
             Qrew.shell.syncHeaderUserProfile();
@@ -441,7 +524,7 @@
       }
       try {
         localStorage.setItem('qrew_sidebar_collapsed', String(collapsed));
-      } catch (e) {}
+      } catch (e) { }
     });
 
     if (initialSidebarCollapsed) {
@@ -523,7 +606,7 @@
         if (currentWidth >= 180 && currentWidth <= 500) {
           try {
             localStorage.setItem('qrew_sidebar_width', String(Math.round(currentWidth)));
-          } catch (err) {}
+          } catch (err) { }
         }
       });
 
@@ -531,7 +614,7 @@
         document.documentElement.style.setProperty('--sidebar-width', '256px');
         try {
           localStorage.setItem('qrew_sidebar_width', '256');
-        } catch (err) {}
+        } catch (err) { }
       });
     }
 
@@ -636,28 +719,117 @@
     if (dropdownHeaderBtn) dropdownHeaderBtn.onclick = navigateToProfile;
 
     // Logout
+    const performLogout = () => {
+      const ws = Qrew.state.activeWorkspace;
+      const currentRoute = Qrew.state.currentRoute || '';
+      const tenantWorkspaces = [
+        'tenant',
+        'office',
+        'tenant-super-admin',
+        'office-admin',
+        'office-config',
+        'department',
+        'member'
+      ];
+
+      const isTenantContext = tenantWorkspaces.includes(ws) ||
+        tenantWorkspaces.some(w => currentRoute.startsWith(w));
+
+      if (isTenantContext) {
+        const tenantId = Qrew.state.currentTenantId || 'ten_sst';
+        Qrew.navigateTo(`#tenant-landing?id=${tenantId}`);
+      } else {
+        Qrew.navigateTo('#landing');
+      }
+    };
+
+    Qrew.shell.performLogout = performLogout;
+
     const logoutBtn = document.getElementById('action-logout');
     if (logoutBtn) {
       logoutBtn.onclick = () => {
         if (DOM.userDropdownMenu) DOM.userDropdownMenu.classList.remove('show');
         QrewUI.confirmDialog({
           title: 'Log Out',
-          message: 'Are you sure you want to log out of your Qrew session?',
+          message: 'Are you sure you want to log out of your session?',
           confirmText: 'Log Out',
           confirmClass: 'btn-danger',
           onConfirm: () => {
             QrewUI.showToast('You have been logged out successfully.', 'info');
-            Qrew.navigateTo('#landing');
+            performLogout();
           }
         });
       };
     }
 
+    // Elevated Admin Panel Switch Confirmation Handlers
+    Qrew.actions.confirmSwitchToSuperAdmin = (event) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      QrewUI.confirmDialog({
+        title: 'Switch to Super Admin',
+        message: 'Are you sure you want to switch to Platform Super Admin?',
+        confirmText: 'Continue',
+        confirmClass: 'btn-blue',
+        icon: 'shield',
+        iconColor: 'var(--color-secondary, #2563EB)',
+        onConfirm: () => {
+          window.location.hash = '#super-admin/overview';
+        }
+      });
+    };
+
+    Qrew.actions.confirmSwitchToTenantSuperAdmin = (event, tenantId) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const tid = tenantId || Qrew.state.currentTenantId || 'ten_sst';
+      QrewUI.confirmDialog({
+        title: 'Switch to Tenant Super Admin',
+        message: 'Are you sure you want to switch to Tenant Super Admin?',
+        confirmText: 'Continue',
+        confirmClass: 'btn-purple',
+        confirmStyle: 'background-color: var(--color-supporting-purple, #7C3AED); border-color: var(--color-supporting-purple, #7C3AED); color: #FFFFFF;',
+        icon: 'shield',
+        iconColor: 'var(--color-supporting-purple, #7C3AED)',
+        onConfirm: () => {
+          window.location.hash = `#tenant-super-admin/plan-and-entitlement?id=${tid}`;
+        }
+      });
+    };
+
+    Qrew.actions.confirmSwitchToOfficeAdmin = (event, tenantId, officeId) => {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      const tid = tenantId || Qrew.state.currentTenantId || 'ten_sst';
+      const oid = officeId || Qrew.state.currentOfficeId || 'off_ctg_port';
+      QrewUI.confirmDialog({
+        title: 'Switch to Office Admin',
+        message: 'Are you sure you want to switch to Office Admin?',
+        confirmText: 'Continue',
+        confirmClass: 'btn-primary',
+        icon: 'settings',
+        iconColor: 'var(--color-primary, #0D9488)',
+        onConfirm: () => {
+          window.location.hash = `#office-admin/overview?tenantId=${tid}&officeId=${oid}`;
+        }
+      });
+    };
+
     // Close dropdowns & tree menus when clicking outside
     document.addEventListener('click', () => {
       if (DOM.userDropdownMenu) DOM.userDropdownMenu.classList.remove('show');
       if (DOM.notificationsPopover) DOM.notificationsPopover.classList.remove('show');
-      document.querySelectorAll('.tree-action-menu.show').forEach(m => m.classList.remove('show'));
+      document.querySelectorAll('.tree-action-menu.show').forEach(m => {
+        m.classList.remove('show');
+        const card = m.closest('.tree-tenant-card') || m.closest('.tree-office-item');
+        if (card) card.style.zIndex = '';
+      });
     });
 
     // Hash Change Listener & Boot
@@ -671,7 +843,7 @@
             Qrew.shell.applyAppearanceSettings();
           }
         });
-      } catch (e) {}
+      } catch (e) { }
     }
     Qrew.shell.syncHeaderUserProfile();
     Qrew.handleRouteChange();

@@ -5,11 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Qrew — Multi-Tenant Access Control Platform</title>
   <meta name="description" content="Enterprise multi-tenant management and hierarchical access-control platform.">
+  <link rel="icon" type="image/png" href="assets/logo.png">
   <!-- Styles -->
-  <link rel="stylesheet" href="styles/tokens.css">
-  <link rel="stylesheet" href="styles/shell.css">
-  <link rel="stylesheet" href="styles/components.css">
-  <link rel="stylesheet" href="interfaces/landing/landing.css">
+  <link rel="stylesheet" href="styles/tokens.css?v=3">
+  <link rel="stylesheet" href="styles/shell.css?v=3">
+  <link rel="stylesheet" href="styles/components.css?v=3">
+  <link rel="stylesheet" href="interfaces/landing/landing.css?v=3">
   <link rel="stylesheet" href="interfaces/department/department.css">
   <link rel="stylesheet" href="interfaces/member/member.css">
 </head>
@@ -19,7 +20,7 @@
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header" id="sidebar-header">
         <div class="brand-wrapper" id="brand-wrapper" title="Go to Platform Landing Page">
-          <div class="brand-logo" id="sidebar-brand-logo">Q</div>
+          <div class="brand-logo has-img" id="sidebar-brand-logo"><img src="assets/logo.png" alt="Qrew Logo" class="brand-logo-img"></div>
           <div class="brand-info" id="sidebar-brand-info">
             <span class="brand-name" id="sidebar-brand-name">Qrew</span>
             <span class="brand-badge" id="sidebar-brand-badge">Platform Level</span>
@@ -65,16 +66,16 @@
             <div class="brand-logo" style="width:28px;height:28px;font-size:13px;border-radius:6px;background:var(--panel-accent, var(--color-accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">Q</div>
             <span style="font-weight:700;font-size:14px;color:var(--color-text-primary);">Qrew</span>
           </div>
-          <a href="#landing" class="topbar-platform-btn" id="topbar-platform-btn" title="Back to Qrew Platform" style="display:none;">
+          <a href="#landing" class="topbar-platform-btn topbar-landing-btn" id="topbar-landing-btn" title="Go to Qrew Landing Page" style="display:none;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            <span>Qrew Platform</span>
+            <span>Qrew Landing</span>
           </a>
         </div>
 
         <div class="topbar-center" id="topbar-center">
           <div class="topbar-domain-badge">
             <span class="topbar-domain-dot"></span>
-            <span id="topbar-domain-text">app.qrew.com/admin</span>
+            <span id="topbar-domain-text">url: app.qrew.com/admin</span>
           </div>
         </div>
 
@@ -157,6 +158,7 @@
   <script src="interfaces/tenant/roles.js"></script>
   <script src="interfaces/tenant/settings.js"></script>
   <script src="interfaces/tenant/index.js"></script>
+  <script src="interfaces/tenant-super-admin/index.js"></script>
   <script src="interfaces/office-config/index.js"></script>
   <script src="interfaces/office/index.js"></script>
   <script src="interfaces/office-admin/index.js"></script>

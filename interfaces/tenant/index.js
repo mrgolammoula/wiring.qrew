@@ -61,16 +61,14 @@
               <span class="nav-icon">${QrewUI.getIcon('roles')}</span>
               <span class="nav-label">Tenant Roles</span>
             </a>
-
-            <div class="nav-divider"></div>
-
-            <a class="nav-item ${view === 'settings' ? 'active' : ''}" href="#tenant/settings?id=${tenantId}">
-              <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
-              <span class="nav-label">Settings</span>
-            </a>
           </div>
         `,
-        footerHtml: ''
+        footerHtml: `
+          <a class="footer-action-link" href="#tenant-super-admin/plan-and-entitlement?id=${tenantId}" onclick="Qrew.actions.confirmSwitchToTenantSuperAdmin(event, '${tenantId}')" title="Tenant Super Admin" data-tooltip="Tenant Super Admin">
+            <span class="footer-action-icon">${QrewUI.getIcon('shield')}</span>
+            <span class="footer-action-label">Tenant Super Admin &rarr;</span>
+          </a>
+        `
       };
     },
 

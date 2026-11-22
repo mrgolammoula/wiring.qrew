@@ -15,20 +15,26 @@
         <!-- Tenant Sticky Header -->
         <header class="landing-navbar">
           <div class="landing-container landing-navbar-inner">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <a href="#tenant-landing?id=${tenant.id}" class="landing-brand">
-                <div class="landing-brand-logo" style="background-color:var(--color-warning);">${tenant.name.charAt(0)}</div>
-                <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
-              </a>
-              <span class="tenant-domain-pill">${domain}</span>
+            <a href="#tenant-landing?id=${tenant.id}" class="landing-brand">
+              <div class="landing-brand-logo" style="background-color:var(--panel-accent, var(--color-supporting-purple));">${tenant.name.charAt(0)}</div>
+              <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
+            </a>
+
+            <!-- Central Tenant Domain -->
+            <div class="landing-domain-badge">
+              <span class="landing-domain-dot" style="background-color:var(--panel-accent, var(--color-supporting-purple));"></span>
+              <span>url: ${domain}</span>
             </div>
 
-            <div class="tenant-nav-actions" style="display:flex;align-items:center;gap:10px;">
-              <a href="#landing" class="tenant-nav-btn tenant-nav-btn-platform" title="Return to Qrew Global SaaS Landing">
-                ← Qrew Platform
+            <!-- Grouped Workspace Navigation Tabs -->
+            <div class="workspace-tabs tenant-nav-actions" role="tablist" aria-label="Tenant Navigation">
+              <a href="#landing" class="workspace-tab" role="tab" title="Return to Qrew Global SaaS Landing">
+                <span class="ws-tab-indicator platform"></span>
+                <span class="ws-tab-text">Qrew Platform</span>
               </a>
-              <a href="#tenant/overview?id=${tenant.id}" class="tenant-nav-btn tenant-nav-btn-admin">
-                Tenant Admin Panel →
+              <a href="#tenant/overview?id=${tenant.id}" class="workspace-tab" role="tab" title="Open Tenant Admin Panel">
+                <span class="ws-tab-indicator tenant"></span>
+                <span class="ws-tab-text">Tenant Admin Panel</span>
               </a>
             </div>
           </div>

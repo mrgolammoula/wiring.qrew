@@ -11,14 +11,14 @@
         <header class="landing-navbar">
           <div class="landing-container landing-navbar-inner">
             <a href="#landing" class="landing-brand">
-              <div class="landing-brand-logo">Q</div>
+              <div class="landing-brand-logo has-img"><img src="assets/logo.png" alt="Qrew" class="brand-logo-img"></div>
               <span class="landing-brand-title">Qrew</span>
             </a>
 
             <!-- Central Platform Domain -->
             <div class="landing-domain-badge">
               <span class="landing-domain-dot"></span>
-              <span>qrew.com</span>
+              <span>url: qrew.com</span>
             </div>
 
             <!-- Workspace Context Tabs on Main Landing Header (wireframe-only quick links) -->

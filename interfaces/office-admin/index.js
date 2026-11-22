@@ -61,7 +61,12 @@
             </a>
           </div>
         `,
-        footerHtml: ''
+        footerHtml: `
+          <a class="footer-action-link" href="#office/overview?tenantId=${tenantId}&officeId=${officeId}" title="Back to Office Workspace" data-tooltip="Office Workspace">
+            <span class="footer-action-icon">${QrewUI.getIcon('chevronLeft')}</span>
+            <span class="footer-action-label">&larr; Office Workspace</span>
+          </a>
+        `
       };
     },
 

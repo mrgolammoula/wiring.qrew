@@ -37,6 +37,7 @@ const QrewUI = (() => {
     invoice: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16l3-1.5 3 1.5 3-1.5 3 1.5 3-1.5 3 1.5V4a2 2 0 0 0-2-2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="12" y2="15"/></svg>`,
     activity: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
     layers: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+    globe: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
     folder: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>`,
     folderClosed: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>`,
     folderOpen: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>`,
@@ -52,9 +53,16 @@ const QrewUI = (() => {
 
   // Badges
   const statusBadge = (status) => {
-    const isAct = status === 'Active';
-    const cls = isAct ? 'badge-active' : 'badge-suspended';
-    return `<span class="badge ${cls}"><span class="badge-dot"></span>${escapeHtml(status)}</span>`;
+    const s = (status || 'Active').toLowerCase();
+    let cls = 'badge-active';
+    if (s === 'active') cls = 'badge-active';
+    else if (s === 'trial') cls = 'badge-trial';
+    else if (s === 'pending') cls = 'badge-pending';
+    else if (s === 'expired') cls = 'badge-expired';
+    else if (s === 'suspended') cls = 'badge-suspended';
+    else if (s === 'cancelled') cls = 'badge-cancelled';
+    else cls = 'badge-suspended';
+    return `<span class="badge ${cls}"><span class="badge-dot"></span>${escapeHtml(status || 'Active')}</span>`;
   };
 
   const roleBadge = (roleName, level = 'tenant') => {
@@ -164,20 +172,29 @@ const QrewUI = (() => {
   };
 
   // Confirmation Dialog
-  const confirmDialog = ({ title, message, confirmText = 'Confirm', confirmClass = 'btn-danger', onConfirm }) => {
+  const confirmDialog = ({
+    title,
+    message,
+    confirmText = 'Confirm',
+    confirmClass = 'btn-danger',
+    confirmStyle = '',
+    icon = 'alert',
+    iconColor = 'var(--color-danger)',
+    onConfirm
+  }) => {
     openModal({
       title: title || 'Confirm Action',
       bodyHtml: `
-        <div style="display:flex;gap:12px;align-items:flex-start;">
-          <div style="color:var(--color-danger);flex-shrink:0;margin-top:2px;">
-            ${getIcon('alert')}
+        <div style="display:flex;gap:14px;align-items:flex-start;">
+          <div style="color:${iconColor};flex-shrink:0;margin-top:2px;">
+            ${getIcon(icon)}
           </div>
-          <p style="font-size:13.5px;color:var(--color-text-primary);line-height:1.5;">${escapeHtml(message)}</p>
+          <div style="font-size:13.5px;color:var(--color-text-primary);line-height:1.5;">${message}</div>
         </div>
       `,
       footerHtml: `
         <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
-        <button class="btn ${confirmClass}" id="confirm-dialog-btn">${escapeHtml(confirmText)}</button>
+        <button class="btn ${confirmClass}" ${confirmStyle ? `style="${confirmStyle}"` : ''} id="confirm-dialog-btn">${escapeHtml(confirmText)}</button>
       `,
       onOpen: (modalEl) => {
         const btn = modalEl.querySelector('#confirm-dialog-btn');

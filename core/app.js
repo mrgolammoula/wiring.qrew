@@ -5,39 +5,51 @@
   const PANEL_THEMES = {
     'platform': {
       name: 'Platform Admin Panel',
-      primaryAccent: '#9E5334',
-      lightAccent: '#F5EAE4',
-      hoverAccent: '#EBD8CD'
+      primaryAccent: '#2563EB',
+      lightAccent: '#EFF6FF',
+      hoverAccent: '#DBEAFE',
+      darkLightAccent: 'rgba(37, 99, 235, 0.2)',
+      darkHoverAccent: 'rgba(37, 99, 235, 0.32)'
     },
     'super-admin': {
       name: 'Super Admin',
-      primaryAccent: '#713B2B',
-      lightAccent: '#F2E7E1',
-      hoverAccent: '#E3CEBF'
+      primaryAccent: '#2563EB',
+      lightAccent: '#EFF6FF',
+      hoverAccent: '#DBEAFE',
+      darkLightAccent: 'rgba(37, 99, 235, 0.2)',
+      darkHoverAccent: 'rgba(37, 99, 235, 0.32)'
     },
     'tenant': {
       name: 'Tenant Workspace',
-      primaryAccent: '#B77942',
-      lightAccent: '#F8EFE3',
-      hoverAccent: '#EEDCC8'
+      primaryAccent: '#7C3AED',
+      lightAccent: '#F5F3FF',
+      hoverAccent: '#EDE9FE',
+      darkLightAccent: 'rgba(124, 58, 237, 0.2)',
+      darkHoverAccent: 'rgba(124, 58, 237, 0.32)'
     },
     'office': {
       name: 'Office Workspace',
-      primaryAccent: '#65734B',
-      lightAccent: '#EEF0E5',
-      hoverAccent: '#D8DDC7'
+      primaryAccent: '#0D9488',
+      lightAccent: '#F0FDFA',
+      hoverAccent: '#CCFBF1',
+      darkLightAccent: 'rgba(13, 148, 136, 0.2)',
+      darkHoverAccent: 'rgba(13, 148, 136, 0.32)'
     },
     'office-admin': {
       name: 'Office Admin Panel',
-      primaryAccent: '#A34F43',
-      lightAccent: '#F6E9E6',
-      hoverAccent: '#EBCBCA'
+      primaryAccent: '#F97316',
+      lightAccent: '#FFF7ED',
+      hoverAccent: '#FFEDD5',
+      darkLightAccent: 'rgba(249, 115, 22, 0.2)',
+      darkHoverAccent: 'rgba(249, 115, 22, 0.32)'
     },
     'office-config': {
       name: 'Office Config',
-      primaryAccent: '#78618A',
-      lightAccent: '#F0EBF4',
-      hoverAccent: '#DFD3EB'
+      primaryAccent: '#F97316',
+      lightAccent: '#FFF7ED',
+      hoverAccent: '#FFEDD5',
+      darkLightAccent: 'rgba(249, 115, 22, 0.2)',
+      darkHoverAccent: 'rgba(249, 115, 22, 0.32)'
     }
   };
 
@@ -115,10 +127,14 @@
       document.body.classList.remove('ws-platform', 'ws-super-admin', 'ws-tenant', 'ws-office', 'ws-office-admin', 'ws-office-config');
       document.body.classList.add(`ws-${workspace}`);
 
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const light = isDark ? (theme.darkLightAccent || 'rgba(37, 99, 235, 0.2)') : theme.lightAccent;
+      const hover = isDark ? (theme.darkHoverAccent || 'rgba(37, 99, 235, 0.32)') : theme.hoverAccent;
+
       if (document.documentElement && document.documentElement.style && document.documentElement.style.setProperty) {
         document.documentElement.style.setProperty('--panel-accent', theme.primaryAccent);
-        document.documentElement.style.setProperty('--panel-accent-light', theme.lightAccent);
-        document.documentElement.style.setProperty('--panel-accent-hover', theme.hoverAccent);
+        document.documentElement.style.setProperty('--panel-accent-light', light);
+        document.documentElement.style.setProperty('--panel-accent-hover', hover);
       }
     },
 
