@@ -78,6 +78,8 @@
         sidebarContextLabel: document.getElementById('sidebar-context-label'),
         sidebarContextSelect: document.getElementById('sidebar-context-select'),
         sidebarNav: document.getElementById('sidebar-nav'),
+        sidebarFooter: document.getElementById('sidebar-footer') || document.querySelector('.sidebar-footer'),
+        sidebarResizer: document.getElementById('sidebar-resizer'),
         sidebarToggle: document.getElementById('sidebar-toggle-btn'),
         mobileMenuBtn: document.getElementById('mobile-menu-btn'),
         userDropdownTrigger: document.getElementById('user-profile-trigger'),

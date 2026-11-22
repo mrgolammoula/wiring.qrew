@@ -8,10 +8,13 @@
     id: 'office-config',
     brandHome: 'platform',
 
-    getDomainBadge: () => ({
-      text: 'app.qrew.com/office config',
-      dotColor: 'var(--panel-accent)'
-    }),
+    getDomainBadge: ({ view }) => {
+      const subPath = view ? `/${view}` : '';
+      return {
+        text: `app.qrew.com/office-config${subPath}`,
+        dotColor: 'var(--panel-accent)'
+      };
+    },
 
     getSidebarConfig: ({ state, view, tenant, office }) => {
       const tenantId = tenant ? tenant.id : state.currentTenantId;
@@ -30,7 +33,7 @@
         brandBadge: 'Configuration Centre',
         brandTitle: 'Go to Platform Landing Page (qrew.com)',
         picker: {
-          label: 'Configure Office Branch',
+          label: '',
           optionsHtml: allOffices.map(o => `
             <option value="${o.id}" ${office && o.id === office.id ? 'selected' : ''}>${QrewUI.escapeHtml(o.name)}</option>
           `).join(''),
@@ -43,7 +46,6 @@
         },
         navHtml: `
           <div class="nav-section">
-            <div class="nav-section-title">Office Config</div>
             <a class="nav-item ${view === 'invoice-templates' ? 'active' : ''}" href="#office-config/invoice-templates?tenantId=${tenantId}&officeId=${officeId}">
               <span class="nav-icon">${QrewUI.getIcon('invoice')}</span>
               <span class="nav-label">Invoice Templates</span>
@@ -52,6 +54,9 @@
               <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
               <span class="nav-label">Roles and Permissions</span>
             </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'customize-fields' ? 'active' : ''}" href="#office-config/customize-fields?tenantId=${tenantId}&officeId=${officeId}">
               <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
               <span class="nav-label">Customize fields</span>
@@ -61,14 +66,8 @@
               <span class="nav-label">Plans and Entitlement</span>
             </a>
           </div>
-          <div class="nav-section" style="margin-top:16px;">
-            <div class="nav-section-title">Platform</div>
-            <a class="nav-item" href="#landing" style="color:var(--color-accent);font-weight:600;">
-              <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
-              <span class="nav-label">&larr; Qrew Landing Page</span>
-            </a>
-          </div>
-        `
+        `,
+        footerHtml: ''
       };
     },
 

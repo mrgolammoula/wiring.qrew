@@ -8,10 +8,13 @@
     id: 'office-admin',
     brandHome: 'tenant',
 
-    getDomainBadge: ({ office }) => ({
-      text: `${Qrew.getOfficeDomain(office)}/admin`,
-      dotColor: 'var(--panel-accent)'
-    }),
+    getDomainBadge: ({ office, view }) => {
+      const subPath = (view && view !== 'overview') ? `/${view}` : '';
+      return {
+        text: `${Qrew.getOfficeDomain(office)}/admin${subPath}`,
+        dotColor: 'var(--panel-accent)'
+      };
+    },
 
     getSidebarConfig: ({ state, view, tenant, office }) => {
       const initial = tenant ? tenant.name.charAt(0).toUpperCase() : 'S';
@@ -19,14 +22,16 @@
       const officeId = office ? office.id : state.currentOfficeId;
       const officesInTenant = tenant ? QrewStore.getOfficesByTenant(tenant.id) : [];
 
+      const officeName = office ? office.name : 'Chittagong Port Office';
+
       return {
         logoText: initial,
         logoBg: 'var(--panel-accent, var(--color-accent))',
         brandName: tenant ? tenant.name : 'SST',
-        brandBadge: office ? office.name : 'Chittagong Port Office',
+        brandBadge: `${officeName} Admin`,
         brandTitle: `Go to ${tenant ? tenant.name : 'Tenant'} Landing Page (${Qrew.getTenantDomain(state.currentTenantId)})`,
         picker: {
-          label: `Branch Admin (${tenant ? tenant.name : ''})`,
+          label: '',
           optionsHtml: officesInTenant.length > 0
             ? officesInTenant.map(o => `
                 <option value="${o.id}" ${office && o.id === office.id ? 'selected' : ''}>${QrewUI.escapeHtml(o.name)}</option>
@@ -39,7 +44,6 @@
         },
         navHtml: `
           <div class="nav-section">
-            <div class="nav-section-title">Office Admin</div>
             <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#office-admin/overview?tenantId=${tenantId}&officeId=${officeId}">
               <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
               <span class="nav-label">Overview</span>
@@ -48,19 +52,16 @@
               <span class="nav-icon">${QrewUI.getIcon('invoice')}</span>
               <span class="nav-label">Invoice</span>
             </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'staffs-management' || view === 'staff' ? 'active' : ''}" href="#office-admin/staffs-management?tenantId=${tenantId}&officeId=${officeId}">
               <span class="nav-icon">${QrewUI.getIcon('users')}</span>
               <span class="nav-label">Staffs Management</span>
             </a>
           </div>
-          <div class="nav-section" style="margin-top:16px;">
-            <div class="nav-section-title">Platform</div>
-            <a class="nav-item" href="#landing" style="color:var(--color-accent);font-weight:600;">
-              <span class="nav-icon">${QrewUI.getIcon('chevronLeft')}</span>
-              <span class="nav-label">&larr; Qrew Landing Page</span>
-            </a>
-          </div>
-        `
+        `,
+        footerHtml: ''
       };
     },
 

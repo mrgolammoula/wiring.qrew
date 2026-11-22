@@ -143,15 +143,44 @@ a {
   flex: 1;
   padding: 16px 12px;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-muted);
 }
 
 .nav-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.nav-divider {
+  height: 1px;
+  background-color: #C5BCB0;
+  background-color: rgba(31, 29, 26, 0.22);
+  margin: 7px 4px;
+  border: none;
+  flex-shrink: 0;
 }
 
 .nav-section-title {
@@ -224,12 +253,13 @@ a {
 }
 
 .sidebar-footer {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-top: 1px solid var(--color-border);
   background-color: var(--color-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 48px;
 }
 
 .system-status {
@@ -248,6 +278,80 @@ a {
   box-shadow: 0 0 0 2px var(--color-success-bg);
 }
 
+.footer-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--panel-accent, var(--color-accent));
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  margin: -4px 0 -4px -6px;
+  transition: var(--transition-fast);
+}
+
+.footer-action-link:hover {
+  background-color: var(--panel-accent-light, var(--color-surface-hover));
+  color: var(--color-accent-hover);
+}
+
+.footer-action-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer-action-label {
+  white-space: nowrap;
+}
+
+.sidebar-version {
+  display: none !important;
+}
+
+/* Draggable Sidebar Resizer Handle */
+.sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 105;
+  user-select: none;
+}
+
+.sidebar-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 2px;
+  width: 2px;
+  height: 100%;
+  background: transparent;
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-resizer:hover::after,
+.sidebar-resizer.resizing::after {
+  background-color: var(--panel-accent, var(--color-accent));
+}
+
+body.is-resizing {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+body.is-resizing .sidebar,
+body.is-resizing .main-wrapper {
+  transition: none !important;
+}
+
 /* =========================================
    Collapsed Sidebar State (ChatGPT Style)
    ========================================= */
@@ -255,8 +359,17 @@ a {
   width: var(--sidebar-collapsed-width);
 }
 
+.sidebar.collapsed .sidebar-resizer {
+  display: none;
+}
+
 .sidebar.collapsed .brand-wrapper {
-  display: none !important;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  cursor: pointer;
+  position: relative;
 }
 
 .sidebar.collapsed .brand-info,
@@ -264,7 +377,10 @@ a {
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .system-status span,
 .sidebar.collapsed .sidebar-footer > div:last-child,
-.sidebar.collapsed .sidebar-context-picker {
+.sidebar.collapsed .sidebar-context-picker,
+.sidebar.collapsed .sidebar-toggle-btn,
+.sidebar.collapsed .footer-action-label,
+.sidebar.collapsed .sidebar-version {
   display: none !important;
 }
 
@@ -273,31 +389,33 @@ a {
   padding: 0;
 }
 
-.sidebar.collapsed .sidebar-toggle-btn {
-  display: flex;
-  width: 38px;
-  height: 38px;
+.sidebar.collapsed .brand-logo {
   margin: 0 auto;
-}
-
-.sidebar-toggle-btn svg {
-  transition: transform var(--transition-normal);
-}
-
-.sidebar.collapsed .sidebar-toggle-btn svg {
-  transform: rotate(180deg);
 }
 
 .sidebar.collapsed .sidebar-nav {
   padding: 16px 8px;
   align-items: center;
   gap: 8px;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.sidebar.collapsed .sidebar-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .sidebar.collapsed .nav-section {
   width: 100%;
   align-items: center;
   gap: 6px;
+}
+
+.sidebar.collapsed .nav-divider {
+  width: 26px;
+  margin: 7px auto;
+  background-color: #C5BCB0;
+  background-color: rgba(31, 29, 26, 0.22);
 }
 
 .sidebar.collapsed .nav-item {
@@ -329,12 +447,34 @@ a {
 
 .sidebar.collapsed .sidebar-footer {
   justify-content: center;
-  padding: 14px 0;
+  padding: 12px 0;
+}
+
+.sidebar.collapsed .footer-action-link {
+  width: 44px;
+  height: 44px;
+  justify-content: center;
+  align-items: center;
+  border-radius: var(--radius-md);
+  margin: 0 auto;
+  position: relative;
+  padding: 0;
+}
+
+.sidebar.collapsed .footer-action-link .footer-action-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.sidebar.collapsed .footer-action-link:hover {
+  background-color: var(--panel-accent-light, var(--color-surface-white));
 }
 
 /* Tooltip on hover in collapsed mode (ChatGPT style) */
 .sidebar.collapsed .nav-item:hover::after,
-.sidebar.collapsed .sidebar-toggle-btn:hover::after {
+.sidebar.collapsed .sidebar-toggle-btn:hover::after,
+.sidebar.collapsed .brand-wrapper:hover::after,
+.sidebar.collapsed .footer-action-link:hover::after {
   content: attr(data-tooltip);
   position: absolute;
   left: calc(100% + 12px);
@@ -383,6 +523,57 @@ a {
   margin-left: var(--sidebar-collapsed-width);
 }
 
+/* =========================================
+   Sidebar Mobile Backdrop (Drawer Overlay)
+   ========================================= */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(31, 29, 26, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 104;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+}
+
+.sidebar-backdrop.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* =========================================
+   Profile Full-Page Mode (Hides Admin Sidebar)
+   ========================================= */
+body.profile-mode .sidebar,
+body.profile-mode .sidebar-resizer,
+body.profile-mode #sidebar,
+body.profile-mode #sidebar-resizer,
+body.profile-mode .mobile-menu-btn {
+  display: none !important;
+}
+
+body.profile-mode .main-wrapper {
+  margin-left: 0 !important;
+  width: 100% !important;
+  transition: none !important;
+}
+
+.topbar-profile-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+body.profile-mode .topbar-profile-brand {
+  display: flex !important;
+}
+
 .topbar {
   height: var(--topbar-height);
   background-color: rgba(247, 244, 240, 0.95);
@@ -414,6 +605,44 @@ a {
 }
 
 /* =========================================
+   Topbar Platform Quick Button (Dashed Box)
+   ========================================= */
+.topbar-platform-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background-color: var(--color-surface);
+  border: 1.5px dashed #B8ADA0;
+  border: 1.5px dashed rgba(31, 29, 26, 0.32);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.topbar-platform-btn:hover {
+  background-color: var(--panel-accent-light, var(--color-surface-hover));
+  border-color: var(--panel-accent, var(--color-accent));
+  color: var(--panel-accent, var(--color-accent));
+}
+
+.topbar-platform-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.topbar-platform-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+/* =========================================
    Topbar Center Domain Badge
    ========================================= */
 .topbar-center {
@@ -430,23 +659,18 @@ a {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 14px;
+  padding: 4px 12px;
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
+  border: 1.5px dashed rgba(31, 29, 26, 0.32);
+  border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: 12.5px;
   font-weight: 600;
   color: var(--color-text-primary);
   letter-spacing: 0.2px;
   text-transform: lowercase;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.topbar-domain-badge:hover {
-  background-color: var(--color-bg);
-  border-color: var(--panel-accent, var(--color-accent));
+  cursor: default;
+  user-select: all;
 }
 
 .topbar-domain-dot {
@@ -464,7 +688,8 @@ a {
   display: flex;
   align-items: center;
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1.5px dashed #B8ADA0;
+  border: 1.5px dashed rgba(31, 29, 26, 0.32);
   border-radius: var(--radius-md);
   padding: 3px;
   gap: 3px;
@@ -641,19 +866,29 @@ a {
 .user-profile-trigger {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 4px 8px 4px 4px;
-  border-radius: var(--radius-md);
+  justify-content: center;
+  padding: 2px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   background: transparent;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .user-profile-trigger:hover,
 .user-profile-trigger.active {
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.user-profile-trigger:hover .user-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(31, 29, 26, 0.2);
+}
+
+.user-profile-trigger .user-meta,
+.user-profile-trigger > svg {
+  display: none !important;
 }
 
 .user-avatar {
@@ -905,12 +1140,35 @@ a {
 }
 
 /* =========================================
-   Responsive Breakpoints
+   Responsive Breakpoints & Layout Adaptations
    ========================================= */
+
+/* Desktop & Large Monitors (1440px and above) */
+@media (min-width: 1440px) {
+  .content-area {
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+/* Tablet & Smaller Laptops (1024px and below) */
+@media (max-width: 1024px) {
+  .topbar {
+    padding: 0 16px;
+  }
+  .content-area {
+    padding: 20px 18px;
+  }
+}
+
+/* Mobile Devices & Large Phones (768px and below) */
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    width: var(--sidebar-width) !important;
+    width: min(280px, calc(100vw - 44px)) !important;
+    z-index: 105;
+    box-shadow: 4px 0 24px rgba(31, 29, 26, 0.25);
   }
 
   .sidebar.mobile-open {
@@ -919,11 +1177,17 @@ a {
 
   .main-wrapper {
     margin-left: 0 !important;
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .sidebar-resizer {
+    display: none !important;
   }
 
   /* Full mobile drawer even if desktop was collapsed */
   .sidebar.collapsed {
-    width: var(--sidebar-width) !important;
+    width: min(280px, calc(100vw - 44px)) !important;
   }
 
   .sidebar.collapsed .brand-wrapper {
@@ -940,7 +1204,7 @@ a {
 
   .sidebar.collapsed .nav-item {
     justify-content: flex-start !important;
-    padding: 8px 10px !important;
+    padding: 9px 12px !important;
     width: 100% !important;
     height: auto !important;
     margin: 0 !important;
@@ -952,34 +1216,148 @@ a {
   }
 
   .sidebar.collapsed .nav-item:hover::after,
-  .sidebar.collapsed .sidebar-toggle-btn:hover::after {
+  .sidebar.collapsed .sidebar-toggle-btn:hover::after,
+  .sidebar.collapsed .brand-wrapper:hover::after,
+  .sidebar.collapsed .footer-action-link:hover::after {
     display: none !important;
   }
 
   .mobile-menu-btn {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .topbar {
+    padding: 0 14px;
+    height: 56px;
   }
 
   .content-area {
-    padding: 16px;
+    padding: 16px 14px;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   .user-meta {
-    display: none;
-  }
-
-  .topbar-center {
-    font-size: 11px;
+    display: none !important;
   }
 
   .page-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+
+  .page-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .page-actions .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 38px;
   }
 }
 
-@media (max-width: 520px) {
+/* Medium Mobile & Narrow Screens (680px and below) */
+@media (max-width: 680px) {
   .topbar-center {
-    display: none;
+    display: none !important;
   }
 }
+
+/* Standard Mobile (480px and below) */
+@media (max-width: 480px) {
+  .topbar {
+    padding: 0 10px;
+    height: 52px;
+    gap: 8px;
+  }
+
+  .topbar-left {
+    gap: 8px;
+  }
+
+  .topbar-right {
+    gap: 8px;
+  }
+
+  .topbar-platform-btn {
+    padding: 5px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .content-area {
+    padding: 12px 10px;
+  }
+
+  .notifications-popover {
+    right: 4px;
+    width: min(300px, calc(100vw - 12px));
+    max-width: calc(100vw - 12px);
+  }
+
+  .dropdown-menu {
+    right: 4px;
+    width: min(230px, calc(100vw - 12px));
+    max-width: calc(100vw - 12px);
+  }
+
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+    font-size: 11px;
+  }
+}
+
+/* Small Mobile (320px – 375px) */
+@media (max-width: 375px) {
+  .topbar-platform-btn span {
+    display: none;
+  }
+
+  .topbar-platform-btn {
+    padding: 5px 7px;
+  }
+
+  .topbar-profile-brand span {
+    display: none;
+  }
+
+  .content-area {
+    padding: 10px 8px;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* =========================================
+   Interface Density Preferences
+   ========================================= */
+body.density-compact .data-table th,
+body.density-compact .data-table td {
+  padding: 6px 12px;
+}
+body.density-compact .nav-item {
+  padding: 6px 10px;
+  min-height: 34px;
+}
+body.density-compact .form-input,
+body.density-compact .form-select {
+  padding: 6px 10px;
+  font-size: 13px;
+  min-height: 32px;
+}
+body.density-compact .btn {
+  padding: 6px 12px;
+}
+

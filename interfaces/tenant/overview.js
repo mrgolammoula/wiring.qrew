@@ -19,7 +19,6 @@
             <h1 class="page-title" style="margin:0;">${QrewUI.escapeHtml(tenant.name)}</h1>
             ${QrewUI.statusBadge(tenant.status)}
           </div>
-          <p class="page-subtitle">Organization tenant workspace in Qrew multi-tenant mesh</p>
         </div>
 
         <div class="page-actions">
@@ -102,7 +101,6 @@
           <div class="card-header">
             <div>
               <h2 class="card-title">Branch Offices</h2>
-              <p class="card-subtitle">Facilities operating under ${QrewUI.escapeHtml(tenant.name)}</p>
             </div>
           </div>
           <div class="table-wrapper" style="border:none;box-shadow:none;">
@@ -138,7 +136,6 @@
           <div class="card-header">
             <div>
               <h2 class="card-title">Tenant Members</h2>
-              <p class="card-subtitle">Verified users in organization</p>
             </div>
           </div>
           <div class="card-body">

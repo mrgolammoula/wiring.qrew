@@ -13,13 +13,12 @@
             <a href="#landing" class="landing-brand">
               <div class="landing-brand-logo">Q</div>
               <span class="landing-brand-title">Qrew</span>
-              <span class="badge" style="background:var(--color-surface);border:1px solid var(--color-border);font-size:10.5px;color:var(--color-text-muted);">Mesh v2.0</span>
             </a>
 
             <!-- Central Platform Domain -->
             <div class="landing-domain-badge">
               <span class="landing-domain-dot"></span>
-              <span>app.qrew.com</span>
+              <span>qrew.com</span>
             </div>
 
             <!-- Workspace Context Tabs on Main Landing Header (wireframe-only quick links) -->
@@ -47,17 +46,9 @@
         <!-- Hero Section -->
         <section class="landing-hero">
           <div class="landing-container">
-            <div class="landing-badge">
-              <span class="landing-badge-dot"></span>
-              <span>Enterprise Hierarchical Governance • 4-Tier RBAC Architecture</span>
-            </div>
             <h1 class="landing-hero-title">
               Hierarchical Multi-Tenant Access Control &amp; Operations Mesh
             </h1>
-            <p class="landing-hero-subtitle">
-              Enterprise governance engineered for complex operational hierarchies.
-              Strictly decouple global platform administration, organizational tenants, physical office branches, and operational departments.
-            </p>
 
             <div class="landing-cta-group">
               <a href="#platform/overview" class="btn btn-primary landing-btn-lg" style="display:inline-flex;align-items:center;gap:8px;">

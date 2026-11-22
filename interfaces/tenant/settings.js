@@ -47,7 +47,7 @@
           <form id="tenant-domain-form" style="display: flex; flex-direction: column; gap: 16px;">
             <div>
               <label for="tenant-domain-input" style="display: block; font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px;">Custom Domain</label>
-              <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="form-domain-input-group" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <input type="text" id="tenant-domain-input" class="form-input" value="${QrewUI.escapeHtml(currentDomain)}" required style="flex: 1; padding: 8px 12px; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); color: var(--color-text-primary); font-size: 14px;">
                 <span class="badge badge-active" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 4px; font-size: 12px;"><span class="badge-dot"></span>SSL Active</span>
               </div>

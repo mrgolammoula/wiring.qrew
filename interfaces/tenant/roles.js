@@ -16,15 +16,6 @@
       <div class="page-header">
         <div class="page-title-group">
           <h1 class="page-title">Tenant Roles</h1>
-          <p class="page-subtitle">Roles and permissions controlling organizational administration within ${QrewUI.escapeHtml(tenant.name)}.</p>
-        </div>
-      </div>
-
-      <div class="notice-box" style="margin-bottom:20px;">
-        ${QrewUI.getIcon('info')}
-        <div>
-          <strong>Tenant Scope:</strong> Tenant roles are confined strictly to ${QrewUI.escapeHtml(tenant.name)}.
-          They govern office creation and member access within this organization namespace.
         </div>
       </div>
 

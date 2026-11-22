@@ -24,18 +24,20 @@
     'audit-log': 'Audit log',
     'audit-logs': 'Audit log',
     'support-access': 'Support Access',
-    'system-health': 'System Health and Incidents',
-    'platform-settings': 'Platform settings'
+    'system-health': 'System Health and Incidents'
   };
 
   Qrew.registerInterface({
     id: 'platform',
     brandHome: 'platform',
 
-    getDomainBadge: () => ({
-      text: 'app.qrew.com/admin',
-      dotColor: 'var(--panel-accent)'
-    }),
+    getDomainBadge: ({ view }) => {
+      const subPath = (view && view !== 'overview') ? `/${view}` : '';
+      return {
+        text: `app.qrew.com/admin${subPath}`,
+        dotColor: 'var(--panel-accent)'
+      };
+    },
 
     getSidebarConfig: ({ view }) => ({
       logoText: 'Q',
@@ -46,7 +48,6 @@
       picker: null,
       navHtml: `
         <div class="nav-section">
-          <div class="nav-section-title">Platform Admin</div>
           <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#platform/overview">
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
             <span class="nav-label">Overview</span>
@@ -55,6 +56,9 @@
             <span class="nav-icon">${QrewUI.getIcon('tenants')}</span>
             <span class="nav-label">Tenants</span>
           </a>
+
+          <div class="nav-divider"></div>
+
           <a class="nav-item ${view === 'platform-access' ? 'active' : ''}" href="#platform/platform-access">
             <span class="nav-icon">${QrewUI.getIcon('users')}</span>
             <span class="nav-label">Platform Access</span>
@@ -63,6 +67,9 @@
             <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
             <span class="nav-label">Permission Access</span>
           </a>
+
+          <div class="nav-divider"></div>
+
           <a class="nav-item ${view === 'template-defaults' ? 'active' : ''}" href="#platform/template-defaults">
             <span class="nav-icon">${QrewUI.getIcon('layers')}</span>
             <span class="nav-label">Template & Defaults</span>
@@ -71,6 +78,9 @@
             <span class="nav-icon">${QrewUI.getIcon('dollar')}</span>
             <span class="nav-label">Plans and Entitlements</span>
           </a>
+
+          <div class="nav-divider"></div>
+
           <a class="nav-item ${view === 'usage-analytics' ? 'active' : ''}" href="#platform/usage-analytics">
             <span class="nav-icon">${QrewUI.getIcon('activity')}</span>
             <span class="nav-label">Usage & Analytics</span>
@@ -79,6 +89,9 @@
             <span class="nav-icon">${QrewUI.getIcon('audit')}</span>
             <span class="nav-label">Audit log</span>
           </a>
+
+          <div class="nav-divider"></div>
+
           <a class="nav-item ${view === 'support-access' ? 'active' : ''}" href="#platform/support-access">
             <span class="nav-icon">${QrewUI.getIcon('users')}</span>
             <span class="nav-label">Support Access</span>
@@ -87,18 +100,13 @@
             <span class="nav-icon">${QrewUI.getIcon('activity')}</span>
             <span class="nav-label">System Health and Incidents</span>
           </a>
-          <a class="nav-item ${view === 'platform-settings' ? 'active' : ''}" href="#platform/platform-settings">
-            <span class="nav-icon">${QrewUI.getIcon('settings')}</span>
-            <span class="nav-label">Platform settings</span>
-          </a>
         </div>
-        <div class="nav-section" style="margin-top:16px;">
-          <div class="nav-section-title">Super Administration</div>
-          <a class="nav-item" href="#super-admin/permission-catalog" style="color:var(--color-accent);font-weight:600;">
-            <span class="nav-icon">${QrewUI.getIcon('shield')}</span>
-            <span class="nav-label">Super Admin &rarr;</span>
-          </a>
-        </div>
+      `,
+      footerHtml: `
+        <a class="footer-action-link" href="#super-admin/permission-catalog" title="Super Admin Panel" data-tooltip="Super Admin">
+          <span class="footer-action-icon">${QrewUI.getIcon('shield')}</span>
+          <span class="footer-action-label">Super Admin &rarr;</span>
+        </a>
       `
     }),
 

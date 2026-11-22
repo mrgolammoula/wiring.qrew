@@ -114,3 +114,21 @@ body.ws-office-config {
   --panel-accent-light: #F0EBF4;
   --panel-accent-hover: #DFD3EB;
 }
+
+/* =========================================
+   Dark Theme Overrides (Warm Espresso Palette)
+   ========================================= */
+[data-theme="dark"] {
+  --color-bg: #1A1715;
+  --color-surface: #24201D;
+  --color-surface-white: #2C2724;
+  --color-surface-hover: #352F2A;
+  --color-text-primary: #F4EFEB;
+  --color-text-muted: #A39B92;
+  --color-border: #3A342F;
+  --color-border-subtle: #2D2723;
+  --color-border-strong: #4E463E;
+  --panel-accent-light: rgba(158, 83, 52, 0.22);
+  --panel-accent-hover: rgba(158, 83, 52, 0.32);
+}
+

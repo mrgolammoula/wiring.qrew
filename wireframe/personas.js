@@ -11,7 +11,7 @@
         <p style="font-size:13.5px;color:var(--color-text-muted);margin-bottom:20px;">
           Select any persona to jump directly into their contextual workspace experience.
         </p>
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+        <div class="personas-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;">
           <!-- Persona 1 -->
           <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;display:flex;flex-direction:column;gap:10px;">
             <div style="display:flex;align-items:center;gap:12px;">

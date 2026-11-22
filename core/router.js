@@ -24,14 +24,26 @@
       return { workspace: 'tenant-landing', view: 'landing', path: 'tenant-landing', params };
     }
 
+    if (pathPart === 'profile' || pathPart.startsWith('profile/')) {
+      const activeWs = (Qrew.state && Qrew.state.activeWorkspace) ? Qrew.state.activeWorkspace : 'platform';
+      return { workspace: activeWs, view: 'profile', path: pathPart, params };
+    }
+
     let workspace = 'platform';
     let view = 'overview';
 
     // Normalize legacy & new paths
-    if (pathPart === 'super-admin' || pathPart.startsWith('super-admin/')) {
+    if (
+      pathPart === 'super-admin' ||
+      pathPart.startsWith('super-admin/') ||
+      pathPart === 'permission-catalog' ||
+      pathPart === 'platform-settings'
+    ) {
       workspace = 'super-admin';
       if (pathPart.startsWith('super-admin/')) {
         view = pathPart.replace('super-admin/', '') || 'permission-catalog';
+      } else if (pathPart === 'platform-settings') {
+        view = 'platform-settings';
       } else {
         view = 'permission-catalog';
       }
@@ -154,8 +166,6 @@
         view = 'support-access';
       } else if (pathPart === 'system-health') {
         view = 'system-health';
-      } else if (pathPart === 'platform-settings') {
-        view = 'platform-settings';
       } else {
         view = 'overview';
       }
@@ -199,6 +209,7 @@
 
     if (iface && iface.landingMode) {
       document.body.classList.add('landing-mode');
+      document.body.classList.remove('profile-mode');
       if (route.params.id) {
         state.currentTenantId = route.params.id;
       }
@@ -206,6 +217,12 @@
       return;
     } else {
       document.body.classList.remove('landing-mode');
+    }
+
+    if (route.view === 'profile') {
+      document.body.classList.add('profile-mode');
+    } else {
+      document.body.classList.remove('profile-mode');
     }
 
     // Update active IDs if present in params
@@ -263,6 +280,15 @@
     // Close mobile drawer on route change
     if (Qrew.dom.sidebar && Qrew.dom.sidebar.classList.contains('mobile-open')) {
       Qrew.dom.sidebar.classList.remove('mobile-open');
+      const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+    }
+
+    if (route.view === 'profile') {
+      if (Qrew.views.profile && Qrew.views.profile.render) {
+        Qrew.views.profile.render(route.params.tab || 'profile', Qrew.buildContext());
+        return;
+      }
     }
 
     if (iface && iface.render) {

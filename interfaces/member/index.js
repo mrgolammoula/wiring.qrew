@@ -139,7 +139,7 @@
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
+        <div class="member-workspace-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:20px;">
           <!-- Left Column: Today's Tasks -->
           <div class="card">
             <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
@@ -261,10 +261,13 @@
     id: 'member',
     brandHome: 'tenant',
 
-    getDomainBadge: ({ office }) => ({
-      text: Qrew.getOfficeDomain(office),
-      dotColor: 'var(--panel-accent)'
-    }),
+    getDomainBadge: ({ office, view }) => {
+      const subPath = (view && view !== 'overview') ? `/${view}` : '';
+      return {
+        text: `${Qrew.getOfficeDomain(office)}/member${subPath}`,
+        dotColor: 'var(--panel-accent)'
+      };
+    },
 
     getSidebarConfig: ({ state }) => {
       const memberUser = QrewStore.getUserById(state.currentMemberId) || { id: 'usr_nusrat', name: 'Staff Member', email: '', platformRole: 'Staff' };
@@ -276,7 +279,6 @@
         picker: null,
         navHtml: `
           <div class="nav-section">
-            <div class="nav-section-title">My Workspace</div>
             <a class="nav-item active" href="#member/overview?userId=${memberUser.id}">
               <span class="nav-icon">${QrewUI.getIcon('users')}</span>
               <span class="nav-label">Schedule & Tasks</span>

@@ -374,10 +374,13 @@
     id: 'department',
     brandHome: 'tenant',
 
-    getDomainBadge: ({ office }) => ({
-      text: Qrew.getOfficeDomain(office),
-      dotColor: 'var(--panel-accent)'
-    }),
+    getDomainBadge: ({ office, view }) => {
+      const subPath = (view && view !== 'overview') ? `/${view}` : '';
+      return {
+        text: `${Qrew.getOfficeDomain(office)}/department${subPath}`,
+        dotColor: 'var(--panel-accent)'
+      };
+    },
 
     getSidebarConfig: ({ state, view, office, dept }) => {
       const activeDept = dept || { name: 'Department', code: 'DEP', id: state.currentDeptId };
@@ -401,11 +404,13 @@
         },
         navHtml: `
           <div class="nav-section">
-            <div class="nav-section-title">Department Hub</div>
             <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#department/overview?deptId=${deptId}">
               <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
               <span class="nav-label">Overview & KPIs</span>
             </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'members' ? 'active' : ''}" href="#department/members?deptId=${deptId}">
               <span class="nav-icon">${QrewUI.getIcon('users')}</span>
               <span class="nav-label">Staff Roster</span>

@@ -24,7 +24,15 @@
     if (DOM.sidebarContextPicker) {
       if (cfg.picker) {
         DOM.sidebarContextPicker.style.display = 'flex';
-        if (DOM.sidebarContextLabel) DOM.sidebarContextLabel.textContent = cfg.picker.label || '';
+        if (DOM.sidebarContextLabel) {
+          if (cfg.picker.label) {
+            DOM.sidebarContextLabel.textContent = cfg.picker.label;
+            DOM.sidebarContextLabel.style.display = 'block';
+          } else {
+            DOM.sidebarContextLabel.textContent = '';
+            DOM.sidebarContextLabel.style.display = 'none';
+          }
+        }
         if (DOM.sidebarContextSelect) {
           DOM.sidebarContextSelect.innerHTML = cfg.picker.optionsHtml || '';
           DOM.sidebarContextSelect.onchange = cfg.picker.onChange || null;
@@ -48,12 +56,63 @@
         }
       });
     }
+
+    const footerEl = DOM.sidebarFooter || document.getElementById('sidebar-footer');
+    if (footerEl) {
+      if (cfg.footerHtml) {
+        footerEl.innerHTML = cfg.footerHtml;
+        footerEl.style.display = 'flex';
+      } else {
+        footerEl.innerHTML = '';
+        footerEl.style.display = 'none';
+      }
+      footerEl.querySelectorAll('.footer-action-link').forEach(link => {
+        const text = link.getAttribute('data-tooltip') || link.getAttribute('title') || 'Super Admin';
+        link.setAttribute('data-tooltip', text);
+        link.setAttribute('title', text);
+      });
+    }
   };
 
   Qrew.shell.updateTopbarDomainBadge = () => {
     const domainTextEl = document.getElementById('topbar-domain-text');
     const domainDotEl = document.querySelector('.topbar-domain-dot');
     if (!domainTextEl) return;
+
+    if (Qrew.state.currentView === 'profile') {
+      const ws = Qrew.state.activeWorkspace || 'platform';
+      const activeTab = (Qrew.state.routeParams && Qrew.state.routeParams.tab)
+        ? Qrew.state.routeParams.tab
+        : (new URLSearchParams(window.location.hash.split('?')[1] || '').get('tab') || 'profile');
+
+      const ctx = Qrew.buildContext();
+      let domainText = `app.qrew.com/admin/setting/${activeTab}`;
+
+      if (ws === 'super-admin') {
+        domainText = `app.qrew.com/super-admin/setting/${activeTab}`;
+      } else if (ws === 'tenant') {
+        const tenantName = (ctx.tenant && ctx.tenant.name) ? ctx.tenant.name.toLowerCase() : 'sst';
+        domainText = `app.${tenantName}.com/tenants/setting/${activeTab}`;
+      } else if (ws === 'office') {
+        const officeDomain = Qrew.getOfficeDomain ? Qrew.getOfficeDomain(ctx.office) : 'sst.ctg.com';
+        domainText = `${officeDomain}/office/setting/${activeTab}`;
+      } else if (ws === 'office-admin') {
+        const officeDomain = Qrew.getOfficeDomain ? Qrew.getOfficeDomain(ctx.office) : 'sst.ctg.com';
+        domainText = `${officeDomain}/office-admin/setting/${activeTab}`;
+      } else if (ws === 'office-config') {
+        domainText = `app.qrew.com/office-config/setting/${activeTab}`;
+      } else if (ws === 'department') {
+        const officeDomain = Qrew.getOfficeDomain ? Qrew.getOfficeDomain(ctx.office) : 'sst.ctg.com';
+        domainText = `${officeDomain}/department/setting/${activeTab}`;
+      } else if (ws === 'member') {
+        const officeDomain = Qrew.getOfficeDomain ? Qrew.getOfficeDomain(ctx.office) : 'sst.ctg.com';
+        domainText = `${officeDomain}/member/setting/${activeTab}`;
+      }
+
+      domainTextEl.textContent = domainText;
+      if (domainDotEl) domainDotEl.style.backgroundColor = 'var(--panel-accent, #9E5334)';
+      return;
+    }
 
     const ctx = Qrew.buildContext();
     const iface = Qrew.interfaces[Qrew.state.activeWorkspace] || Qrew.interfaces.platform;
@@ -63,6 +122,51 @@
 
     domainTextEl.textContent = badge.text;
     if (domainDotEl) domainDotEl.style.backgroundColor = badge.dotColor || 'var(--panel-accent)';
+
+    // Update Topbar Platform Button (Dashed box button for Tenant/Office panels)
+    const platformBtn = document.getElementById('topbar-platform-btn');
+    if (platformBtn) {
+      const ws = Qrew.state.activeWorkspace;
+      const isProfile = Qrew.state.currentView === 'profile';
+      const showPlatformBtn = !isProfile && (ws === 'tenant' || ws === 'office' || ws === 'office-admin' || ws === 'office-config' || ws === 'department' || ws === 'member');
+      platformBtn.style.display = showPlatformBtn ? 'inline-flex' : 'none';
+    }
+  };
+
+  Qrew.shell.applyAppearanceSettings = () => {
+    const theme = localStorage.getItem('qrew_ui_theme') || 'system';
+    const accent = localStorage.getItem('qrew_ui_accent');
+    const density = localStorage.getItem('qrew_ui_density') || 'comfortable';
+
+    // 1. Theme
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (theme === 'light') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (isSystemDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+      }
+    }
+
+    // 2. Accent
+    if (accent) {
+      document.documentElement.style.setProperty('--panel-accent', accent);
+      document.documentElement.style.setProperty('--color-accent', accent);
+    } else {
+      document.documentElement.style.removeProperty('--panel-accent');
+      document.documentElement.style.removeProperty('--color-accent');
+    }
+
+    // 3. Density
+    if (density === 'compact') {
+      if (document.body) document.body.classList.add('density-compact');
+    } else {
+      if (document.body) document.body.classList.remove('density-compact');
+    }
   };
 
   Qrew.shell.getPanelUserInfo = () => {
@@ -218,7 +322,7 @@
             <input type="email" class="form-input" id="profile-edit-email" value="${QrewUI.escapeHtml(user.email)}" required>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
+          <div class="form-row-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
             <div class="form-group">
               <label class="form-label">Active Panel Role</label>
               <input type="text" class="form-input" value="${QrewUI.escapeHtml(user.role)}" disabled style="background:var(--color-surface);color:var(--color-text-muted);cursor:not-allowed;">
@@ -313,10 +417,21 @@
 
     const [getSidebarCollapsed, setSidebarCollapsed, subscribeSidebar] = useReactSidebarState(initialSidebarCollapsed);
 
+    const brandWrapperEl = document.getElementById('brand-wrapper');
+
     subscribeSidebar((collapsed) => {
       Qrew.state.sidebarCollapsed = collapsed;
       if (DOM.sidebar) {
         DOM.sidebar.classList.toggle('collapsed', collapsed);
+      }
+      if (brandWrapperEl) {
+        if (collapsed) {
+          brandWrapperEl.setAttribute('data-tooltip', 'Expand sidebar (Ctrl+B)');
+          brandWrapperEl.setAttribute('title', 'Expand sidebar (Ctrl+B)');
+        } else {
+          brandWrapperEl.removeAttribute('data-tooltip');
+          brandWrapperEl.setAttribute('title', 'Go to Platform Landing Page');
+        }
       }
       const label = collapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)';
       if (DOM.sidebarToggle) {
@@ -332,6 +447,10 @@
     if (initialSidebarCollapsed) {
       Qrew.state.sidebarCollapsed = true;
       if (DOM.sidebar) DOM.sidebar.classList.add('collapsed');
+      if (brandWrapperEl) {
+        brandWrapperEl.setAttribute('data-tooltip', 'Expand sidebar (Ctrl+B)');
+        brandWrapperEl.setAttribute('title', 'Expand sidebar (Ctrl+B)');
+      }
       if (DOM.sidebarToggle) {
         DOM.sidebarToggle.setAttribute('title', 'Expand sidebar (Ctrl+B)');
         DOM.sidebarToggle.setAttribute('aria-label', 'Expand sidebar (Ctrl+B)');
@@ -357,9 +476,72 @@
       };
     }
 
-    // Brand logo click navigation
+    // Sidebar Resizer Dragging & Persistence
+    const resizer = document.getElementById('sidebar-resizer');
+    const savedSidebarWidth = parseInt(localStorage.getItem('qrew_sidebar_width'), 10);
+    if (savedSidebarWidth && savedSidebarWidth >= 180 && savedSidebarWidth <= 500) {
+      document.documentElement.style.setProperty('--sidebar-width', `${savedSidebarWidth}px`);
+    }
+
+    if (resizer) {
+      let isResizing = false;
+      let startX = 0;
+      let startWidth = 256;
+
+      resizer.addEventListener('mousedown', (e) => {
+        if (Qrew.state.sidebarCollapsed) return;
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = (DOM.sidebar ? DOM.sidebar.getBoundingClientRect().width : 256);
+        document.body.classList.add('is-resizing');
+        resizer.classList.add('resizing');
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const currentX = e.clientX;
+        const diff = currentX - startX;
+        let newWidth = startWidth + diff;
+
+        if (newWidth < 180) {
+          newWidth = 180;
+        } else if (newWidth > 500) {
+          newWidth = 500;
+        }
+
+        document.documentElement.style.setProperty('--sidebar-width', `${newWidth}px`);
+      });
+
+      document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
+        isResizing = false;
+        document.body.classList.remove('is-resizing');
+        resizer.classList.remove('resizing');
+
+        const currentWidth = DOM.sidebar ? DOM.sidebar.getBoundingClientRect().width : 256;
+        if (currentWidth >= 180 && currentWidth <= 500) {
+          try {
+            localStorage.setItem('qrew_sidebar_width', String(Math.round(currentWidth)));
+          } catch (err) {}
+        }
+      });
+
+      resizer.addEventListener('dblclick', () => {
+        document.documentElement.style.setProperty('--sidebar-width', '256px');
+        try {
+          localStorage.setItem('qrew_sidebar_width', '256');
+        } catch (err) {}
+      });
+    }
+
+    // Brand logo click navigation (expands if collapsed, else goes home)
     const navigateBrandHome = (e) => {
       if (e) e.stopPropagation();
+      if (Qrew.state.sidebarCollapsed) {
+        toggleSidebar();
+        return;
+      }
       const iface = Qrew.interfaces[Qrew.state.activeWorkspace];
       if (iface && iface.brandHome === 'platform') {
         Qrew.navigateTo('#landing');
@@ -379,12 +561,6 @@
       brandWrapper.onclick = navigateBrandHome;
     }
 
-    const topbarDomainBadge = document.querySelector('.topbar-domain-badge');
-    if (topbarDomainBadge) {
-      topbarDomainBadge.title = 'Go to Qrew Landing Page';
-      topbarDomainBadge.onclick = () => Qrew.navigateTo('#landing');
-    }
-
     // Keyboard shortcut: Ctrl+B or Cmd+B to toggle sidebar; Escape to close menus
     document.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
@@ -397,10 +573,20 @@
       }
     });
 
-    // Mobile Menu
+    // Mobile Menu & Backdrop Drawer
+    const sidebarBackdrop = document.getElementById('sidebar-backdrop');
     if (DOM.mobileMenuBtn) {
       DOM.mobileMenuBtn.onclick = () => {
-        if (DOM.sidebar) DOM.sidebar.classList.toggle('mobile-open');
+        if (DOM.sidebar) {
+          const isOpen = DOM.sidebar.classList.toggle('mobile-open');
+          if (sidebarBackdrop) sidebarBackdrop.classList.toggle('active', isOpen);
+        }
+      };
+    }
+    if (sidebarBackdrop) {
+      sidebarBackdrop.onclick = () => {
+        if (DOM.sidebar) DOM.sidebar.classList.remove('mobile-open');
+        sidebarBackdrop.classList.remove('active');
       };
     }
 
@@ -437,29 +623,31 @@
       };
     }
 
-    // Profile Edit Triggers
+    // Profile Navigation (Full Page Settings with Profile, Appearance, Security)
+    const navigateToProfile = () => {
+      if (DOM.userDropdownMenu) DOM.userDropdownMenu.classList.remove('show');
+      Qrew.navigateTo('#profile');
+    };
+
     const myProfileBtn = document.getElementById('action-my-profile');
-    if (myProfileBtn) myProfileBtn.onclick = openEditProfileModal;
+    if (myProfileBtn) myProfileBtn.onclick = navigateToProfile;
 
     const dropdownHeaderBtn = document.getElementById('dropdown-header-btn');
-    if (dropdownHeaderBtn) dropdownHeaderBtn.onclick = openEditProfileModal;
+    if (dropdownHeaderBtn) dropdownHeaderBtn.onclick = navigateToProfile;
 
-    // Reset Demo Data
-    const resetDemoBtn = document.getElementById('action-reset-data');
-    if (resetDemoBtn) {
-      resetDemoBtn.onclick = () => {
+    // Logout
+    const logoutBtn = document.getElementById('action-logout');
+    if (logoutBtn) {
+      logoutBtn.onclick = () => {
         if (DOM.userDropdownMenu) DOM.userDropdownMenu.classList.remove('show');
         QrewUI.confirmDialog({
-          title: 'Reset Demo Database',
-          message: 'This will reset all localStorage state back to the initial sample seed data (SST organization).',
-          confirmText: 'Reset to Defaults',
+          title: 'Log Out',
+          message: 'Are you sure you want to log out of your Qrew session?',
+          confirmText: 'Log Out',
           confirmClass: 'btn-danger',
           onConfirm: () => {
-            try { localStorage.removeItem('qrew_panel_user_overrides'); } catch (e) {}
-            QrewStore.reset();
-            Qrew.shell.syncHeaderUserProfile();
-            QrewUI.showToast('Demo data restored to initial state.', 'success');
-            Qrew.handleRouteChange();
+            QrewUI.showToast('You have been logged out successfully.', 'info');
+            Qrew.navigateTo('#landing');
           }
         });
       };
@@ -474,6 +662,17 @@
 
     // Hash Change Listener & Boot
     window.addEventListener('hashchange', Qrew.handleRouteChange);
+    Qrew.shell.applyAppearanceSettings();
+    if (window.matchMedia) {
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+          const currentTheme = localStorage.getItem('qrew_ui_theme') || 'system';
+          if (currentTheme === 'system') {
+            Qrew.shell.applyAppearanceSettings();
+          }
+        });
+      } catch (e) {}
+    }
     Qrew.shell.syncHeaderUserProfile();
     Qrew.handleRouteChange();
   });

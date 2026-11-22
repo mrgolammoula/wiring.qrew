@@ -175,20 +175,11 @@
       <div class="page-header">
         <div class="page-title-group">
           <h1 class="page-title">Tenant Members</h1>
-          <p class="page-subtitle">Users verified with organization membership in ${QrewUI.escapeHtml(tenant.name)}.</p>
         </div>
         <div class="page-actions">
           <button class="btn btn-primary" id="btn-add-tenant-member">
             ${QrewUI.getIcon('plus')} Add Member
           </button>
-        </div>
-      </div>
-
-      <div class="notice-box" style="margin-bottom:16px;">
-        ${QrewUI.getIcon('info')}
-        <div>
-          <strong>Qrew Membership & Access Governance:</strong> Tenant members hold scoped organization roles.
-          <strong>A Platform Owner cannot be assigned as a Tenant Admin</strong> to enforce architectural separation between global infrastructure governance and tenant administration.
         </div>
       </div>
 
