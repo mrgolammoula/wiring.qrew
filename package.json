@@ -1,0 +1,17 @@
+{
+  "name": "wiring.qrew",
+  "version": "1.0.0",
+  "description": "Enterprise multi-tenant management and hierarchical access-control platform wireframe",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve . -l 3000",
+    "dev": "serve . -l 3000",
+    "serve": "serve . -l 3000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serve": "^14.2.8"
+  }
+}

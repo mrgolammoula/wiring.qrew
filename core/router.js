@@ -37,13 +37,16 @@
       pathPart === 'super-admin' ||
       pathPart.startsWith('super-admin/') ||
       pathPart === 'permission-catalog' ||
-      pathPart === 'platform-settings'
+      pathPart === 'platform-settings' ||
+      pathPart === 'platform-access'
     ) {
       workspace = 'super-admin';
       if (pathPart.startsWith('super-admin/')) {
         view = pathPart.replace('super-admin/', '') || 'permission-catalog';
       } else if (pathPart === 'platform-settings') {
         view = 'platform-settings';
+      } else if (pathPart === 'platform-access') {
+        view = 'platform-access';
       } else {
         view = 'permission-catalog';
       }
