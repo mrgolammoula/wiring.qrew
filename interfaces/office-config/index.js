@@ -76,9 +76,21 @@
       };
     },
 
-    render: (view) => {
+    render: (view, ctx) => {
+      const officeId = (ctx && ctx.params && ctx.params.officeId) || (ctx && ctx.office && ctx.office.id) || Qrew.state.currentOfficeId;
+      const tenantId = (ctx && ctx.params && ctx.params.tenantId) || (ctx && ctx.tenant && ctx.tenant.id) || Qrew.state.currentTenantId;
+
+      if (view !== 'invoice-templates') {
+        if (Qrew.dom && Qrew.dom.mainContent) {
+          Qrew.dom.mainContent.classList.remove('studio-mode');
+        }
+      }
+
       switch (view) {
         case 'invoice-templates':
+          if (Qrew.views['office-config'] && Qrew.views['office-config'].renderInvoiceTemplates) {
+            return Qrew.views['office-config'].renderInvoiceTemplates(officeId, tenantId, ctx);
+          }
           return Qrew.renderBlankTitledPage('Invoice Templates');
         case 'roles-permissions':
         case 'roles':
