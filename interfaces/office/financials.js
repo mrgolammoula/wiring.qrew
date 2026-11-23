@@ -120,12 +120,12 @@
                 <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 980px;">
                   <thead>
                     <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); background: var(--color-surface, #F8FAFC); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--color-text-muted);">
-                      <th style="padding: 12px 16px; width: 24%; text-align: left;">File / Project</th>
-                      <th style="padding: 12px 16px; width: 15%; text-align: left;">Spent By</th>
-                      <th style="padding: 12px 16px; width: 19%; text-align: left;">Category</th>
-                      <th style="padding: 12px 16px; width: 22%; text-align: left;">Description</th>
-                      <th style="padding: 12px 16px; width: 10%; text-align: left;">Date</th>
-                      <th style="padding: 12px 16px; width: 6%; text-align: right;">Amount</th>
+                      <th style="padding: 12px 16px; width: 24%; text-align: center;">File / Project</th>
+                      <th style="padding: 12px 16px; width: 15%; text-align: center;">Spent By</th>
+                      <th style="padding: 12px 16px; width: 19%; text-align: center;">Category</th>
+                      <th style="padding: 12px 16px; width: 22%; text-align: center;">Description</th>
+                      <th style="padding: 12px 16px; width: 10%; text-align: center;">Date</th>
+                      <th style="padding: 12px 16px; width: 6%; text-align: center;">Amount</th>
                       <th style="padding: 12px 10px; width: 4%; text-align: center;"></th>
                     </tr>
                   </thead>
@@ -134,8 +134,8 @@
                       <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
                         
                         <!-- 1. File / Project -->
-                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden;">
-                          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden; text-align: center;">
+                          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; overflow: hidden;">
                             <span style="color: var(--panel-accent, var(--color-accent)); flex-shrink: 0;">${QrewUI.getIcon('folder')}</span>
                             <span style="font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(exp.fileProject)}">
                               ${QrewUI.escapeHtml(exp.fileProject)}
@@ -144,8 +144,8 @@
                         </td>
 
                         <!-- 2. Spent By -->
-                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
-                          <div style="display: flex; align-items: center; gap: 8px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap; text-align: center;">
+                          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary); flex-shrink: 0;">
                               ${exp.spentBy ? exp.spentBy.charAt(0).toUpperCase() : 'U'}
                             </div>
@@ -154,26 +154,26 @@
                         </td>
 
                         <!-- 3. Category -->
-                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap; text-align: center;">
                           <span class="badge-role office" style="font-size: 11px; padding: 4px 10px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border); white-space: nowrap; display: inline-block;">
                             ${QrewUI.escapeHtml(exp.category)}
                           </span>
                         </td>
 
                         <!-- 4. Description -->
-                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-secondary); line-height: 1.4; overflow: hidden;">
-                          <div style="overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;" title="${QrewUI.escapeHtml(exp.description)}">
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-secondary); line-height: 1.4; overflow: hidden; text-align: center;">
+                          <div style="overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-align: center;" title="${QrewUI.escapeHtml(exp.description)}">
                             ${QrewUI.escapeHtml(exp.description)}
                           </div>
                         </td>
 
                         <!-- 5. Date -->
-                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap; text-align: center;">
                           ${exp.date}
                         </td>
 
                         <!-- 6. Amount -->
-                        <td style="padding: 14px 16px; vertical-align: middle; text-align: right; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; text-align: center; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
                           ${formatMoney(exp.amount, '$')}
                         </td>
 
@@ -205,12 +205,12 @@
                 <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 980px;">
                   <thead>
                     <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); background: var(--color-surface, #F8FAFC); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--color-text-muted);">
-                      <th style="padding: 12px 16px; width: 18%; text-align: left;">Requested By</th>
-                      <th style="padding: 12px 16px; width: 11%; text-align: left;">Amount</th>
-                      <th style="padding: 12px 16px; width: 10%; text-align: left;">Date</th>
-                      <th style="padding: 12px 16px; width: 26%; text-align: left;">File / Project</th>
+                      <th style="padding: 12px 16px; width: 18%; text-align: center;">Requested By</th>
+                      <th style="padding: 12px 16px; width: 11%; text-align: center;">Amount</th>
+                      <th style="padding: 12px 16px; width: 10%; text-align: center;">Date</th>
+                      <th style="padding: 12px 16px; width: 26%; text-align: center;">File / Project</th>
                       <th style="padding: 12px 16px; width: 11%; text-align: center;">Status</th>
-                      <th style="padding: 12px 16px; width: 24%; text-align: right;">Actions</th>
+                      <th style="padding: 12px 16px; width: 24%; text-align: center;">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,12 +218,12 @@
                       <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
                         
                         <!-- 1. Requested By -->
-                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
-                          <div style="display: flex; align-items: center; gap: 8px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap; text-align: center;">
+                          <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary); flex-shrink: 0;">
                               ${req.requestedBy ? req.requestedBy.charAt(0).toUpperCase() : 'U'}
                             </div>
-                            <div>
+                            <div style="text-align: left;">
                               <div style="font-weight: 600; color: var(--color-text-primary); font-size: 13px;">${QrewUI.escapeHtml(req.requestedBy)}</div>
                               <div style="font-size: 11px; color: var(--color-text-muted); font-family: monospace;">${QrewUI.escapeHtml(req.requisitionNo)}</div>
                             </div>
@@ -231,26 +231,26 @@
                         </td>
 
                         <!-- 2. Amount -->
-                        <td style="padding: 14px 16px; vertical-align: middle; font-weight: 700; color: var(--color-text-primary); font-size: 14px; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; font-weight: 700; color: var(--color-text-primary); font-size: 14px; white-space: nowrap; text-align: center;">
                           ${formatMoney(req.amount)}
                           ${req.originalAmount && req.originalAmount !== req.amount ? `
-                            <div style="font-size: 10px; color: var(--color-text-muted); text-decoration: line-through; font-weight: 400;">
+                            <div style="font-size: 10px; color: var(--color-text-muted); text-decoration: line-through; font-weight: 400; text-align: center;">
                               orig: ${formatMoney(req.originalAmount)}
                             </div>
                           ` : ''}
                         </td>
 
                         <!-- 3. Date -->
-                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap; text-align: center;">
                           ${req.date}
                         </td>
 
                         <!-- 4. File / Project -->
-                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden;">
-                          <div style="font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(req.fileProject || 'General Operations')}">
+                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden; text-align: center;">
+                          <div style="font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;" title="${QrewUI.escapeHtml(req.fileProject || 'General Operations')}">
                             ${QrewUI.escapeHtml(req.fileProject || 'General Operations')}
                           </div>
-                          <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(req.purpose || req.category)}">
+                          <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;" title="${QrewUI.escapeHtml(req.purpose || req.category)}">
                             ${QrewUI.escapeHtml(req.purpose || req.category)}
                           </div>
                         </td>
@@ -261,8 +261,8 @@
                         </td>
 
                         <!-- 6. Actions (Two Sections: 'Action' and 'Action & Disburse') -->
-                        <td style="padding: 14px 16px; vertical-align: middle; text-align: right; white-space: nowrap;">
-                          <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; text-align: center; white-space: nowrap;">
+                          <div style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                             
                             <!-- Section 1: Standard Action Button / Menu -->
                             <button class="btn btn-secondary btn-action-preview" style="padding: 6px 12px; font-size: 12px; font-weight: 500;" onclick="Qrew.views.office.openActionModal('${req.id}')" title="Preview Requisition Details">
