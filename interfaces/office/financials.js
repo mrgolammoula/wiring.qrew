@@ -530,7 +530,7 @@
                 <div><strong>Payee:</strong> ${QrewUI.escapeHtml(req.requestedBy)}</div>
                 <div><strong>File/Project:</strong> ${QrewUI.escapeHtml(req.fileProject || 'General')}</div>
                 <div><strong>Source Wallet:</strong> <span id="preview-wallet-name">${selectedWalletName}</span></div>
-                <div><strong>Category:</strong> ${QrewUI.escapeHtml(req.category)}</div>
+                <div><strong>Purpose:</strong> ${QrewUI.escapeHtml(req.purpose || req.category || 'General Operations')}</div>
               </div>
 
               <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
@@ -826,26 +826,15 @@
               <input type="number" step="0.01" min="1" id="req-amount" class="form-input" placeholder="0.00" required>
             </div>
             <div class="form-group" style="flex: 1;">
-              <label class="form-label" for="req-category">Category *</label>
-              <select id="req-category" class="form-input">
-                <option value="Port Operations">Port Operations</option>
-                <option value="Customs Clearance">Customs Clearance</option>
-                <option value="Petty Cash">Petty Cash Replenishment</option>
-                <option value="Emergency Disbursal">Emergency Disbursal</option>
-              </select>
+              <label class="form-label" for="req-by">Requested By *</label>
+              <input list="req-staff-list" id="req-by" class="form-input" placeholder="Enter or select staff name" required>
+              <datalist id="req-staff-list">
+                ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
+                <option value="Jack Rahman">
+                <option value="Rafiqul Islam">
+                <option value="Nusrat Jahan">
+              </datalist>
             </div>
-          </div>
-
-          <!-- Requested By (Full-width, Target Wallet option removed) -->
-          <div class="form-group">
-            <label class="form-label" for="req-by">Requested By *</label>
-            <input list="req-staff-list" id="req-by" class="form-input" placeholder="Enter or select staff name" required>
-            <datalist id="req-staff-list">
-              ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
-              <option value="Jack Rahman">
-              <option value="Rafiqul Islam">
-              <option value="Nusrat Jahan">
-            </datalist>
           </div>
         </form>
       `,
@@ -891,14 +880,13 @@
           }
 
           const amount = parseFloat(document.getElementById('req-amount').value);
-          const category = document.getElementById('req-category').value;
           const requestedBy = document.getElementById('req-by').value.trim();
 
           const req = QrewStore.createOfficeRequisition(state.currentOfficeId, {
             fileProject,
             purpose,
             amount,
-            category,
+            category: purpose,
             requestedBy,
             wallet: 'Operations Petty Cash'
           });
