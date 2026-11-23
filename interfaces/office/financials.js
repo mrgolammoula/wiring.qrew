@@ -773,13 +773,24 @@
   const openRequestFundsModal = () => {
     const operationalFiles = QrewStore.getOperationalFiles(state.currentOfficeId);
     const officeStaff = QrewStore.getOfficeStaff(state.currentOfficeId);
-    const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
+
+    const purposeCategories = [
+      'Harbor Tugboat & Towage Advance',
+      'Port Authority Berth & Pilotage Tariff',
+      'Customs Regulatory Clearance & Manifest Stamp Duty',
+      'Container Yard Equipment & Stevedoring Disbursal',
+      'Vessel Fresh Water & Bunker Supply Logistics',
+      'Emergency Port Security & Line Handlers Advance',
+      'Operational Petty Cash Replenishment',
+      'Berth Hire & Quay Access Fee'
+    ];
 
     QrewUI.openModal({
       title: 'Request Operational Funds',
       bodyHtml: `
         <form id="request-funds-form" style="display: flex; flex-direction: column; gap: 14px;">
           
+          <!-- File / Project -->
           <div class="form-group">
             <label class="form-label" for="req-file-project">File / Project *</label>
             <input list="req-projects-list" id="req-file-project" class="form-input" placeholder="Select or type file / project (e.g. PRJ-CTG-0042)" required>
@@ -793,9 +804,20 @@
             </datalist>
           </div>
 
+          <!-- Purpose / Requisition Reason with Preset Categories + None Option -->
           <div class="form-group">
-            <label class="form-label" for="req-purpose">Purpose / Requisition Reason *</label>
-            <input type="text" id="req-purpose" class="form-input" placeholder="e.g. Harbor tugboat fuel advance for vessel berthing" required>
+            <label class="form-label" for="req-purpose-select">Purpose / Requisition Reason *</label>
+            <select id="req-purpose-select" class="form-input" required>
+              <option value="" disabled selected>Select Purpose / Reason</option>
+              ${purposeCategories.map(p => `<option value="${p}">${p}</option>`).join('')}
+              <option value="none">None (Personalized Reason)</option>
+            </select>
+          </div>
+
+          <!-- Dynamic Personalized Reason (Appears only when 'None' is selected) -->
+          <div class="form-group" id="custom-purpose-group" style="display: none; background: var(--color-surface); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--color-border-strong);">
+            <label class="form-label" for="req-purpose-custom" style="color: var(--panel-accent, var(--color-accent)); font-weight: 600;">Personalized Purpose / Reason *</label>
+            <input type="text" id="req-purpose-custom" class="form-input" placeholder="Enter personalized purpose or reason for requisition...">
           </div>
 
           <div class="form-row">
@@ -814,23 +836,16 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label" for="req-by">Requested By *</label>
-              <input list="req-staff-list" id="req-by" class="form-input" placeholder="Staff Name" required>
-              <datalist id="req-staff-list">
-                ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
-                <option value="Jack Rahman">
-                <option value="Rafiqul Islam">
-                <option value="Nusrat Jahan">
-              </datalist>
-            </div>
-            <div class="form-group" style="flex: 1;">
-              <label class="form-label" for="req-wallet">Target Wallet</label>
-              <select id="req-wallet" class="form-input">
-                ${wallets.map(w => `<option value="${w.name}">${w.name}</option>`).join('')}
-              </select>
-            </div>
+          <!-- Requested By (Full-width, Target Wallet option removed) -->
+          <div class="form-group">
+            <label class="form-label" for="req-by">Requested By *</label>
+            <input list="req-staff-list" id="req-by" class="form-input" placeholder="Enter or select staff name" required>
+            <datalist id="req-staff-list">
+              ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
+              <option value="Jack Rahman">
+              <option value="Rafiqul Islam">
+              <option value="Nusrat Jahan">
+            </datalist>
           </div>
         </form>
       `,
@@ -841,6 +856,22 @@
       onOpen: (modalEl) => {
         const form = modalEl.querySelector('#request-funds-form');
         const submitBtn = modalEl.querySelector('#btn-submit-req-funds');
+        const purposeSelect = modalEl.querySelector('#req-purpose-select');
+        const customPurposeGroup = modalEl.querySelector('#custom-purpose-group');
+        const customPurposeInput = modalEl.querySelector('#req-purpose-custom');
+
+        // Toggle personalized input on 'none' selection
+        purposeSelect.onchange = () => {
+          if (purposeSelect.value === 'none') {
+            customPurposeGroup.style.display = 'block';
+            customPurposeInput.setAttribute('required', 'required');
+            customPurposeInput.focus();
+          } else {
+            customPurposeGroup.style.display = 'none';
+            customPurposeInput.removeAttribute('required');
+            customPurposeInput.value = '';
+          }
+        };
 
         submitBtn.onclick = () => {
           if (!form.checkValidity()) {
@@ -849,11 +880,19 @@
           }
 
           const fileProject = document.getElementById('req-file-project').value.trim();
-          const purpose = document.getElementById('req-purpose').value.trim();
+          let purpose = purposeSelect.value;
+          if (purpose === 'none') {
+            purpose = customPurposeInput.value.trim();
+            if (!purpose) {
+              customPurposeInput.focus();
+              alert('Please enter your personalized purpose / reason.');
+              return;
+            }
+          }
+
           const amount = parseFloat(document.getElementById('req-amount').value);
           const category = document.getElementById('req-category').value;
           const requestedBy = document.getElementById('req-by').value.trim();
-          const wallet = document.getElementById('req-wallet').value;
 
           const req = QrewStore.createOfficeRequisition(state.currentOfficeId, {
             fileProject,
@@ -861,7 +900,7 @@
             amount,
             category,
             requestedBy,
-            wallet
+            wallet: 'Operations Petty Cash'
           });
 
           QrewUI.closeModal();
