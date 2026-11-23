@@ -78,7 +78,8 @@
     interfaces: {},
     views: {
       platform: {},
-      tenant: {}
+      tenant: {},
+      'office-config': {}
     },
     actions: {},
     shell: {},

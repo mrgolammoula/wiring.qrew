@@ -300,6 +300,386 @@ const DEFAULT_DATA = {
       description: 'Provisioned organization SST for Rafiqul Islam',
       timestamp: '2026-09-12 09:00:00'
     }
+  ],
+  operationalFiles: [
+    {
+      id: 'prj_ctg_01',
+      type: 'project',
+      fileCode: 'PRJ-CTG-0042',
+      title: 'MV Meghna Harmony - Berth 4 Discharge & Port Call',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      clientName: 'Apex Shipping Lines Ltd.',
+      clientCode: 'CLI-APX-88',
+      billingTerms: 'Net 30',
+      status: 'In-Progress',
+      vesselName: 'MV Meghna Harmony',
+      portCall: 'Chittagong Port',
+      terminal: 'NCT Berth 4',
+      voyageNo: 'V-2026-08',
+      grt: 3500,
+      nrt: 1800,
+      arrivalDate: '2026-11-20',
+      berthingDate: '2026-11-21',
+      departureDate: '2026-11-25',
+      scheduledDates: '2026-11-20 to 2026-11-25',
+      defaultDeliverables: [
+        { name: 'Harbor Pilotage & Vessel Escort', token: 'PILOT_FEE', equation: '1200.00' },
+        { name: 'Berth Clearance & Port Authority Dues', token: 'BERTH_PERMIT', equation: '800.00' },
+        { name: 'Gantry Crane Operations (10 hrs)', token: 'CRANE_OPS', equation: '= 10 * 350' },
+        { name: 'Container Terminal Yard Storage', token: 'TERMINAL_FEE', equation: '1500.00' }
+      ]
+    },
+    {
+      id: 'prj_ctg_02',
+      type: 'project',
+      fileCode: 'PRJ-CTG-0055',
+      title: 'MV Banglar Joy - Dredging Supervision & Cargo Discharge',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      clientName: 'Pacific Ocean Transport Inc.',
+      clientCode: 'CLI-POT-42',
+      billingTerms: 'Due on Receipt',
+      status: 'Scheduled',
+      vesselName: 'MV Banglar Joy',
+      portCall: 'Chittagong Port',
+      terminal: 'CCT Berth 2',
+      voyageNo: 'V-2026-11',
+      grt: 4200,
+      nrt: 2150,
+      arrivalDate: '2026-12-01',
+      berthingDate: '2026-12-02',
+      departureDate: '2026-12-07',
+      scheduledDates: '2026-12-01 to 2026-12-10',
+      defaultDeliverables: [
+        { name: 'Rapid Response Harbor Tugboat Fleet', token: 'DISPATCH_BASE', equation: '3200.00' },
+        { name: 'Under-Hull Diving Inspection Crew', token: 'DIVER_CREW', equation: '1400.00' }
+      ]
+    },
+    {
+      id: 'prj_mgl_02',
+      type: 'project',
+      fileCode: 'PRJ-MGL-0105',
+      title: 'MV Mongla Express - Jetty Towage & Handling',
+      officeId: 'off_mgl_port',
+      tenantId: 'ten_sst',
+      clientName: 'Bengal Maritime Freight Ltd.',
+      clientCode: 'CLI-BMF-10',
+      billingTerms: 'Net 15',
+      status: 'Scheduled',
+      vesselName: 'MV Mongla Express',
+      portCall: 'Mongla Port',
+      terminal: 'Jetty 5',
+      voyageNo: 'V-2026-03',
+      grt: 2800,
+      nrt: 1400,
+      arrivalDate: '2026-11-28',
+      berthingDate: '2026-11-29',
+      departureDate: '2026-12-04',
+      scheduledDates: '2026-11-28 to 2026-12-04',
+      defaultDeliverables: [
+        { name: 'Lighter Barge Towage & Jetty Shunting', token: 'LIGHTER_TOW', equation: '1850.00' },
+        { name: 'Mongla Port Basin Wharfage Surcharge', token: 'WHARF_CHARGE', equation: '650.00' }
+      ]
+    },
+    {
+      id: 'prod_stevedoring_std',
+      type: 'product',
+      fileCode: 'PROD-STEVE-20',
+      title: 'Standard 20ft Container Stevedoring',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      clientName: 'Apex Shipping Lines Ltd.',
+      clientCode: 'CLI-APX-88',
+      billingTerms: 'Net 30',
+      status: 'Active',
+      sku: 'SKU-STEVE-20',
+      baseUnitPrice: 350.00,
+      stockOnHand: 'Unlimited Service',
+      defaultDeliverables: [
+        { name: 'Standard 20ft Container Stevedoring (Unit)', token: 'UNIT_STEVEDORE', equation: '350.00' },
+        { name: 'Quayside Handling Tariff', token: 'QUAY_TARIFF', equation: '120.00' }
+      ]
+    },
+    {
+      id: 'prod_gantry_block',
+      type: 'product',
+      fileCode: 'PROD-CRANE-10H',
+      title: 'Gantry Heavy-Lift Crane Block (10h Package)',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      clientName: 'Pacific Ocean Transport Inc.',
+      clientCode: 'CLI-POT-42',
+      billingTerms: 'Due on Receipt',
+      status: 'Active',
+      sku: 'SKU-CRANE-10H',
+      baseUnitPrice: 3500.00,
+      stockOnHand: '12 Available',
+      defaultDeliverables: [
+        { name: 'Gantry Heavy-Lift Crane Block (10h Package)', token: 'CRANE_BLOCK', equation: '3500.00' },
+        { name: 'Operator & Rigging Certification Fee', token: 'RIG_CERT', equation: '450.00' }
+      ]
+    }
+  ],
+  premadeDeliverables: [
+    { token: 'PILOT_FEE', name: 'Harbor Pilotage & Vessel Escort', equation: '1200.00', category: 'Navigation & Port' },
+    { token: 'WHARFAGE_FEE', name: 'Wharfage Dues & Quay Access', equation: '850.00', category: 'Navigation & Port' },
+    { token: 'CRANE_OPS', name: 'Gantry Heavy-Lift Crane (10 hrs)', equation: '= 10 * 350', category: 'Stevedoring & Cargo' },
+    { token: 'TERMINAL_FEE', name: 'Container Terminal Yard Storage', equation: '1500.00', category: 'Stevedoring & Cargo' },
+    { token: 'CUSTOMS_CLR', name: 'Customs Regulatory Document Clearance', equation: '450.00', category: 'Compliance & Legal' },
+    { token: 'TOWAGE_DISP', name: 'Emergency Harbor Towage Assistance', equation: '2200.00', category: 'Emergency Services' },
+    { token: 'MOORING_FEE', name: 'Vessel Berthing & Line Handlers', equation: '400.00', category: 'Navigation & Port' },
+    { token: 'INSPECT_CERT', name: 'Maritime Dangerous Goods Compliance Signoff', equation: '650.00', category: 'Compliance & Legal' }
+  ],
+  invoiceTemplates: [
+    {
+      id: 'tpl_pda',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'PDA',
+      description: 'Proforma Disbursement Account for Chittagong Port calls',
+      code: 'PDA-2026-001',
+      tag: 'STANDARD',
+      isDefault: true,
+      status: 'Active',
+      currency: 'USD',
+      currencySymbol: '$',
+      updatedAt: 'Nov 19, 2026',
+      createdAt: '2026-10-10',
+      headerFields: [
+        { key: 'NAME', label: 'Name', value: 'MV Banglar Samriddhi Port Call' },
+        { key: 'STATUS', label: 'Status', value: 'Active' },
+        { key: 'CLIENTID', label: 'Client', value: 'Apex Shipping Lines Ltd.' },
+        { key: 'TERMINAL', label: 'Terminal', value: 'NCT Berth 4' },
+        { key: 'VOYAGE_NO', label: 'Voyage No', value: 'V-2026-08' },
+        { key: 'PORT', label: 'Port', value: 'Chittagong Port' },
+        { key: 'ARRIVAL', label: 'Arrival', value: '2026-11-20' },
+        { key: 'NRT', label: 'NRT', value: '1800' },
+        { key: 'BERTHING', label: 'Berthing', value: '2026-11-21' },
+        { key: 'GRT', label: 'GRT', value: '3500' },
+        { key: 'DEPARTURE', label: 'Departure', value: '2026-11-25' },
+        { key: 'NAME_OF_VESSEL', label: 'Name Of Vessel', value: 'MV Banglar Samriddhi' }
+      ],
+      globalConstants: {
+        DOLLAR_RATE: 121,
+        PORT_DUES_PER_GRT: 0.31,
+        IN_OUT_WARD: 2500,
+        MMD: 1150,
+        LEVY_FUND_BDT: 2000,
+        LIGHT_DUES_PER_NRT: 12.50,
+        NOC: 1150,
+        WAIVER: 2500,
+        SOURCE_TAX_RATE: 0.08
+      },
+      localConstants: {
+        AGENCY_BASE: 500.00
+      },
+      sections: [
+        {
+          id: 'sec_port_tariff',
+          title: 'AS PER PORT TARIFF',
+          color: 'green',
+          rows: [
+            { id: 'r_port_1', token: 'PORT_DUES', name: 'PORT DUES', equation: '0', sl: 1, editable: 'NOT EDITABLE' },
+            { id: 'r_port_2', token: 'PILOT', name: 'PILOT-1 UNIT MANDATORY PAY', equation: '1230', sl: 2, editable: 'NOT EDITABLE' },
+            { id: 'r_port_3', token: 'TUGBOAT', name: 'PORT TUG HIRE 1 UNIT MANDATORY PAY', equation: '800', sl: 3, editable: 'NOT EDITABLE' }
+          ],
+          charges: [
+            { id: 'c_port_vat', token: 'ON_1_VAT', name: 'Vat', equation: '0', editable: 'NOT EDITABLE' }
+          ],
+          subtotal: { token: 'SEC_PORT_TARIFF_TOTAL', label: 'Section Total', equation: '= PORT_DUES + PILOT + TUGBOAT' }
+        },
+        {
+          id: 'sec_as_tariff',
+          title: 'AS PER TARIFF',
+          color: 'blue',
+          rows: [
+            { id: 'r_tar_1', token: 'LEVY_FUND', name: 'Levy Fund', equation: '16.53', sl: 4, editable: 'NOT EDITABLE' },
+            { id: 'r_tar_2', token: 'LIGHT_DUES', name: 'Light Dues', equation: '0', sl: 5, editable: 'NOT EDITABLE' },
+            { id: 'r_tar_3', token: 'IN_OUT_MMD_NOC', name: 'IN /OUT WARD AND MMD NOC CHARGE', equation: '30.17', sl: 6, editable: 'NOT EDITABLE' },
+            { id: 'r_tar_4', token: 'WAIVER_CLEARANCE', name: 'Waiver Clearance', equation: '20.66', sl: 7, editable: 'NOT EDITABLE' }
+          ],
+          charges: [],
+          subtotal: { token: 'SEC_AS_TARIFF_TOTAL', label: 'Section Total', equation: '= LEVY_FUND + LIGHT_DUES + IN_OUT_MMD_NOC + WAIVER_CLEARANCE' }
+        },
+        {
+          id: 'sec_private',
+          title: 'PRIVATE SERVICE',
+          color: 'orange',
+          rows: [
+            { id: 'r_pvt_1', token: 'PRIVATE_PILOT', name: 'PRIVATE PILOT IN/OUT WARD', equation: '0', sl: 8, editable: 'NOT EDITABLE' },
+            { id: 'r_pvt_2', token: 'TUG_BOAT', name: 'TUG BOAT 2 UNITS 2200-2400 HP BERTHING & UNBERTHING', equation: '0', sl: 9, editable: 'NOT EDITABLE' },
+            { id: 'r_pvt_3', token: 'SOURCE_TAX', name: 'Source Tax', equation: '0', sl: 10, editable: 'NOT EDITABLE' },
+            { id: 'r_pvt_4', token: 'AGENCY_FEE', name: 'Agency Fee', equation: '0', sl: 11, editable: 'NOT EDITABLE' }
+          ],
+          charges: [
+            { id: 'c_pvt_st', token: 'PVT_SOURCE_TAX', name: 'Source Tax', equation: '0', editable: 'NOT EDITABLE' },
+            { id: 'c_pvt_vat', token: 'PVT_VAT', name: 'Vat', equation: '0', editable: 'NOT EDITABLE' }
+          ],
+          subtotal: { token: 'SEC_PRIVATE_TOTAL', label: 'Section Total', equation: '= PRIVATE_PILOT + TUG_BOAT + SOURCE_TAX + AGENCY_FEE' }
+        }
+      ],
+      grandTotal: {
+        token: 'TOTAL',
+        label: 'TOTAL',
+        equation: '= SEC_PORT_TARIFF_TOTAL + SEC_AS_TARIFF_TOTAL + SEC_PRIVATE_TOTAL'
+      }
+    },
+    {
+      id: 'tpl_fda',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'FDA',
+      description: 'Final Disbursement Account for completed vessel clearance',
+      code: 'FDA-2026-001',
+      tag: 'STANDARD',
+      isDefault: false,
+      status: 'Active',
+      currency: 'USD',
+      currencySymbol: '$',
+      updatedAt: 'Oct 22, 2026',
+      createdAt: '2026-09-15',
+      headerFields: [
+        { key: 'NAME', label: 'Name', value: 'Final Disbursement Clearance' },
+        { key: 'STATUS', label: 'Status', value: 'Completed' },
+        { key: 'CLIENTID', label: 'Client', value: 'Apex Shipping Lines Ltd.' },
+        { key: 'TERMINAL', label: 'Terminal', value: 'NCT Berth 4' },
+        { key: 'VOYAGE_NO', label: 'Voyage No', value: 'V-2026-07' },
+        { key: 'PORT', label: 'Port', value: 'Chittagong Port' },
+        { key: 'ARRIVAL', label: 'Arrival', value: '2026-10-18' },
+        { key: 'NRT', label: 'NRT', value: '2100' },
+        { key: 'BERTHING', label: 'Berthing', value: '2026-10-19' },
+        { key: 'GRT', label: 'GRT', value: '4200' },
+        { key: 'DEPARTURE', label: 'Departure', value: '2026-10-22' },
+        { key: 'NAME_OF_VESSEL', label: 'Name Of Vessel', value: 'MV Banglar Agradoot' }
+      ],
+      globalConstants: {
+        DOLLAR_RATE: 121,
+        PORT_DUES_PER_GRT: 0.31,
+        IN_OUT_WARD: 2500,
+        MMD: 1150
+      },
+      localConstants: {},
+      sections: [
+        {
+          id: 'sec_fda_port',
+          title: 'AS PER PORT TARIFF',
+          color: 'green',
+          rows: [
+            { id: 'r_fda_1', token: 'FDA_PORT_DUES', name: 'PORT DUES', equation: '1302', sl: 1, editable: 'NOT EDITABLE' },
+            { id: 'r_fda_2', token: 'FDA_PILOT', name: 'PILOT-1 UNIT MANDATORY PAY', equation: '1230', sl: 2, editable: 'NOT EDITABLE' }
+          ],
+          charges: [],
+          subtotal: { token: 'SEC_FDA_PORT_TOTAL', label: 'Section Total', equation: '= FDA_PORT_DUES + FDA_PILOT' }
+        }
+      ],
+      grandTotal: {
+        token: 'TOTAL',
+        label: 'TOTAL',
+        equation: '= SEC_FDA_PORT_TOTAL'
+      }
+    },
+    {
+      id: 'tpl_expense1',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'expense1',
+      description: 'Standard operational field expense billing',
+      code: 'EXPENSE1-2026-001',
+      tag: 'STANDARD',
+      isDefault: false,
+      status: 'Active',
+      currency: 'USD',
+      currencySymbol: '$',
+      updatedAt: 'Oct 22, 2026',
+      createdAt: '2026-09-20',
+      headerFields: [
+        { key: 'NAME', label: 'Name', value: 'Fleet Expense Allocation' },
+        { key: 'STATUS', label: 'Status', value: 'Active' },
+        { key: 'CLIENTID', label: 'Client', value: 'General Port Fleet' },
+        { key: 'TERMINAL', label: 'Terminal', value: 'Fleet Anchorage B' },
+        { key: 'VOYAGE_NO', label: 'Voyage No', value: 'EXP-2026-03' },
+        { key: 'PORT', label: 'Port', value: 'Chittagong Port' },
+        { key: 'ARRIVAL', label: 'Arrival', value: '2026-10-15' },
+        { key: 'NRT', label: 'NRT', value: '950' },
+        { key: 'BERTHING', label: 'Berthing', value: '2026-10-16' },
+        { key: 'GRT', label: 'GRT', value: '1850' },
+        { key: 'DEPARTURE', label: 'Departure', value: '2026-10-22' },
+        { key: 'NAME_OF_VESSEL', label: 'Name Of Vessel', value: 'MT Chittagong Pioneer' }
+      ],
+      globalConstants: {
+        DOLLAR_RATE: 121
+      },
+      localConstants: {},
+      sections: [
+        {
+          id: 'sec_exp_1',
+          title: 'OPERATIONAL EXPENSES',
+          color: 'blue',
+          rows: [
+            { id: 'r_exp_1', token: 'FUEL_COST', name: 'Tugboat Marine Diesel Bunkering', equation: '2400', sl: 1, editable: 'EDITABLE' },
+            { id: 'r_exp_2', token: 'CREW_ALLOW', name: 'Deck Crew Shift Allowance', equation: '650', sl: 2, editable: 'EDITABLE' }
+          ],
+          charges: [],
+          subtotal: { token: 'SEC_EXP_TOTAL', label: 'Section Total', equation: '= FUEL_COST + CREW_ALLOW' }
+        }
+      ],
+      grandTotal: {
+        token: 'TOTAL',
+        label: 'TOTAL',
+        equation: '= SEC_EXP_TOTAL'
+      }
+    },
+    {
+      id: 'tpl_template11',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'template11',
+      description: 'Standard container freight retainer billing',
+      code: 'INV-26-001',
+      tag: 'STANDARD',
+      isDefault: false,
+      status: 'Active',
+      currency: 'USD',
+      currencySymbol: '$',
+      updatedAt: 'Nov 19, 2026',
+      createdAt: '2026-10-01',
+      headerFields: [
+        { key: 'NAME', label: 'Name', value: 'Container Freight Retainer' },
+        { key: 'STATUS', label: 'Status', value: 'Active' },
+        { key: 'CLIENTID', label: 'Client', value: 'Pacific Ocean Transport Inc.' },
+        { key: 'TERMINAL', label: 'Terminal', value: 'CCT Berth 2' },
+        { key: 'VOYAGE_NO', label: 'Voyage No', value: 'V-2026-11' },
+        { key: 'PORT', label: 'Port', value: 'Chittagong Port' },
+        { key: 'ARRIVAL', label: 'Arrival', value: '2026-11-12' },
+        { key: 'NRT', label: 'NRT', value: '2400' },
+        { key: 'BERTHING', label: 'Berthing', value: '2026-11-13' },
+        { key: 'GRT', label: 'GRT', value: '4800' },
+        { key: 'DEPARTURE', label: 'Departure', value: '2026-11-18' },
+        { key: 'NAME_OF_VESSEL', label: 'Name Of Vessel', value: 'MV Pacific Voyager' }
+      ],
+      globalConstants: {
+        DOLLAR_RATE: 121
+      },
+      localConstants: {},
+      sections: [
+        {
+          id: 'sec_t11_1',
+          title: 'AS PER TARIFF',
+          color: 'green',
+          rows: [
+            { id: 'r_t11_1', token: 'RETAINER_FEE', name: 'Quarterly Terminal Access Retainer', equation: '5000', sl: 1, editable: 'EDITABLE' }
+          ],
+          charges: [],
+          subtotal: { token: 'SEC_T11_TOTAL', label: 'Section Total', equation: '= RETAINER_FEE' }
+        }
+      ],
+      grandTotal: {
+        token: 'TOTAL',
+        label: 'TOTAL',
+        equation: '= SEC_T11_TOTAL'
+      }
+    }
   ]
 };
 
@@ -328,6 +708,9 @@ class DataStore {
         if (!parsed.officeConfigs || Object.keys(parsed.officeConfigs).length === 0) parsed.officeConfigs = JSON.parse(JSON.stringify(DEFAULT_DATA.officeConfigs || {}));
         if (!parsed.memberTasks || parsed.memberTasks.length === 0) parsed.memberTasks = JSON.parse(JSON.stringify(DEFAULT_DATA.memberTasks || []));
         if (!parsed.memberActivity || parsed.memberActivity.length === 0) parsed.memberActivity = JSON.parse(JSON.stringify(DEFAULT_DATA.memberActivity || []));
+        if (!parsed.operationalFiles || parsed.operationalFiles.length === 0) parsed.operationalFiles = JSON.parse(JSON.stringify(DEFAULT_DATA.operationalFiles || []));
+        if (!parsed.premadeDeliverables || parsed.premadeDeliverables.length === 0) parsed.premadeDeliverables = JSON.parse(JSON.stringify(DEFAULT_DATA.premadeDeliverables || []));
+        if (!parsed.invoiceTemplates || parsed.invoiceTemplates.length === 0) parsed.invoiceTemplates = JSON.parse(JSON.stringify(DEFAULT_DATA.invoiceTemplates || []));
         return parsed;
       }
     } catch (e) {
@@ -1434,6 +1817,208 @@ class DataStore {
     if (this.data.memberActivity.length > 50) this.data.memberActivity.pop();
     this.save();
     return newActivity;
+  }
+
+  // Operational Files (Projects & Products)
+  getOperationalFiles(officeId = null, type = null) {
+    if (!this.data.operationalFiles) this.data.operationalFiles = [];
+    return this.data.operationalFiles.filter(f => {
+      const matchOffice = !officeId || f.officeId === officeId;
+      const matchType = !type || type === 'all' || f.type === type;
+      return matchOffice && matchType;
+    });
+  }
+
+  getOperationalFileById(fileId) {
+    if (!this.data.operationalFiles) this.data.operationalFiles = [];
+    return this.data.operationalFiles.find(f => f.id === fileId) || null;
+  }
+
+  // Premade Deliverables Library
+  getPremadeDeliverables() {
+    if (!this.data.premadeDeliverables) this.data.premadeDeliverables = [];
+    return JSON.parse(JSON.stringify(this.data.premadeDeliverables));
+  }
+
+  // Invoice Templates
+  getInvoiceTemplates(officeId = null) {
+    if (!this.data.invoiceTemplates) this.data.invoiceTemplates = [];
+    let list = this.data.invoiceTemplates;
+    if (officeId) {
+      list = list.filter(t => t.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  getInvoiceTemplateById(templateId) {
+    if (!this.data.invoiceTemplates) this.data.invoiceTemplates = [];
+    const found = this.data.invoiceTemplates.find(t => t.id === templateId);
+    return found ? JSON.parse(JSON.stringify(found)) : null;
+  }
+
+  createInvoiceTemplate(officeId, templateData) {
+    if (!this.data.invoiceTemplates) this.data.invoiceTemplates = [];
+    const office = this.getOfficeById(officeId);
+    const tenantId = office ? office.tenantId : 'ten_sst';
+    const id = 'tpl_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+    
+    // Auto-generate code if missing
+    const count = this.data.invoiceTemplates.filter(t => t.officeId === officeId).length + 1;
+    const prefix = office ? office.name.substring(0, 3).toUpperCase() : 'OFF';
+    const code = templateData.code || `SST-${prefix}-INV-${String(count).padStart(2, '0')}`;
+    
+    // If setting as default, clear others in this office
+    if (templateData.isDefault) {
+      this.data.invoiceTemplates.forEach(t => {
+        if (t.officeId === officeId) t.isDefault = false;
+      });
+    }
+
+    const newTemplate = {
+      id,
+      officeId,
+      tenantId,
+      name: templateData.name || 'Untitled Invoice Template',
+      code,
+      status: templateData.status || 'Active',
+      isDefault: Boolean(templateData.isDefault),
+      currency: templateData.currency || 'USD',
+      currencySymbol: templateData.currencySymbol || '$',
+      clientName: templateData.clientName || '',
+      clientCode: templateData.clientCode || '',
+      billingTerms: templateData.billingTerms || 'Net 30',
+      sourceFileId: templateData.sourceFileId || null,
+      sourceFileType: templateData.sourceFileType || null,
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
+      globalConstants: templateData.globalConstants || { BASE_VAT: 0.15, PORT_SURCHARGE: 0.05, DOLLAR_RATE: 120.50 },
+      localConstants: templateData.localConstants || { SETUP_FEE: 250.00 },
+      sections: templateData.sections || [
+        {
+          id: 'sec_1',
+          title: 'Section 1: General Deliverables',
+          rows: [
+            { id: 'r1', token: 'ITEM_1', name: 'Primary Operational Service', equation: '1000.00' }
+          ],
+          subtotal: { token: 'SEC1_TOTAL', label: 'Section Total', equation: '= ITEM_1' }
+        }
+      ],
+      grandTotal: templateData.grandTotal || {
+        token: 'GRAND_TOTAL',
+        label: '*** GRAND TOTAL (Balance Due)',
+        equation: '= SEC1_TOTAL * (1 + BASE_VAT)'
+      }
+    };
+
+    this.data.invoiceTemplates.unshift(newTemplate);
+    this.addAuditLog(
+      'CREATE_TEMPLATE',
+      'Invoice Template',
+      newTemplate.id,
+      `Created invoice template "${newTemplate.name}" (${newTemplate.code}) for office ${office ? office.name : officeId}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(newTemplate));
+  }
+
+  updateInvoiceTemplate(id, templateData) {
+    if (!this.data.invoiceTemplates) this.data.invoiceTemplates = [];
+    const idx = this.data.invoiceTemplates.findIndex(t => t.id === id);
+    if (idx === -1) throw new Error(`Invoice template ${id} not found.`);
+
+    const existing = this.data.invoiceTemplates[idx];
+    const officeId = existing.officeId;
+
+    if (templateData.isDefault && !existing.isDefault) {
+      this.data.invoiceTemplates.forEach(t => {
+        if (t.officeId === officeId && t.id !== id) t.isDefault = false;
+      });
+    }
+
+    const updated = {
+      ...existing,
+      ...templateData,
+      id,
+      officeId,
+      updatedAt: new Date().toISOString().split('T')[0]
+    };
+
+    this.data.invoiceTemplates[idx] = updated;
+    this.addAuditLog(
+      'UPDATE_TEMPLATE',
+      'Invoice Template',
+      id,
+      `Updated invoice template "${updated.name}" (${updated.code})`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(updated));
+  }
+
+  duplicateInvoiceTemplate(id) {
+    const original = this.getInvoiceTemplateById(id);
+    if (!original) throw new Error(`Invoice template ${id} not found.`);
+
+    const count = this.data.invoiceTemplates.filter(t => t.officeId === original.officeId).length + 1;
+    const clonedData = JSON.parse(JSON.stringify(original));
+    clonedData.name = `${original.name} (Copy)`;
+    clonedData.code = `${original.code}-CPY${count}`;
+    clonedData.isDefault = false;
+
+    return this.createInvoiceTemplate(original.officeId, clonedData);
+  }
+
+  deleteInvoiceTemplate(id) {
+    if (!this.data.invoiceTemplates) return false;
+    const idx = this.data.invoiceTemplates.findIndex(t => t.id === id);
+    if (idx === -1) return false;
+
+    const removed = this.data.invoiceTemplates.splice(idx, 1)[0];
+    this.addAuditLog(
+      'DELETE_TEMPLATE',
+      'Invoice Template',
+      id,
+      `Deleted invoice template "${removed.name}" (${removed.code})`
+    );
+    this.save();
+    return true;
+  }
+
+  archiveInvoiceTemplate(id) {
+    const updated = this.updateInvoiceTemplate(id, { status: 'Archived' });
+    this.addAuditLog(
+      'ARCHIVE_TEMPLATE',
+      'Invoice Template',
+      id,
+      `Archived invoice template "${updated.name}" (${updated.code})`
+    );
+    return updated;
+  }
+
+  unarchiveInvoiceTemplate(id) {
+    const updated = this.updateInvoiceTemplate(id, { status: 'Active' });
+    this.addAuditLog(
+      'UNARCHIVE_TEMPLATE',
+      'Invoice Template',
+      id,
+      `Restored invoice template "${updated.name}" (${updated.code}) to active status`
+    );
+    return updated;
+  }
+
+  setDefaultInvoiceTemplate(officeId, id) {
+    if (!this.data.invoiceTemplates) return;
+    this.data.invoiceTemplates.forEach(t => {
+      if (t.officeId === officeId) {
+        t.isDefault = (t.id === id);
+      }
+    });
+    this.addAuditLog(
+      'SET_DEFAULT_TEMPLATE',
+      'Invoice Template',
+      id,
+      `Set invoice template ${id} as default for office ${officeId}`
+    );
+    this.save();
   }
 }
 
