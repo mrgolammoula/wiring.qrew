@@ -680,6 +680,226 @@ const DEFAULT_DATA = {
         equation: '= SEC_T11_TOTAL'
       }
     }
+  ],
+  officeInvoices: [
+    {
+      id: 'inv_101',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-084',
+      clientName: 'Apex Shipping Lines Ltd.',
+      clientCode: 'APEX-SHP',
+      vessel: 'MV Banglar Samriddhi',
+      voyageNo: 'V-2026-08',
+      issueDate: '2026-11-18',
+      dueDate: '2026-12-18',
+      amount: 48500.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Paid',
+      paidDate: '2026-11-22',
+      items: [
+        { name: 'Port Dues & Berthing Charges (NCT Berth 4)', amount: 24500.00 },
+        { name: 'Pilotage & Harbor Tug Assistance', amount: 12800.00 },
+        { name: 'Agency Operational Fee & Customs Clearance', amount: 11200.00 }
+      ],
+      notes: 'Disbursement settled via SCB wire transfer ref #88214.'
+    },
+    {
+      id: 'inv_102',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-085',
+      clientName: 'Maersk Bangladesh Ltd.',
+      clientCode: 'MAERSK-BD',
+      vessel: 'MV Northern Diamond',
+      voyageNo: 'ND-441',
+      issueDate: '2026-11-20',
+      dueDate: '2026-12-20',
+      amount: 36200.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Pending',
+      items: [
+        { name: 'Container Terminal Yard Storage & Handling', amount: 18500.00 },
+        { name: 'Gantry Crane Discharge Operations', amount: 11500.00 },
+        { name: 'Documentation & Manifest Filing', amount: 6200.00 }
+      ],
+      notes: 'Pending client accounts payable approval cycle.'
+    },
+    {
+      id: 'inv_103',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-086',
+      clientName: 'Hapag-Lloyd Maritime',
+      clientCode: 'HL-MAR',
+      vessel: 'MV Ocean Voyager',
+      voyageNo: 'HL-882',
+      issueDate: '2026-10-15',
+      dueDate: '2026-11-15',
+      amount: 14850.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Overdue',
+      items: [
+        { name: 'Emergency Harbor Towage Assistance', amount: 8850.00 },
+        { name: 'Vessel Berthing Line Handlers & Mooring', amount: 6000.00 }
+      ],
+      notes: 'Overdue by 9 days. First reminder dispatched on Nov 16.'
+    },
+    {
+      id: 'inv_104',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-087',
+      clientName: 'Cosco Shipping Lines',
+      clientCode: 'COSCO-BD',
+      vessel: 'MV Golden Fortune',
+      voyageNo: 'CS-109',
+      issueDate: '2026-11-22',
+      dueDate: '2026-12-22',
+      amount: 28900.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Paid',
+      paidDate: '2026-11-23',
+      items: [
+        { name: 'Bulk Cargo Stevedoring & Wharfage Access', amount: 16500.00 },
+        { name: 'Port Authority Environmental Levy & Security', amount: 7400.00 },
+        { name: 'Maritime Clearance & NOC Expediting', amount: 5000.00 }
+      ],
+      notes: 'Paid in full via HSBC swift transfer.'
+    },
+    {
+      id: 'inv_105',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-088',
+      clientName: 'Evergreen Marine Corp',
+      clientCode: 'EMC-LINE',
+      vessel: 'MV Green Horizon',
+      voyageNo: 'EM-512',
+      issueDate: '2026-11-23',
+      dueDate: '2026-12-23',
+      amount: 14400.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Draft',
+      items: [
+        { name: 'Proforma Bunker Supply & Fresh Water Delivery', amount: 9800.00 },
+        { name: 'Crew Change & Immigration Logistics', amount: 4600.00 }
+      ],
+      notes: 'Draft proforma undergoing master verification.'
+    },
+    {
+      id: 'inv_106',
+      officeId: 'off_mgl_port',
+      tenantId: 'ten_sst',
+      invoiceNo: 'INV-2026-089',
+      clientName: 'Apex Shipping Lines Ltd.',
+      clientCode: 'APEX-SHP',
+      vessel: 'MV Meghna Star',
+      voyageNo: 'MS-202',
+      issueDate: '2026-11-19',
+      dueDate: '2026-12-19',
+      amount: 21500.00,
+      currency: 'USD',
+      currencySymbol: '$',
+      status: 'Paid',
+      paidDate: '2026-11-21',
+      items: [
+        { name: 'Mongla Fairway Anchorage & Pilotage', amount: 14000.00 },
+        { name: 'Inland Lighterage Coordination', amount: 7500.00 }
+      ],
+      notes: 'Cleared through Mongla Port Accounts.'
+    }
+  ],
+  officeTransactions: [
+    {
+      id: 'txn_101',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-23',
+      reference: 'TXN-88219',
+      type: 'Credit',
+      category: 'Client Settlement',
+      description: 'Cosco Shipping settlement for INV-2026-087',
+      amount: 28900.00,
+      currency: 'USD',
+      method: 'SWIFT Wire',
+      status: 'Completed'
+    },
+    {
+      id: 'txn_102',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-22',
+      reference: 'TXN-88214',
+      type: 'Credit',
+      category: 'Client Settlement',
+      description: 'Apex Shipping settlement for INV-2026-084',
+      amount: 48500.00,
+      currency: 'USD',
+      method: 'Bank Transfer',
+      status: 'Completed'
+    },
+    {
+      id: 'txn_103',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-21',
+      reference: 'TXN-88190',
+      type: 'Debit',
+      category: 'Port Authority Tariff',
+      description: 'Chittagong Port Authority (CPA) Berthing & Pilotage Disbursal',
+      amount: 14200.00,
+      currency: 'USD',
+      method: 'Bank Draft',
+      status: 'Completed'
+    },
+    {
+      id: 'txn_104',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-19',
+      reference: 'TXN-88155',
+      type: 'Debit',
+      category: 'Towage & Marine Service',
+      description: 'Harbor Tug Assistance Disbursal for NCT Berth 4',
+      amount: 5600.00,
+      currency: 'USD',
+      method: 'Pay Order',
+      status: 'Completed'
+    },
+    {
+      id: 'txn_105',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-17',
+      reference: 'TXN-88112',
+      type: 'Debit',
+      category: 'Stevedoring & Equipment',
+      description: 'Heavy crane & container yard equipment rental fee',
+      amount: 3800.00,
+      currency: 'USD',
+      method: 'Electronic Transfer',
+      status: 'Completed'
+    },
+    {
+      id: 'txn_106',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      date: '2026-11-14',
+      reference: 'TXN-88091',
+      type: 'Debit',
+      category: 'Customs & Regulatory',
+      description: 'Customs regulatory document processing and compliance duty',
+      amount: 1950.00,
+      currency: 'USD',
+      method: 'Treasury Challan',
+      status: 'Completed'
+    }
   ]
 };
 
@@ -711,6 +931,8 @@ class DataStore {
         if (!parsed.operationalFiles || parsed.operationalFiles.length === 0) parsed.operationalFiles = JSON.parse(JSON.stringify(DEFAULT_DATA.operationalFiles || []));
         if (!parsed.premadeDeliverables || parsed.premadeDeliverables.length === 0) parsed.premadeDeliverables = JSON.parse(JSON.stringify(DEFAULT_DATA.premadeDeliverables || []));
         if (!parsed.invoiceTemplates || parsed.invoiceTemplates.length === 0) parsed.invoiceTemplates = JSON.parse(JSON.stringify(DEFAULT_DATA.invoiceTemplates || []));
+        if (!parsed.officeInvoices || parsed.officeInvoices.length === 0) parsed.officeInvoices = JSON.parse(JSON.stringify(DEFAULT_DATA.officeInvoices || []));
+        if (!parsed.officeTransactions || parsed.officeTransactions.length === 0) parsed.officeTransactions = JSON.parse(JSON.stringify(DEFAULT_DATA.officeTransactions || []));
         return parsed;
       }
     } catch (e) {
@@ -2019,6 +2241,141 @@ class DataStore {
       `Set invoice template ${id} as default for office ${officeId}`
     );
     this.save();
+  }
+
+  // Office Financial Invoices
+  getOfficeInvoices(officeId = null) {
+    if (!this.data.officeInvoices) this.data.officeInvoices = [];
+    let list = this.data.officeInvoices;
+    if (officeId) {
+      list = list.filter(i => i.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  getOfficeInvoiceById(id) {
+    if (!this.data.officeInvoices) this.data.officeInvoices = [];
+    const found = this.data.officeInvoices.find(i => i.id === id);
+    return found ? JSON.parse(JSON.stringify(found)) : null;
+  }
+
+  createOfficeInvoice(officeId, data) {
+    if (!this.data.officeInvoices) this.data.officeInvoices = [];
+    const office = this.getOfficeById(officeId);
+    const tenantId = office ? office.tenantId : 'ten_sst';
+    const count = this.data.officeInvoices.length + 1;
+    const invoiceNo = data.invoiceNo || `INV-2026-${String(count).padStart(3, '0')}`;
+    const id = 'inv_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+
+    const newInvoice = {
+      id,
+      officeId,
+      tenantId,
+      invoiceNo,
+      clientName: data.clientName || 'General Shipping Client',
+      clientCode: data.clientCode || 'GEN-CLT',
+      vessel: data.vessel || 'Vessel Port Call',
+      voyageNo: data.voyageNo || 'V-2026',
+      issueDate: data.issueDate || new Date().toISOString().split('T')[0],
+      dueDate: data.dueDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+      amount: parseFloat(data.amount) || 0,
+      currency: data.currency || 'USD',
+      currencySymbol: data.currencySymbol || '$',
+      status: data.status || 'Pending',
+      items: data.items && data.items.length ? data.items : [
+        { name: data.description || 'Maritime Operational Services', amount: parseFloat(data.amount) || 0 }
+      ],
+      notes: data.notes || 'Created via Financials Hub.'
+    };
+
+    this.data.officeInvoices.unshift(newInvoice);
+    this.addAuditLog(
+      'CREATE_INVOICE',
+      'Office Invoice',
+      newInvoice.id,
+      `Issued invoice "${newInvoice.invoiceNo}" for ${newInvoice.clientName} (${newInvoice.currencySymbol}${newInvoice.amount.toLocaleString()})`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(newInvoice));
+  }
+
+  updateOfficeInvoiceStatus(id, status, paidDate = null) {
+    if (!this.data.officeInvoices) this.data.officeInvoices = [];
+    const idx = this.data.officeInvoices.findIndex(i => i.id === id);
+    if (idx === -1) throw new Error(`Invoice ${id} not found.`);
+
+    const existing = this.data.officeInvoices[idx];
+    existing.status = status;
+    if (status === 'Paid') {
+      existing.paidDate = paidDate || new Date().toISOString().split('T')[0];
+    }
+    this.addAuditLog(
+      'UPDATE_INVOICE_STATUS',
+      'Office Invoice',
+      id,
+      `Updated invoice "${existing.invoiceNo}" status to ${status}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(existing));
+  }
+
+  deleteOfficeInvoice(id) {
+    if (!this.data.officeInvoices) this.data.officeInvoices = [];
+    const idx = this.data.officeInvoices.findIndex(i => i.id === id);
+    if (idx === -1) return false;
+    const removed = this.data.officeInvoices.splice(idx, 1)[0];
+    this.addAuditLog(
+      'DELETE_INVOICE',
+      'Office Invoice',
+      id,
+      `Deleted invoice "${removed.invoiceNo}"`
+    );
+    this.save();
+    return true;
+  }
+
+  // Office Financial Transactions
+  getOfficeTransactions(officeId = null) {
+    if (!this.data.officeTransactions) this.data.officeTransactions = [];
+    let list = this.data.officeTransactions;
+    if (officeId) {
+      list = list.filter(t => t.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  createOfficeTransaction(officeId, data) {
+    if (!this.data.officeTransactions) this.data.officeTransactions = [];
+    const office = this.getOfficeById(officeId);
+    const tenantId = office ? office.tenantId : 'ten_sst';
+    const id = 'txn_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+    const count = this.data.officeTransactions.length + 1;
+    const reference = data.reference || `TXN-88${String(count).padStart(3, '0')}`;
+
+    const newTxn = {
+      id,
+      officeId,
+      tenantId,
+      date: data.date || new Date().toISOString().split('T')[0],
+      reference,
+      type: data.type || 'Credit', // Credit or Debit
+      category: data.category || 'General Operational',
+      description: data.description || 'Financial transaction record',
+      amount: parseFloat(data.amount) || 0,
+      currency: data.currency || 'USD',
+      method: data.method || 'Wire Transfer',
+      status: 'Completed'
+    };
+
+    this.data.officeTransactions.unshift(newTxn);
+    this.addAuditLog(
+      'CREATE_TRANSACTION',
+      'Financial Transaction',
+      newTxn.id,
+      `Logged ${newTxn.type} of $${newTxn.amount.toLocaleString()} (${newTxn.category}) - Ref: ${newTxn.reference}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(newTxn));
   }
 }
 
