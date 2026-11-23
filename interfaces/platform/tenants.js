@@ -101,6 +101,7 @@
         id: 'usr_rafiq',
         name: ownerName,
         email: tenant.ownerEmail || 'rafiq@sst.com',
+        phone: '+880 1711-234567',
         platformRole: 'Platform User',
         status: 'Active',
         createdAt: '2026-10-02'
@@ -110,23 +111,16 @@
       const tenantMember = tenantMembers.find(m => m.tenantId === tenant.id && (m.userId === user.id || user.name === ownerName));
       const tenantRole = tenantMember ? tenantMember.tenantRole : 'Tenant Admin';
 
-      const officeStaffList = (QrewStore.data && QrewStore.data.officeStaff) ? QrewStore.data.officeStaff : [];
-      const officeStaff = officeStaffList.find(s => s.tenantId === tenant.id && s.userId === user.id);
-      const tenantOffices = QrewStore.getOfficesByTenant(tenant.id) || [];
-      const office = officeStaff ? QrewStore.getOfficeById(officeStaff.officeId) : (tenantOffices[0] || { name: 'Chittagong Port Office', id: 'off_ctg_port' });
-      const officeRole = officeStaff ? officeStaff.officeRole : 'Office Manager';
-
-      const deptMembers = (QrewStore.data && QrewStore.data.departmentMembers) ? QrewStore.data.departmentMembers : [];
-      const deptMember = deptMembers.find(d => d.userId === user.id);
-      const dept = deptMember 
-        ? QrewStore.getDepartmentById(deptMember.deptId) 
-        : ((QrewStore.data && QrewStore.data.departments) ? QrewStore.data.departments.find(d => d.officeId === (office ? office.id : 'off_ctg_port')) : null)
-        || { name: 'Port Operations', code: 'OPS' };
-      const deptRole = deptMember ? deptMember.deptRole : 'Department Lead';
-      const shift = deptMember ? deptMember.shift : 'Morning (08:00 - 16:00)';
+      const phone = tenant.phone || user.phone || '+880 1711-234567';
+      const address = tenant.address || 'Port Access Road, Agrabad C/A, Chittagong';
+      const plan = tenant.plan || 'Enterprise';
+      const planSubtext = plan === 'Starter' ? 'Small Teams' 
+        : plan === 'Standard' ? 'Growing Teams' 
+        : plan === 'Professional' ? 'Advanced Operations' 
+        : 'Large Organizations';
 
       QrewUI.openModal({
-        title: `User Profile: ${user.name}`,
+        title: `Organization Information: ${tenant.name}`,
         bodyHtml: `
           <div style="display:flex;flex-direction:column;gap:16px;">
             <!-- Profile Card -->
@@ -146,7 +140,7 @@
             </div>
 
             <!-- Attributes Grid -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;">
+            <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:12px;">
               <div style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
                 <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Organization</div>
                 <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(tenant.name)}</div>
@@ -160,27 +154,21 @@
               </div>
 
               <div style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Physical Facility</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${office ? QrewUI.escapeHtml(office.name) : 'Chittagong Port Office'}</div>
-                <div style="font-size:12px;color:var(--color-text-muted);">${officeRole}</div>
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Phone</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(phone)}</div>
+                <div style="font-size:12px;color:var(--color-text-muted);">Primary Contact</div>
               </div>
 
               <div style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Department &amp; Shift</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${dept ? QrewUI.escapeHtml(dept.name) : 'Port Operations'}</div>
-                <div style="font-size:12px;color:var(--color-text-muted);">${deptRole} &bull; ${shift}</div>
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Address</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(address)}</div>
+                <div style="font-size:12px;color:var(--color-text-muted);">Headquarters / Facility</div>
               </div>
 
-              <div style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Platform Governance Tier</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${user.platformRole || 'Platform User'}</div>
-                <div style="font-size:12px;color:var(--color-text-muted);">Decoupled from Global Admin</div>
-              </div>
-
-              <div style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Account Status</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${user.status || 'Active'}</div>
-                <div style="font-size:12px;color:var(--color-text-muted);">Verified Identity &bull; Est. ${tenantMember ? tenantMember.joinedAt : (tenant.createdAt || '2026-09-12')}</div>
+              <div style="grid-column: 1 / -1;background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:12px 14px;">
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--color-text-muted);margin-bottom:4px;">Subscription Plan</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(plan)}</div>
+                <div style="font-size:12px;color:var(--color-text-muted);">${planSubtext}</div>
               </div>
             </div>
           </div>
@@ -192,7 +180,7 @@
     } catch (err) {
       console.error('Error opening profile modal:', err);
       QrewUI.openModal({
-        title: 'User Profile: Rafiqul Islam',
+        title: 'Organization Information: Rafiqul Islam',
         bodyHtml: `
           <div style="padding:16px;">
             <p><strong>Name:</strong> Rafiqul Islam</p>
@@ -266,6 +254,21 @@
     });
   };
 
+  const handleSuspendTenant = (tenantId, tenantName) => {
+    const tenant = QrewStore.getTenantById(tenantId) || { name: tenantName };
+    QrewUI.confirmDialog({
+      title: 'Suspend Organization',
+      message: `Are you sure you want to suspend organization "${tenant.name}"? Suspended organizations are moved to the Archive and cannot access operational workspaces.`,
+      confirmText: 'Suspend & Move to Archive',
+      confirmClass: 'btn-danger',
+      onConfirm: () => {
+        QrewStore.updateTenant(tenantId, { status: 'Suspended' });
+        QrewUI.showToast(`Organization "${tenant.name}" suspended and moved to Archive.`, 'info');
+        window.location.hash = '#platform/archive';
+      }
+    });
+  };
+
   const handleToggleTenantStatus = (tenantId, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     const actionVerb = newStatus === 'Active' ? 'activate' : 'suspend';
@@ -284,25 +287,7 @@
   };
 
   const handleDeleteTenant = (tenantId, tenantName) => {
-    QrewUI.confirmDialog({
-      title: 'Delete Tenant Organization',
-      message: `Permanently delete organization "${tenantName}"? This will delete all branch offices, memberships, and staff assignments.`,
-      confirmText: 'Delete Tenant',
-      confirmClass: 'btn-danger',
-      onConfirm: () => {
-        try {
-          QrewStore.deleteTenant(tenantId);
-          QrewUI.showToast(`Tenant "${tenantName}" deleted.`, 'success');
-          const remaining = QrewStore.getTenants();
-          Qrew.state.currentTenantId = remaining.length > 0 ? remaining[0].id : '';
-          const remainingOffices = Qrew.state.currentTenantId ? QrewStore.getOfficesByTenant(Qrew.state.currentTenantId) : [];
-          Qrew.state.currentOfficeId = remainingOffices.length > 0 ? remainingOffices[0].id : '';
-          Qrew.handleRouteChange();
-        } catch (e) {
-          QrewUI.showToast(e.message, 'error');
-        }
-      }
-    });
+    openGithubDeleteModal(tenantId);
   };
 
   const renderPlatformTenants = () => {
@@ -334,7 +319,7 @@
             (o.location && o.location.toLowerCase().includes(filter))
           )
         );
-        const matchesStatus = status === 'All' || t.status === status;
+        const matchesStatus = status === 'All' ? t.status !== 'Suspended' : t.status === status;
         return matchesSearch && matchesStatus;
       });
 
@@ -383,7 +368,7 @@
                     </span>
                   </button>
                   <div class="tree-title-group">
-                    <a href="#tenant/overview?id=${t.id}" class="tree-entity-name tree-tenant-link" title="Open Tenant Workspace (${QrewUI.escapeHtml(t.name)})">${QrewUI.escapeHtml(t.name)}</a>
+                    <span class="tree-entity-name tree-tenant-text" title="${QrewUI.escapeHtml(t.name)}">${QrewUI.escapeHtml(t.name)}</span>
                     <span class="tree-id-badge" title="Tenant Organization Identifier">${t.id}</span>
                   </div>
                 </div>
@@ -419,22 +404,14 @@
                   <span>Est. ${t.createdAt || '2026-09-12'}</span>
                 </div>
 
-                <!-- Col 6: Actions -->
+                <!-- Col 6: Actions (Edit & Suspend direct action icons) -->
                 <div class="tree-col-actions" onclick="event.stopPropagation()">
-                  <div class="tree-action-dropdown-wrap">
-                    <button class="action-icon-btn tree-dropdown-trigger" data-dropdown="platform-tenant-menu-${t.id}" title="More Actions" aria-label="More Organization Actions">
-                      ${QrewUI.getIcon('moreHorizontal')}
-                    </button>
-                    <div class="tree-action-menu" id="platform-tenant-menu-${t.id}">
-                      <button class="tree-action-item edit-tenant-btn" data-id="${t.id}">
-                        ${QrewUI.getIcon('edit')} <span>Edit Organization</span>
-                      </button>
-                      <div class="tree-action-divider"></div>
-                      <button class="tree-action-item danger delete-tenant-btn" data-id="${t.id}" data-name="${QrewUI.escapeHtml(t.name)}">
-                        ${QrewUI.getIcon('trash')} <span>Delete Organization</span>
-                      </button>
-                    </div>
-                  </div>
+                  <button class="action-icon-btn edit-tenant-btn" data-id="${t.id}" title="Edit Organization" aria-label="Edit Organization">
+                    ${QrewUI.getIcon('edit')}
+                  </button>
+                  <button class="action-icon-btn warning suspend-tenant-btn" data-id="${t.id}" data-name="${QrewUI.escapeHtml(t.name)}" title="Suspend Organization" aria-label="Suspend Organization">
+                    ${QrewUI.getIcon('pause')}
+                  </button>
                 </div>
               </div>
 
@@ -452,16 +429,16 @@
                     </div>
                   ` : filteredOffices.map(off => `
                     <div class="tree-office-item" data-id="${off.id}">
-                      <!-- Col 1: Identity -->
+                      <!-- Col 1: Identity (Plain text, not linked to any page) -->
                       <div class="tree-col-identity">
                         <span class="tree-branch-connector" aria-hidden="true"></span>
                         <div class="tree-office-icon-wrap" aria-hidden="true" title="Facility Branch">
                           ${QrewUI.getIcon('building2') || QrewUI.getIcon('building')}
                         </div>
                         <div class="tree-title-group">
-                          <a href="#office/overview?tenantId=${t.id}&officeId=${off.id}" class="tree-entity-name tree-office-link" title="Open Branch Facility Workspace">
+                          <span class="tree-entity-name tree-office-text" title="Branch Facility">
                             ${QrewUI.escapeHtml(off.name)}
-                          </a>
+                          </span>
                           <span class="tree-id-badge" title="Branch Office Identifier">${off.id}</span>
                         </div>
                       </div>
@@ -485,21 +462,16 @@
                         ${QrewUI.statusBadge(off.status)}
                       </div>
 
-                      <!-- Col 5: Spacer for Date alignment -->
-                      <div class="tree-col-date"></div>
+                      <!-- Col 5: Created Date -->
+                      <div class="tree-col-date" title="Office Created Date">
+                        <span>Est. ${off.createdAt || '2026-09-15'}</span>
+                      </div>
 
-                      <!-- Col 6: Actions -->
+                      <!-- Col 6: Actions (Direct Office Config gear icon) -->
                       <div class="tree-col-actions" onclick="event.stopPropagation()">
-                        <div class="tree-action-dropdown-wrap">
-                          <button class="action-icon-btn tree-dropdown-trigger" data-dropdown="platform-office-menu-${off.id}" title="More Office Actions" aria-label="More Office Actions">
-                            ${QrewUI.getIcon('moreHorizontal')}
-                          </button>
-                          <div class="tree-action-menu" id="platform-office-menu-${off.id}">
-                            <a href="#office-config?tenantId=${t.id}&officeId=${off.id}" class="tree-action-item" title="Office Config">
-                              ${QrewUI.getIcon('settings')} <span>Office Config</span>
-                            </a>
-                          </div>
-                        </div>
+                        <a href="#office-config?tenantId=${t.id}&officeId=${off.id}" class="action-icon-btn office-config-btn" title="Office Config" aria-label="Office Config">
+                          ${QrewUI.getIcon('settings')}
+                        </a>
                       </div>
                     </div>
                   `).join('')}
@@ -533,6 +505,22 @@
             const card = targetMenu.closest('.tree-tenant-card') || targetMenu.closest('.tree-office-item');
             if (card) card.style.zIndex = '50';
           }
+        };
+      });
+
+      // Click on empty space of first layer (.tree-tenant-row) to collapse / expand folder
+      treeListEl.querySelectorAll('.tree-tenant-row').forEach(row => {
+        row.onclick = (e) => {
+          if (e.target.closest('button, a, input, select, .tree-col-actions, .tree-owner-link, .tree-tenant-link')) {
+            return;
+          }
+          const tid = row.dataset.tenantId;
+          if (platformTenantTreeState.expandedTenants.has(tid)) {
+            platformTenantTreeState.expandedTenants.delete(tid);
+          } else {
+            platformTenantTreeState.expandedTenants.add(tid);
+          }
+          renderTreeNodes();
         };
       });
 
@@ -572,19 +560,11 @@
         };
       });
 
-      treeListEl.querySelectorAll('.toggle-tenant-btn').forEach(btn => {
+      treeListEl.querySelectorAll('.suspend-tenant-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.stopPropagation();
           closeOpenMenus();
-          handleToggleTenantStatus(btn.dataset.id, btn.dataset.status);
-        };
-      });
-
-      treeListEl.querySelectorAll('.delete-tenant-btn').forEach(btn => {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          closeOpenMenus();
-          handleDeleteTenant(btn.dataset.id, btn.dataset.name);
+          handleSuspendTenant(btn.dataset.id, btn.dataset.name);
         };
       });
 
@@ -621,12 +601,19 @@
       });
     };
 
+    const suspendedCount = allTenants.filter(t => t.status === 'Suspended').length;
+
     Qrew.dom.mainContent.innerHTML = `
       <div class="page-header" style="margin-bottom:20px;">
         <div class="page-title-group">
           <h1 class="page-title">Tenant Management</h1>
         </div>
-        <div class="page-actions">
+        <div class="page-actions" style="display:flex;align-items:center;gap:10px;">
+          <a href="#platform/archive" class="btn btn-secondary" id="btn-view-archive" title="View Suspended & Archived Organizations" style="display:inline-flex;align-items:center;gap:6px;">
+            ${QrewUI.getIcon('archive')}
+            <span>Archive</span>
+            ${suspendedCount > 0 ? `<span class="badge badge-suspended" style="padding:1px 6px;font-size:11px;line-height:1.2;">${suspendedCount}</span>` : ''}
+          </a>
           <button class="btn btn-primary" id="btn-create-tenant">
             ${QrewUI.getIcon('plus')} Create Tenant
           </button>
@@ -686,9 +673,310 @@
     renderTreeNodes();
   };
 
+  /* ==========================================================================
+     GitHub-Style Delete Confirmation Modal (Requires Owner Email Match)
+     ========================================================================== */
+  const openGithubDeleteModal = (tenantId) => {
+    const tenant = QrewStore.getTenantById(tenantId);
+    if (!tenant) return;
+
+    const ownerEmail = (tenant.ownerEmail || 'rafiq@sst.com').trim();
+    const offices = QrewStore.getOfficesByTenant(tenantId) || [];
+    const members = QrewStore.getTenantMembers(tenantId) || [];
+
+    QrewUI.openModal({
+      title: 'Permanently Delete Organization',
+      bodyHtml: `
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Danger Alert Banner -->
+          <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.28);border-radius:var(--radius-sm);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;">
+            <div style="color:var(--color-danger);flex-shrink:0;margin-top:2px;">
+              ${QrewUI.getIcon('alert')}
+            </div>
+            <div style="font-size:13px;line-height:1.5;color:var(--color-text-primary);">
+              <div style="font-weight:600;color:var(--color-danger);margin-bottom:4px;">
+                Warning: This action cannot be undone
+              </div>
+              This will permanently delete <strong>${QrewUI.escapeHtml(tenant.name)}</strong> (${tenant.id}), including 
+              <strong>${offices.length} branch office${offices.length === 1 ? '' : 's'}</strong> and 
+              <strong>${members.length} member assignment${members.length === 1 ? '' : 's'}</strong>.
+            </div>
+          </div>
+
+          <!-- Prompt Text -->
+          <div style="font-size:13.5px;color:var(--color-text-primary);line-height:1.5;">
+            To confirm deletion, please enter the owner email address below:
+            <div style="margin-top:8px;padding:8px 12px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-sm);font-family:monospace;font-size:13px;font-weight:600;color:var(--color-text-primary);user-select:all;display:inline-block;">
+              ${QrewUI.escapeHtml(ownerEmail)}
+            </div>
+          </div>
+
+          <!-- Email Input Field -->
+          <div class="form-group" style="margin:0;">
+            <label class="form-label" for="github-delete-email-input" style="font-size:12.5px;font-weight:500;">
+              Type the owner's email to proceed:
+            </label>
+            <input 
+              type="text" 
+              id="github-delete-email-input" 
+              class="form-input" 
+              placeholder="${QrewUI.escapeHtml(ownerEmail)}" 
+              autocomplete="off" 
+              spellcheck="false"
+              style="width:100%;font-family:monospace;font-size:13px;"
+            />
+            <div id="github-delete-feedback" style="font-size:11.5px;margin-top:6px;min-height:16px;color:var(--color-text-muted);">
+              Enter exact email address to enable the delete button.
+            </div>
+          </div>
+        </div>
+      `,
+      footerHtml: `
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;width:100%;">
+          <button class="btn btn-secondary" id="github-delete-cancel-btn">Cancel</button>
+          <button class="btn btn-danger disabled" id="github-delete-confirm-btn" disabled style="opacity:0.45;cursor:not-allowed;">
+            ${QrewUI.getIcon('trash')} I understand, delete this organization
+          </button>
+        </div>
+      `
+    });
+
+    const inputEl = document.getElementById('github-delete-email-input');
+    const confirmBtn = document.getElementById('github-delete-confirm-btn');
+    const cancelBtn = document.getElementById('github-delete-cancel-btn');
+    const feedbackEl = document.getElementById('github-delete-feedback');
+
+    if (cancelBtn) {
+      cancelBtn.onclick = () => QrewUI.closeModal();
+    }
+
+    if (inputEl && confirmBtn) {
+      setTimeout(() => inputEl.focus(), 60);
+
+      inputEl.oninput = () => {
+        const val = inputEl.value.trim().toLowerCase();
+        const expected = ownerEmail.toLowerCase();
+        if (val === expected) {
+          confirmBtn.removeAttribute('disabled');
+          confirmBtn.classList.remove('disabled');
+          confirmBtn.style.opacity = '1';
+          confirmBtn.style.cursor = 'pointer';
+          if (feedbackEl) {
+            feedbackEl.textContent = '✓ Email matches. You may now permanently delete.';
+            feedbackEl.style.color = 'var(--color-accent)';
+          }
+        } else {
+          confirmBtn.setAttribute('disabled', 'true');
+          confirmBtn.classList.add('disabled');
+          confirmBtn.style.opacity = '0.45';
+          confirmBtn.style.cursor = 'not-allowed';
+          if (feedbackEl) {
+            feedbackEl.textContent = val.length > 0 ? 'Email address does not match.' : 'Enter exact email address to enable the delete button.';
+            feedbackEl.style.color = val.length > 0 ? 'var(--color-danger)' : 'var(--color-text-muted)';
+          }
+        }
+      };
+
+      confirmBtn.onclick = () => {
+        const val = inputEl.value.trim().toLowerCase();
+        if (val !== ownerEmail.toLowerCase()) return;
+
+        try {
+          QrewStore.deleteTenant(tenantId);
+          QrewUI.closeModal();
+          QrewUI.showToast(`Organization "${tenant.name}" permanently deleted.`, 'success');
+
+          // Reset selection if active tenant was deleted
+          const remaining = QrewStore.getTenants();
+          if (Qrew.state.currentTenantId === tenantId) {
+            Qrew.state.currentTenantId = remaining.length > 0 ? remaining[0].id : '';
+            const remainingOffices = Qrew.state.currentTenantId ? QrewStore.getOfficesByTenant(Qrew.state.currentTenantId) : [];
+            Qrew.state.currentOfficeId = remainingOffices.length > 0 ? remainingOffices[0].id : '';
+          }
+
+          // Re-render Archive if on Archive view
+          if (Qrew.views.platform && Qrew.views.platform.renderArchive) {
+            renderArchive();
+          }
+        } catch (err) {
+          QrewUI.showToast(err.message, 'error');
+        }
+      };
+    }
+  };
+
+  /* ==========================================================================
+     Archive Page View: Manage Suspended Organizations
+     ========================================================================== */
+  const renderArchive = () => {
+    let archiveSearchTerm = '';
+
+    const renderArchiveList = () => {
+      const allTenants = QrewStore.getTenants();
+      const suspendedTenants = allTenants.filter(t => t.status === 'Suspended');
+      const containerEl = document.getElementById('archive-tenants-list');
+      const counterEl = document.getElementById('archive-stats-badge');
+      if (!containerEl) return;
+
+      const term = archiveSearchTerm.toLowerCase().trim();
+      const filtered = suspendedTenants.filter(t => {
+        if (!term) return true;
+        return t.name.toLowerCase().includes(term) ||
+          t.id.toLowerCase().includes(term) ||
+          (t.ownerName && t.ownerName.toLowerCase().includes(term)) ||
+          (t.ownerEmail && t.ownerEmail.toLowerCase().includes(term));
+      });
+
+      if (counterEl) {
+        counterEl.textContent = `${filtered.length} Archived Organization${filtered.length === 1 ? '' : 's'}`;
+      }
+
+      if (filtered.length === 0) {
+        containerEl.innerHTML = `
+          <div style="padding:48px 24px;background:var(--color-surface-white);border:1px dashed var(--color-border);border-radius:var(--radius-md);text-align:center;">
+            <div style="width:48px;height:48px;margin:0 auto 14px;border-radius:50%;background:var(--color-surface);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted);">
+              ${QrewUI.getIcon('archive')}
+            </div>
+            <h3 style="font-size:16px;font-weight:600;color:var(--color-text-primary);margin-bottom:6px;">
+              ${term ? `No archived organizations match "${QrewUI.escapeHtml(term)}"` : 'No Archived Organizations'}
+            </h3>
+            <p style="color:var(--color-text-muted);font-size:13px;max-width:440px;margin:0 auto 16px;">
+              ${term ? 'Try searching by organization name, ID, or owner email.' : 'Suspended tenant organizations will be listed here. You can reactivate them or permanently delete them.'}
+            </p>
+            <a href="#platform/tenants" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;">
+              ${QrewUI.getIcon('tenants')} Go to Active Tenants
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      containerEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          ${filtered.map(t => {
+            const offices = QrewStore.getOfficesByTenant(t.id) || [];
+            const members = QrewStore.getTenantMembers(t.id) || [];
+            const ownerEmail = t.ownerEmail || 'rafiq@sst.com';
+            const ownerName = t.ownerName || 'Rafiqul Islam';
+
+            return `
+              <div class="archive-tenant-card" style="background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:var(--transition-fast);">
+                <!-- Left: Identity & Owner Info -->
+                <div style="display:flex;align-items:center;gap:16px;min-width:0;flex:1;">
+                  <div style="width:40px;height:40px;border-radius:var(--radius-sm);background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;color:var(--color-danger);flex-shrink:0;">
+                    ${QrewUI.getIcon('archive')}
+                  </div>
+                  <div style="min-width:0;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                      <span style="font-size:15px;font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(t.name)}</span>
+                      <span class="tree-id-badge">${t.id}</span>
+                      <span class="badge badge-suspended"><span class="badge-dot"></span>Suspended</span>
+                      <span class="badge" style="background:var(--color-surface);color:var(--color-text-muted);border:1px solid var(--color-border);font-size:11px;">Plan: ${t.plan || 'Enterprise'}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--color-text-muted);flex-wrap:wrap;">
+                      <span style="display:inline-flex;align-items:center;gap:5px;">
+                        ${QrewUI.getIcon('users')} Owner: <strong style="color:var(--color-text-primary);">${QrewUI.escapeHtml(ownerName)}</strong> (${QrewUI.escapeHtml(ownerEmail)})
+                      </span>
+                      <span>•</span>
+                      <span>${offices.length} office${offices.length === 1 ? '' : 's'}</span>
+                      <span>•</span>
+                      <span>${members.length} member${members.length === 1 ? '' : 's'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Action Buttons -->
+                <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+                  <button class="btn btn-secondary btn-sm restore-tenant-btn" data-id="${t.id}" data-name="${QrewUI.escapeHtml(t.name)}" title="Reactivate this organization" style="display:inline-flex;align-items:center;gap:6px;">
+                    ${QrewUI.getIcon('play')} <span>Restore</span>
+                  </button>
+                  <button class="btn btn-danger btn-sm archive-delete-btn" data-id="${t.id}" data-name="${QrewUI.escapeHtml(t.name)}" title="Permanently delete this organization" style="display:inline-flex;align-items:center;gap:6px;">
+                    ${QrewUI.getIcon('trash')} <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      // Wire Restore button
+      containerEl.querySelectorAll('.restore-tenant-btn').forEach(btn => {
+        btn.onclick = () => {
+          const tid = btn.dataset.id;
+          const tname = btn.dataset.name;
+          QrewUI.confirmDialog({
+            title: 'Restore Organization',
+            message: `Reactivate organization "${tname}"? This will restore active operational access for this tenant and its facilities.`,
+            confirmText: 'Restore to Active',
+            confirmClass: 'btn-primary',
+            onConfirm: () => {
+              QrewStore.updateTenant(tid, { status: 'Active' });
+              QrewUI.showToast(`Organization "${tname}" restored to Active.`, 'success');
+              renderArchive();
+            }
+          });
+        };
+      });
+
+      // Wire Delete button -> GitHub style delete modal
+      containerEl.querySelectorAll('.archive-delete-btn').forEach(btn => {
+        btn.onclick = () => {
+          openGithubDeleteModal(btn.dataset.id);
+        };
+      });
+    };
+
+    const initialSuspended = QrewStore.getTenants().filter(t => t.status === 'Suspended');
+
+    Qrew.dom.mainContent.innerHTML = `
+      <div class="page-header" style="margin-bottom:20px;">
+        <div class="page-title-group">
+          <h1 class="page-title">Archived Organizations</h1>
+        </div>
+        <div class="page-actions">
+          <a href="#platform/tenants" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:6px;">
+            ${QrewUI.getIcon('tenants')} Active Tenants
+          </a>
+        </div>
+      </div>
+
+      <div class="tree-view-wrapper">
+        <div class="tree-toolbar">
+          <div class="tree-toolbar-left" style="display:flex;align-items:center;gap:12px;flex:1;max-width:540px;">
+            <div class="tree-search-wrap" style="flex:1;">
+              <span class="tree-search-icon">${QrewUI.getIcon('search')}</span>
+              <input type="text" class="tree-search-input" id="archive-search-input" placeholder="Search archived organizations by name, ID, or owner email..." />
+            </div>
+          </div>
+          <div class="tree-toolbar-actions">
+            <span class="tree-meta-badge" id="archive-stats-badge" style="background:var(--color-surface);color:var(--color-text-muted);border:1px solid var(--color-border);font-size:12px;padding:5px 10px;">
+              ${initialSuspended.length} Archived Organization${initialSuspended.length === 1 ? '' : 's'}
+            </span>
+          </div>
+        </div>
+
+        <div id="archive-tenants-list" style="padding:16px 0;"></div>
+      </div>
+    `;
+
+    const searchInput = document.getElementById('archive-search-input');
+    if (searchInput) {
+      searchInput.oninput = (e) => {
+        archiveSearchTerm = e.target.value;
+        renderArchiveList();
+      };
+    }
+
+    renderArchiveList();
+  };
+
   Qrew.views.platform.renderTenants = renderPlatformTenants;
+  Qrew.views.platform.renderArchive = renderArchive;
   Qrew.actions.openCreateTenantModal = openCreateTenantModal;
   Qrew.actions.openEditTenantModal = openEditTenantModal;
+  Qrew.actions.handleSuspendTenant = handleSuspendTenant;
   Qrew.actions.handleToggleTenantStatus = handleToggleTenantStatus;
   Qrew.actions.handleDeleteTenant = handleDeleteTenant;
+  Qrew.actions.openGithubDeleteModal = openGithubDeleteModal;
 })();

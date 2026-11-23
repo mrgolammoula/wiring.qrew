@@ -110,7 +110,7 @@
           ].map(([rule, status], i, arr) => `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;${i<arr.length-1?'border-bottom:1px solid var(--color-border-subtle);':''}">
               <span style="font-size:13px;">${rule}</span>
-              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">${status}</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;background:var(--color-danger-bg);color:var(--color-danger);border:1px solid var(--color-danger-border);">${status}</span>
             </div>`).join('')}
         </div>
       </div>
@@ -441,12 +441,12 @@
       <style id="perm-catalog-custom-styles">
         /* Toolbar */
         .perm-toolbar-card {
-          background: #ffffff;
+          background: var(--color-surface-white);
           border: 1px solid var(--color-border);
           border-radius: 12px;
           padding: 16px 20px;
           margin-bottom: 28px;
-          box-shadow: 0 1px 3px rgba(31, 29, 26, 0.04);
+          box-shadow: var(--shadow-xs);
         }
         .perm-counter-pill {
           display: inline-flex;
@@ -462,12 +462,12 @@
           transition: all 0.2s ease;
         }
         .perm-counter-pill.has-selection {
-          background: rgba(158, 83, 52, 0.08);
-          border-color: rgba(158, 83, 52, 0.35);
-          color: var(--color-accent);
+          background: var(--panel-accent-light, rgba(37, 99, 235, 0.12));
+          border-color: var(--panel-accent, rgba(37, 99, 235, 0.35));
+          color: var(--panel-accent, var(--color-accent));
         }
         .perm-counter-badge {
-          background: var(--color-accent);
+          background: var(--panel-accent, var(--color-accent));
           color: #fff;
           font-size: 11px;
           font-weight: 700;
@@ -537,15 +537,15 @@
           font-weight: 600;
           border-radius: 6px;
           border: 1px solid var(--color-border);
-          background: #ffffff;
+          background: var(--color-surface-white);
           color: var(--color-text-primary);
           cursor: pointer;
           transition: all 0.15s ease;
         }
         .btn-cat-action:hover {
-          border-color: var(--color-accent);
-          color: var(--color-accent);
-          background: #FAF7F4;
+          border-color: var(--panel-accent, var(--color-accent));
+          color: var(--panel-accent, var(--color-accent));
+          background: var(--color-surface-hover);
         }
 
         /* Bespoke Permission Cards */
@@ -556,7 +556,7 @@
         }
         .perm-card {
           position: relative;
-          background: #ffffff;
+          background: var(--color-surface-white);
           border: 1.5px solid var(--color-border);
           border-left: 3.5px solid transparent;
           border-radius: 10px;
@@ -566,7 +566,7 @@
           gap: 12px;
           cursor: pointer;
           user-select: none;
-          box-shadow: 0 1px 3px rgba(31, 29, 26, 0.04);
+          box-shadow: var(--shadow-xs);
           transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                       box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                       border-color 0.18s ease,
@@ -575,22 +575,22 @@
         }
         .perm-card:hover {
           transform: translateY(-2px);
-          border-color: #CEC5B8;
-          box-shadow: 0 8px 20px -2px rgba(31, 29, 26, 0.08);
+          border-color: var(--color-border-strong);
+          box-shadow: var(--shadow-md);
         }
         .perm-card:active {
           transform: scale(0.988) translateY(0);
           transition-duration: 0.06s;
         }
         .perm-card.selected {
-          background-color: #FFFDFB;
-          border-color: var(--color-accent);
-          border-left-color: var(--color-accent);
-          box-shadow: 0 0 0 1px var(--color-accent), 0 10px 24px -2px rgba(158, 83, 52, 0.14);
+          background-color: var(--panel-accent-light, var(--color-surface-hover));
+          border-color: var(--panel-accent, var(--color-accent));
+          border-left-color: var(--panel-accent, var(--color-accent));
+          box-shadow: 0 0 0 1px var(--panel-accent, var(--color-accent)), var(--shadow-sm);
           transform: translateY(-2px);
         }
         .perm-card:focus-visible {
-          outline: 2px solid var(--color-accent);
+          outline: 2px solid var(--panel-accent, var(--color-accent));
           outline-offset: 2px;
         }
 
@@ -612,8 +612,8 @@
           width: 22px;
           height: 22px;
           border-radius: 6px;
-          border: 1.5px solid var(--color-border);
-          background: #ffffff;
+          border: 1.5px solid var(--color-border-strong);
+          background: var(--color-surface);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -622,12 +622,12 @@
           transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .perm-card:hover .perm-card-check {
-          border-color: #B5ACA0;
+          border-color: var(--panel-accent, var(--color-accent));
         }
         .perm-card.selected .perm-card-check {
-          background: var(--color-accent);
-          border-color: var(--color-accent);
-          box-shadow: 0 2px 6px rgba(158, 83, 52, 0.35);
+          background: var(--panel-accent, var(--color-accent));
+          border-color: var(--panel-accent, var(--color-accent));
+          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
         }
         .perm-card-check svg {
           opacity: 0;
@@ -663,7 +663,7 @@
           text-overflow: ellipsis;
         }
         .perm-card.selected .perm-card-title {
-          color: var(--color-accent);
+          color: var(--panel-accent, var(--color-accent));
         }
         .perm-card-scope {
           font-size: 11px;
@@ -698,6 +698,21 @@
           color: #B91C1C;
           border: 1px solid #FECACA;
         }
+        [data-theme="dark"] .perm-type-badge.read {
+          background: rgba(37, 99, 235, 0.18);
+          color: #93C5FD;
+          border: 1px solid rgba(37, 99, 235, 0.35);
+        }
+        [data-theme="dark"] .perm-type-badge.write {
+          background: rgba(16, 185, 129, 0.18);
+          color: #6EE7B7;
+          border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        [data-theme="dark"] .perm-type-badge.danger {
+          background: rgba(239, 68, 68, 0.18);
+          color: #FCA5A5;
+          border: 1px solid rgba(239, 68, 68, 0.35);
+        }
 
         /* Card Description */
         .perm-card-desc {
@@ -714,7 +729,7 @@
           justify-content: space-between;
           gap: 8px;
           padding-top: 10px;
-          border-top: 1px solid rgba(227, 221, 211, 0.7);
+          border-top: 1px solid var(--color-border-subtle);
           margin-top: auto;
         }
         .perm-key-tag {
@@ -742,8 +757,8 @@
           background: transparent;
         }
         .perm-card.selected .perm-state-tag {
-          color: var(--color-accent);
-          background: rgba(158, 83, 52, 0.08);
+          color: var(--panel-accent, var(--color-accent));
+          background: var(--panel-accent-light, rgba(37, 99, 235, 0.12));
         }
       </style>
 
@@ -892,9 +907,9 @@
         </div>
       </div>
 
-      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius-md);padding:12px 16px;margin-bottom:24px;display:flex;align-items:center;gap:10px;">
-        <span style="color:#dc2626;">${QrewUI.getIcon('alert')}</span>
-        <span style="font-size:13px;color:#991b1b;font-weight:600;">Changes here affect all tenants and offices platform-wide. High-impact changes require re-authentication.</span>
+      <div style="background:var(--color-danger-bg);border:1px solid var(--color-danger-border);border-radius:var(--radius-md);padding:12px 16px;margin-bottom:24px;display:flex;align-items:center;gap:10px;">
+        <span style="color:var(--color-danger);">${QrewUI.getIcon('alert')}</span>
+        <span style="font-size:13px;color:var(--color-danger);font-weight:600;">Changes here affect all tenants and offices platform-wide. High-impact changes require re-authentication.</span>
       </div>
 
       ${[
@@ -957,7 +972,7 @@
                 <div style="display:flex;align-items:center;gap:10px;">
                   <span style="font-size:13px;">${f.value}</span>
                   ${f.locked
-                    ? '<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">LOCKED</span>'
+                    ? '<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--color-danger-bg);color:var(--color-danger);border:1px solid var(--color-danger-border);">LOCKED</span>'
                     : `<button class="btn btn-secondary btn-sm" onclick="QrewUI.showToast('Edit coming in full build.','info')">${QrewUI.getIcon('edit')}</button>`
                   }
                 </div>
@@ -990,8 +1005,14 @@
       picker: null,
       navHtml: `
         <div class="nav-section">
-          <div class="nav-section-title">Super Admin</div>
-          <a class="nav-item ${view === 'platform-access' || view === 'overview' ? 'active' : ''}" href="#super-admin/platform-access">
+          <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#super-admin/overview">
+            <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
+            <span class="nav-label">Overview</span>
+          </a>
+
+          <div class="nav-divider"></div>
+
+          <a class="nav-item ${view === 'platform-access' ? 'active' : ''}" href="#super-admin/platform-access">
             <span class="nav-icon">${QrewUI.getIcon('users')}</span>
             <span class="nav-label">Platform Access</span>
           </a>
@@ -1015,12 +1036,12 @@
 
     render: (view) => {
       switch (view) {
-        case 'overview':
+        case 'overview':          return Qrew.renderBlankTitledPage('Overview');
         case 'platform-access':   return renderSuperAdminPlatformAccess();
         case 'permission-catalog':return renderPermissionCatalog();
         case 'platform-settings':
         case 'platform-setting':  return renderSuperAdminPlatformSettings();
-        default:                  return renderPermissionCatalog();
+        default:                  return Qrew.renderBlankTitledPage('Overview');
       }
     }
   });

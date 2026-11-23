@@ -53,9 +53,16 @@
             <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
             <span class="nav-label">Overview</span>
           </a>
+
+          <div class="nav-divider"></div>
+
           <a class="nav-item ${view === 'tenants' ? 'active' : ''}" href="#platform/tenants">
             <span class="nav-icon">${QrewUI.getIcon('tenants')}</span>
             <span class="nav-label">Tenants</span>
+          </a>
+          <a class="nav-item ${view === 'archive' ? 'active' : ''}" href="#platform/archive">
+            <span class="nav-icon">${QrewUI.getIcon('archive')}</span>
+            <span class="nav-label">Archive</span>
           </a>
 
           <div class="nav-divider"></div>
@@ -114,6 +121,7 @@
     render: (view) => {
       if (view === 'overview') return renderPlatformOverview();
       if (view === 'tenants') return Qrew.views.platform.renderTenants();
+      if (view === 'archive') return (Qrew.views.platform && Qrew.views.platform.renderArchive) ? Qrew.views.platform.renderArchive() : Qrew.renderBlankTitledPage('Archive');
       if (PLACEHOLDER_TITLES[view]) return Qrew.renderBlankTitledPage(PLACEHOLDER_TITLES[view]);
       return renderPlatformOverview();
     }

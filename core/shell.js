@@ -214,34 +214,47 @@
   Qrew.shell.applyAppearanceSettings = () => {
     const urlTheme = new URLSearchParams(window.location.search).get('theme');
     const theme = urlTheme || localStorage.getItem('qrew_ui_theme') || 'system';
-    const accent = localStorage.getItem('qrew_ui_accent');
     const density = localStorage.getItem('qrew_ui_density') || 'comfortable';
 
     // 1. Theme
     if (theme === 'dark') {
       document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.style.backgroundColor = '#0B1220';
+      document.documentElement.style.colorScheme = 'dark';
     } else if (theme === 'light') {
       document.documentElement.removeAttribute('data-theme');
+      document.documentElement.style.backgroundColor = '#F8FAFC';
+      document.documentElement.style.colorScheme = 'light';
     } else {
       const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (isSystemDark) {
         document.documentElement.setAttribute('data-theme', 'dark');
+        document.documentElement.style.backgroundColor = '#0B1220';
+        document.documentElement.style.colorScheme = 'dark';
       } else {
         document.documentElement.removeAttribute('data-theme');
+        document.documentElement.style.backgroundColor = '#F8FAFC';
+        document.documentElement.style.colorScheme = 'light';
       }
     }
 
+    // 2. Secondary Color & Workspace Theme
     if (Qrew.applyPanelTheme && Qrew.state.activeWorkspace) {
       Qrew.applyPanelTheme(Qrew.state.activeWorkspace);
-    }
-
-    // 2. Accent
-    if (accent) {
-      document.documentElement.style.setProperty('--panel-accent', accent);
-      document.documentElement.style.setProperty('--color-accent', accent);
     } else {
-      document.documentElement.style.removeProperty('--panel-accent');
-      document.documentElement.style.removeProperty('--color-accent');
+      const secondary = localStorage.getItem('qrew_ui_secondary') || localStorage.getItem('qrew_ui_accent');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (secondary && secondary !== 'default') {
+        const hoverColor = Qrew.getAccentHover ? Qrew.getAccentHover(secondary, isDark) : secondary;
+        document.documentElement.style.setProperty('--color-secondary', secondary);
+        document.documentElement.style.setProperty('--panel-accent', secondary);
+        document.documentElement.style.setProperty('--color-accent', secondary);
+        document.documentElement.style.setProperty('--color-accent-hover', hoverColor);
+      } else {
+        document.documentElement.style.removeProperty('--color-secondary');
+        document.documentElement.style.removeProperty('--color-accent');
+        document.documentElement.style.removeProperty('--color-accent-hover');
+      }
     }
 
     // 3. Density
@@ -269,6 +282,7 @@
         name: 'Sakib',
         role: 'Platform Admin',
         email: 'sakib@qrew.io',
+        address: 'Gulshan-2, Dhaka',
         avatar: 'S',
         avatarBg: 'var(--panel-accent)'
       };
@@ -277,6 +291,7 @@
         name: 'Sakib',
         role: 'Super Admin',
         email: 'sakib@qrew.io',
+        address: 'Gulshan-2, Dhaka',
         avatar: 'S',
         avatarBg: 'var(--panel-accent)'
       };
@@ -287,6 +302,7 @@
         name: ownerName,
         role: 'Tenant Admin',
         email: ownerEmail,
+        address: (tenant && tenant.address) ? tenant.address : 'Port Access Road, Agrabad C/A, Chittagong',
         avatar: ownerName.charAt(0).toUpperCase(),
         avatarBg: 'var(--panel-accent)'
       };
@@ -295,6 +311,7 @@
         name: 'Jack Rahman',
         role: 'Office Admin',
         email: 'jack@sst.com',
+        address: 'Port Access Road, Chittagong',
         avatar: 'J',
         avatarBg: 'var(--panel-accent)'
       };
@@ -303,6 +320,7 @@
         name: 'Jack Rahman',
         role: 'Office Manager',
         email: 'jack@sst.com',
+        address: 'Port Access Road, Chittagong',
         avatar: 'J',
         avatarBg: 'var(--panel-accent)'
       };
@@ -311,6 +329,7 @@
         name: 'Jack Rahman',
         role: 'Office Admin',
         email: 'jack@sst.com',
+        address: 'Port Access Road, Chittagong',
         avatar: 'J',
         avatarBg: 'var(--panel-accent)'
       };
@@ -323,6 +342,7 @@
         name: leadName,
         role: 'Department Lead',
         email: 'lead@sst.com',
+        address: 'Port Access Road, Chittagong',
         avatar: leadName.charAt(0).toUpperCase(),
         avatarBg: 'var(--color-accent)'
       };
@@ -336,6 +356,7 @@
         name: memName,
         role: 'Office Staff',
         email: memEmail,
+        address: 'Port Access Road, Chittagong',
         avatar: memName.charAt(0).toUpperCase(),
         avatarBg: 'var(--color-text-muted)'
       };
@@ -344,6 +365,7 @@
         name: 'Sakib',
         role: 'Platform Admin',
         email: 'sakib@qrew.io',
+        address: 'Gulshan-2, Dhaka',
         avatar: 'S',
         avatarBg: 'var(--color-dark)'
       };
@@ -365,8 +387,13 @@
     const dropdownRoleEl = document.getElementById('dropdown-user-role');
 
     if (avatarEl) {
-      avatarEl.textContent = user.avatar || user.name.charAt(0).toUpperCase();
-      avatarEl.style.backgroundColor = user.avatarBg || 'var(--color-dark)';
+      if (user.photo) {
+        avatarEl.innerHTML = `<img src="${user.photo}" alt="${user.name}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;">`;
+        avatarEl.style.backgroundColor = 'transparent';
+      } else {
+        avatarEl.textContent = user.avatar || user.name.charAt(0).toUpperCase();
+        avatarEl.style.backgroundColor = user.avatarBg || 'var(--color-dark)';
+      }
     }
     if (nameEl) nameEl.textContent = user.name;
     if (roleEl) roleEl.textContent = user.role;
@@ -385,8 +412,8 @@
       title: 'Edit Profile Settings',
       bodyHtml: `
         <div style="display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--color-border-subtle);">
-          <div class="user-avatar" style="width:48px;height:48px;font-size:18px;font-weight:700;background-color:${user.avatarBg || 'var(--color-dark)'};">
-            ${QrewUI.escapeHtml(user.avatar || user.name.charAt(0).toUpperCase())}
+          <div class="user-avatar" style="width:48px;height:48px;font-size:18px;font-weight:700;overflow:hidden;background-color:${user.photo ? 'transparent' : (user.avatarBg || 'var(--color-dark)')};">
+            ${user.photo ? `<img src="${user.photo}" alt="${user.name}" style="width:100%;height:100%;object-fit:cover;display:block;">` : QrewUI.escapeHtml(user.avatar || user.name.charAt(0).toUpperCase())}
           </div>
           <div>
             <h3 style="font-size:16px;font-weight:600;color:var(--color-text-primary);margin:0;">${QrewUI.escapeHtml(user.name)}</h3>
@@ -775,6 +802,8 @@
         confirmClass: 'btn-blue',
         icon: 'shield',
         iconColor: 'var(--color-secondary, #2563EB)',
+        showDoNotAskAgain: true,
+        doNotAskAgainKey: 'qrew_skip_confirm_switch_super_admin',
         onConfirm: () => {
           window.location.hash = '#super-admin/overview';
         }
@@ -795,8 +824,10 @@
         confirmStyle: 'background-color: var(--color-supporting-purple, #7C3AED); border-color: var(--color-supporting-purple, #7C3AED); color: #FFFFFF;',
         icon: 'shield',
         iconColor: 'var(--color-supporting-purple, #7C3AED)',
+        showDoNotAskAgain: true,
+        doNotAskAgainKey: 'qrew_skip_confirm_switch_tenant_super_admin',
         onConfirm: () => {
-          window.location.hash = `#tenant-super-admin/plan-and-entitlement?id=${tid}`;
+          window.location.hash = `#tenant-super-admin/overview?id=${tid}`;
         }
       });
     };
@@ -815,6 +846,8 @@
         confirmClass: 'btn-primary',
         icon: 'settings',
         iconColor: 'var(--color-primary, #0D9488)',
+        showDoNotAskAgain: true,
+        doNotAskAgainKey: 'qrew_skip_confirm_switch_office_admin',
         onConfirm: () => {
           window.location.hash = `#office-admin/overview?tenantId=${tid}&officeId=${oid}`;
         }

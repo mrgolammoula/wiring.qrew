@@ -10,10 +10,12 @@
         <!-- Sticky Header -->
         <header class="landing-navbar">
           <div class="landing-container landing-navbar-inner">
-            <a href="#landing" class="landing-brand">
-              <div class="landing-brand-logo has-img"><img src="assets/logo.png" alt="Qrew" class="brand-logo-img"></div>
-              <span class="landing-brand-title">Qrew</span>
-            </a>
+            <div class="landing-navbar-left">
+              <a href="#landing" class="landing-brand">
+                <div class="landing-brand-logo has-img"><img src="assets/logo.png" alt="Qrew" class="brand-logo-img"></div>
+                <span class="landing-brand-title">Qrew</span>
+              </a>
+            </div>
 
             <!-- Central Platform Domain -->
             <div class="landing-domain-badge">
@@ -21,24 +23,33 @@
               <span>url: qrew.com</span>
             </div>
 
-            <!-- Workspace Context Tabs on Main Landing Header (wireframe-only quick links) -->
-            <div class="workspace-tabs" role="tablist" aria-label="Workspaces">
-              <a href="#platform/overview" class="workspace-tab" role="tab" title="Platform Admin">
-                <span class="ws-tab-indicator platform"></span>
-                <span class="ws-tab-text">Platform Admin</span>
-              </a>
-              <a href="#tenant/overview?id=ten_sst" class="workspace-tab" role="tab" title="Tenant Admin Panel">
-                <span class="ws-tab-indicator tenant"></span>
-                <span class="ws-tab-text">Tenant</span>
-              </a>
-              <a href="#office/overview?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Workspace">
-                <span class="ws-tab-indicator office"></span>
-                <span class="ws-tab-text">Office</span>
-              </a>
-              <a href="#office-config?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Configuration Centre">
-                <span class="ws-tab-indicator config"></span>
-                <span class="ws-tab-text">Office Config</span>
-              </a>
+            <!-- Header Right: Quick tabs + Auth Buttons -->
+            <div class="landing-navbar-right">
+              <!-- Workspace Context Tabs on Main Landing Header (wireframe-only quick links) -->
+              <div class="workspace-tabs" role="tablist" aria-label="Workspaces">
+                <a href="#platform/overview" class="workspace-tab" role="tab" title="Platform Admin">
+                  <span class="ws-tab-indicator platform"></span>
+                  <span class="ws-tab-text">Platform Admin</span>
+                </a>
+                <a href="#tenant/overview?id=ten_sst" class="workspace-tab" role="tab" title="Tenant Admin Panel">
+                  <span class="ws-tab-indicator tenant"></span>
+                  <span class="ws-tab-text">Tenant</span>
+                </a>
+                <a href="#office/overview?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Workspace">
+                  <span class="ws-tab-indicator office"></span>
+                  <span class="ws-tab-text">Office</span>
+                </a>
+                <a href="#office-config?tenantId=ten_sst&officeId=off_ctg_port" class="workspace-tab" role="tab" title="Office Configuration Centre">
+                  <span class="ws-tab-indicator config"></span>
+                  <span class="ws-tab-text">Office Config</span>
+                </a>
+              </div>
+
+              <!-- Auth Buttons -->
+              <div class="landing-auth-buttons">
+                <button type="button" class="btn btn-secondary landing-auth-btn landing-signin-btn">Sign In</button>
+                <button type="button" class="btn btn-primary landing-auth-btn landing-signup-btn">Sign Up</button>
+              </div>
             </div>
           </div>
         </header>
@@ -51,12 +62,12 @@
             </h1>
 
             <div class="landing-cta-group">
-              <a href="#platform/overview" class="btn btn-primary landing-btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+              <a href="#platform/overview" class="btn btn-primary landing-btn-lg">
                 <span>Launch Demo Platform</span>
                 ${QrewUI.getIcon('arrowRight')}
               </a>
               <button class="btn btn-secondary landing-btn-lg" onclick="window.showPersonasModal()">
-                Explore Personas
+                <span>Explore Personas</span>
               </button>
             </div>
 

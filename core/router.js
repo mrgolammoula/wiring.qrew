@@ -45,8 +45,7 @@
     ) {
       workspace = 'super-admin';
       if (pathPart.startsWith('super-admin/')) {
-        const sub = pathPart.replace('super-admin/', '') || 'platform-access';
-        view = sub === 'overview' ? 'platform-access' : sub;
+        view = pathPart.replace('super-admin/', '') || 'overview';
       } else if (pathPart === 'platform-settings') {
         view = 'platform-settings';
       } else if (pathPart === 'platform-access') {
@@ -54,7 +53,7 @@
       } else if (pathPart === 'permission-catalog') {
         view = 'permission-catalog';
       } else {
-        view = 'platform-access';
+        view = 'overview';
       }
     } else if (pathPart === 'office-config' || pathPart.startsWith('office-config/')) {
       workspace = 'office-config';
@@ -83,9 +82,9 @@
     ) {
       workspace = 'tenant-super-admin';
       if (pathPart.startsWith('tenant-super-admin/')) {
-        view = pathPart.replace('tenant-super-admin/', '') || 'plan-and-entitlement';
+        view = pathPart.replace('tenant-super-admin/', '') || 'overview';
       } else {
-        view = 'plan-and-entitlement';
+        view = 'overview';
       }
     } else if (
       pathPart.startsWith('tenant/') ||
@@ -169,6 +168,8 @@
         view = pathPart.replace('platform/', '') || 'overview';
       } else if (pathPart === 'tenants') {
         view = 'tenants';
+      } else if (pathPart === 'archive') {
+        view = 'archive';
       } else if (pathPart === 'platform-users' || pathPart === 'platform-access') {
         view = 'platform-access';
       } else if (pathPart === 'roles-permissions' || pathPart === 'platform-roles' || pathPart === 'permission-access') {

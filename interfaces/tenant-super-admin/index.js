@@ -5,6 +5,7 @@
   const Qrew = window.Qrew;
 
   const PAGE_TITLES = {
+    'overview': 'Overview',
     'plan-and-entitlement': 'Plan and Entitlement',
     'qrew-profile': 'Qrew Profile',
     'setting': 'Setting',
@@ -19,7 +20,7 @@
 
     getDomainBadge: ({ tenant, view }) => {
       const tenantName = (tenant && tenant.name) ? tenant.name.toLowerCase() : 'sst';
-      const subPath = view ? `/${view}` : '/plan-and-entitlement';
+      const subPath = view ? `/${view}` : '/overview';
       return {
         text: `app.${tenantName}.com/super-admin${subPath}`,
         dotColor: 'var(--panel-accent)'
@@ -39,6 +40,13 @@
         picker: null,
         navHtml: `
           <div class="nav-section">
+            <a class="nav-item ${view === 'overview' ? 'active' : ''}" href="#tenant-super-admin/overview?id=${tenantId}">
+              <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
+              <span class="nav-label">Overview</span>
+            </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'plan-and-entitlement' ? 'active' : ''}" href="#tenant-super-admin/plan-and-entitlement?id=${tenantId}">
               <span class="nav-icon">${QrewUI.getIcon('layers')}</span>
               <span class="nav-label">Plan and Entitlement</span>
@@ -71,7 +79,7 @@
     },
 
     render: (view) => {
-      const title = PAGE_TITLES[view] || 'Plan and Entitlement';
+      const title = PAGE_TITLES[view] || 'Overview';
       return Qrew.renderBlankTitledPage(title);
     }
   });

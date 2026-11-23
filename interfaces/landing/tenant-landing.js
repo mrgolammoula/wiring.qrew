@@ -15,10 +15,20 @@
         <!-- Tenant Sticky Header -->
         <header class="landing-navbar">
           <div class="landing-container landing-navbar-inner">
-            <a href="#tenant-landing?id=${tenant.id}" class="landing-brand">
-              <div class="landing-brand-logo" style="background-color:var(--panel-accent, var(--color-supporting-purple));">${tenant.name.charAt(0)}</div>
-              <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
-            </a>
+            <!-- Header Left: Brand + Qrew Platform Tab -->
+            <div class="landing-navbar-left">
+              <a href="#tenant-landing?id=${tenant.id}" class="landing-brand">
+                <div class="landing-brand-logo" style="background-color:var(--panel-accent, var(--color-supporting-purple));">${tenant.name.charAt(0)}</div>
+                <span class="landing-brand-title">${QrewUI.escapeHtml(tenant.name)}</span>
+              </a>
+
+              <div class="workspace-tabs landing-nav-platform" role="tablist" aria-label="Platform Switcher">
+                <a href="#landing" class="workspace-tab" role="tab" title="Return to Qrew Global SaaS Landing">
+                  <span class="ws-tab-indicator platform"></span>
+                  <span class="ws-tab-text">Qrew Platform</span>
+                </a>
+              </div>
+            </div>
 
             <!-- Central Tenant Domain -->
             <div class="landing-domain-badge">
@@ -26,16 +36,20 @@
               <span>url: ${domain}</span>
             </div>
 
-            <!-- Grouped Workspace Navigation Tabs -->
-            <div class="workspace-tabs tenant-nav-actions" role="tablist" aria-label="Tenant Navigation">
-              <a href="#landing" class="workspace-tab" role="tab" title="Return to Qrew Global SaaS Landing">
-                <span class="ws-tab-indicator platform"></span>
-                <span class="ws-tab-text">Qrew Platform</span>
-              </a>
-              <a href="#tenant/overview?id=${tenant.id}" class="workspace-tab" role="tab" title="Open Tenant Admin Panel">
-                <span class="ws-tab-indicator tenant"></span>
-                <span class="ws-tab-text">Tenant Admin Panel</span>
-              </a>
+            <!-- Header Right: Tenant Admin Panel + Auth Buttons -->
+            <div class="landing-navbar-right">
+              <div class="workspace-tabs tenant-nav-actions" role="tablist" aria-label="Tenant Navigation">
+                <a href="#tenant/overview?id=${tenant.id}" class="workspace-tab" role="tab" title="Open Tenant Admin Panel">
+                  <span class="ws-tab-indicator tenant"></span>
+                  <span class="ws-tab-text">Tenant Admin Panel</span>
+                </a>
+              </div>
+
+              <!-- Auth Buttons -->
+              <div class="landing-auth-buttons">
+                <button type="button" class="btn btn-secondary landing-auth-btn landing-signin-btn">Sign In</button>
+                <button type="button" class="btn btn-primary landing-auth-btn landing-signup-btn">Sign Up</button>
+              </div>
             </div>
           </div>
         </header>
@@ -48,15 +62,15 @@
             </h1>
 
             <div class="landing-cta-group">
-              <a href="#tenant/overview?id=${tenant.id}" class="btn btn-primary landing-btn-lg" style="display:inline-flex;align-items:center;gap:8px;">
+              <a href="#tenant/overview?id=${tenant.id}" class="btn btn-primary landing-btn-lg">
                 <span>Open Tenant Admin Panel</span>
                 ${QrewUI.getIcon('arrowRight')}
               </a>
               <a href="#tenant/offices?id=${tenant.id}" class="btn btn-secondary landing-btn-lg">
-                Manage Offices Directory
+                <span>Manage Offices Directory</span>
               </a>
               <a href="#member/overview?userId=usr_nusrat" class="btn btn-secondary landing-btn-lg">
-                Staff Workspace
+                <span>Staff Workspace</span>
               </a>
             </div>
 

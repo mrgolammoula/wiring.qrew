@@ -48,6 +48,9 @@
               <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
               <span class="nav-label">Overview</span>
             </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'invoice' ? 'active' : ''}" href="#office-admin/invoice?tenantId=${tenantId}&officeId=${officeId}">
               <span class="nav-icon">${QrewUI.getIcon('invoice')}</span>
               <span class="nav-label">Invoice</span>

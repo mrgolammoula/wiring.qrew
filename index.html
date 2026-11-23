@@ -6,6 +6,45 @@
   <title>Qrew — Multi-Tenant Access Control Platform</title>
   <meta name="description" content="Enterprise multi-tenant management and hierarchical access-control platform.">
   <link rel="icon" type="image/png" href="assets/logo.png">
+
+  <!-- Critical Anti-FOWC (Flash of White Content) Early Theme Initialization -->
+  <script>
+    (function() {
+      try {
+        var urlTheme = new URLSearchParams(window.location.search).get('theme');
+        var theme = urlTheme || localStorage.getItem('qrew_ui_theme') || 'system';
+        var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.style.backgroundColor = '#0B1220';
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.removeAttribute('data-theme');
+          document.documentElement.style.backgroundColor = '#F8FAFC';
+          document.documentElement.style.colorScheme = 'light';
+        }
+        var secondary = localStorage.getItem('qrew_ui_secondary') || localStorage.getItem('qrew_ui_accent');
+        if (secondary && secondary !== 'default') {
+          document.documentElement.style.setProperty('--color-secondary', secondary);
+          document.documentElement.style.setProperty('--panel-accent', secondary);
+          document.documentElement.style.setProperty('--color-accent', secondary);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    html {
+      background-color: #0B1220;
+    }
+    html:not([data-theme="dark"]) {
+      background-color: #F8FAFC;
+    }
+    body {
+      background-color: inherit;
+      color: inherit;
+    }
+  </style>
+
   <!-- Styles -->
   <link rel="stylesheet" href="styles/tokens.css?v=3">
   <link rel="stylesheet" href="styles/shell.css?v=3">

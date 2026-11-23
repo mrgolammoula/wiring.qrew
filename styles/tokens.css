@@ -1,28 +1,30 @@
 :root {
-  /* Brand Core Color Tokens */
-  --color-primary: #0D9488;            /* Primary Teal */
-  --color-primary-hover: #0F766E;      /* Deep Teal */
-  --color-secondary: #2563EB;          /* Secondary Blue */
-  --color-accent-orange: #F97316;      /* Accent Orange */
-  --color-supporting-purple: #7C3AED;  /* Supporting Purple */
+  /* =========================================
+     Qrew Brand Core Color Tokens
+     ========================================= */
+  --color-primary: #0F766E;            /* Primary Teal (Main Brand Color) */
+  --color-primary-hover: #115E59;      /* Primary Button Hover in Light */
+  --color-secondary: #2563EB;          /* Secondary Blue (Platform / Admin Accents) */
+  --color-accent-orange: #EA580C;      /* Accent Orange (Config / Highlight Accents) */
+  --color-supporting-purple: #7C3AED;  /* Supporting Purple (Tenant Accents) */
 
   /* Global Theme Semantics (Light Mode Default) */
   --color-bg: #F8FAFC;                 /* Light Background (Slate-50) */
-  --color-surface: #F1F5F9;            /* Light Surface / Containers (Slate-100) */
-  --color-surface-white: #FFFFFF;      /* Clean White for Cards & Elevated Surfaces */
-  --color-surface-hover: #E2E8F0;      /* Surface Hover State (Slate-200) */
+  --color-surface-white: #FFFFFF;      /* Primary Surface: Clean White for Cards & Elevated Surfaces */
+  --color-surface: #F1F5F9;            /* Secondary Surface: Containers, Sidebars, Filters (Slate-100) */
+  --color-surface-hover: #E2E8F0;      /* Hover Surface (Slate-200) */
   --color-surface-nested: #F8FAFC;     /* Nested containers */
 
-  --color-text-primary: #1E293B;       /* Primary Text (Light - Slate-800) */
-  --color-text-muted: #64748B;         /* Muted Text (Light - Slate-500) */
+  --color-text-primary: #1E293B;       /* Primary Text (Slate-800) */
+  --color-text-muted: #64748B;         /* Secondary Text (Slate-500) */
 
-  --color-accent: #0D9488;             /* Primary Teal (Primary Buttons & Main Actions) */
-  --color-accent-hover: #0F766E;       /* Deep Teal (Button Hover) */
-  --color-dark: #090D16;               /* Dark Base */
+  --color-accent: #0F766E;             /* Primary Button */
+  --color-accent-hover: #115E59;       /* Primary Button Hover */
+  --color-dark: #0B1220;               /* Dark Base */
 
-  --color-border: #E2E8F0;             /* Soft Border (Slate-200) */
+  --color-border: #E2E8F0;             /* Border (Slate-200) */
   --color-border-subtle: #F1F5F9;      /* Subtle Border */
-  --color-border-strong: #CBD5E1;      /* Stronger Border (Slate-300) */
+  --color-border-strong: #CBD5E1;      /* Strong Border (Slate-300) */
 
   /* Panel-Specific Accent Tokens (Default: Platform Admin Panel -> Blue) */
   --panel-accent: #2563EB;
@@ -73,7 +75,7 @@
 
 /* =========================================
    Six Dashboard-Specific Color Identity Themes
-   Harmonized with Qrew Brand Palette
+   Harmonized with Qrew Brand Palette (Light Mode)
    ========================================= */
 
 /* 1. Platform Admin Panel (Secondary Blue) */
@@ -103,7 +105,7 @@ body.ws-tenant {
 /* 4. Office Workspace (Primary Teal) */
 body[data-workspace="office"],
 body.ws-office {
-  --panel-accent: #0D9488;
+  --panel-accent: #0F766E;
   --panel-accent-light: #F0FDFA;
   --panel-accent-hover: #CCFBF1;
 }
@@ -111,7 +113,7 @@ body.ws-office {
 /* 5. Office Admin Panel (Accent Orange) */
 body[data-workspace="office-admin"],
 body.ws-office-admin {
-  --panel-accent: #F97316;
+  --panel-accent: #EA580C;
   --panel-accent-light: #FFF7ED;
   --panel-accent-hover: #FFEDD5;
 }
@@ -119,31 +121,44 @@ body.ws-office-admin {
 /* 6. Office Config (Accent Orange) */
 body[data-workspace="office-config"],
 body.ws-office-config {
-  --panel-accent: #F97316;
+  --panel-accent: #EA580C;
   --panel-accent-light: #FFF7ED;
   --panel-accent-hover: #FFEDD5;
 }
 
 /* =========================================
-   Dark Theme Overrides (Qrew Dark Slate / Charcoal Palette)
+   Dark Theme Overrides (Qrew Dark Navy Palette)
    ========================================= */
 [data-theme="dark"] {
-  --color-bg: #090D16;                 /* Dark Background */
-  --color-surface: #131D31;            /* Dark Surface (Sidebar, Filter bars, etc.) */
-  --color-surface-white: #131D31;      /* Cards & Elevated Containers in Dark Mode */
-  --color-surface-hover: #1E293B;      /* Dark Surface Hover State */
-  --color-surface-nested: #0B1323;     /* Nested sub-containers */
+  --color-primary: #0F766E;
+  --color-primary-hover: #14B8A6;
+  --color-secondary: #2563EB;
+  --color-accent-orange: #EA580C;
+  --color-supporting-purple: #7C3AED;
+
+  /* Global Theme Semantics (Dark Mode) */
+  --color-bg: #0B1220;                 /* Dark Deep Navy Background */
+  --color-surface-white: #151F32;      /* Primary Surface: Cards & Elevated Containers in Dark Mode */
+  --color-surface: #1E293B;            /* Secondary Surface: Sidebars, Filter bars, Tables */
+  --color-surface-hover: #293548;      /* Hover Surface */
+  --color-surface-nested: #111A2C;     /* Nested sub-containers */
 
   --color-text-primary: #F1F5F9;       /* Primary Text (Dark) */
-  --color-text-muted: #94A3B8;         /* Muted Text (Dark) */
+  --color-text-muted: #94A3B8;         /* Secondary Text (Dark) */
 
-  --color-accent: #0D9488;             /* Primary Teal */
-  --color-accent-hover: #14B8A6;       /* Bright Teal Hover in Dark */
-  --color-dark: #090D16;
+  --color-accent: #0F766E;             /* Primary Button */
+  --color-accent-hover: #14B8A6;       /* Primary Button Hover in Dark */
+  --color-dark: #0B1220;
 
-  --color-border: #1E293B;             /* Dark Border */
-  --color-border-subtle: #172338;      /* Subtle Dark Border */
+  --color-border: #293548;             /* Dark Border */
+  --color-border-subtle: #1E293B;      /* Subtle Dark Border */
   --color-border-strong: #334155;      /* Stronger Dark Border */
+
+  /* Dark Theme Brighter Brand Accent Variants for Visibility */
+  --accent-teal-bright: #2DD4BF;
+  --accent-blue-bright: #60A5FA;
+  --accent-orange-bright: #FB923C;
+  --accent-purple-bright: #A78BFA;
 
   /* Semantic Feedback Colors in Dark Mode */
   --color-success: #10B981;
@@ -165,49 +180,80 @@ body.ws-office-config {
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
   --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.5);
 
-  --panel-accent-light: rgba(37, 99, 235, 0.2);
-  --panel-accent-hover: rgba(37, 99, 235, 0.32);
+  --panel-accent-light: rgba(96, 165, 250, 0.18);
+  --panel-accent-hover: rgba(96, 165, 250, 0.30);
 }
 
-/* Dark Theme Panel Accents */
+/* =========================================
+   Dark Theme Panel Accents (Brighter Variants for High Contrast)
+   ========================================= */
 [data-theme="dark"] body[data-workspace="platform"],
 [data-theme="dark"] body.ws-platform {
-  --panel-accent: #3B82F6;
-  --panel-accent-light: rgba(37, 99, 235, 0.2);
-  --panel-accent-hover: rgba(37, 99, 235, 0.32);
+  --panel-accent: #60A5FA;
+  --panel-accent-light: rgba(96, 165, 250, 0.18);
+  --panel-accent-hover: rgba(96, 165, 250, 0.30);
 }
 
 [data-theme="dark"] body[data-workspace="super-admin"],
 [data-theme="dark"] body.ws-super-admin {
-  --panel-accent: #3B82F6;
-  --panel-accent-light: rgba(37, 99, 235, 0.2);
-  --panel-accent-hover: rgba(37, 99, 235, 0.32);
+  --panel-accent: #60A5FA;
+  --panel-accent-light: rgba(96, 165, 250, 0.18);
+  --panel-accent-hover: rgba(96, 165, 250, 0.30);
 }
 
 [data-theme="dark"] body[data-workspace="tenant"],
 [data-theme="dark"] body.ws-tenant {
-  --panel-accent: #A855F7;
-  --panel-accent-light: rgba(124, 58, 237, 0.2);
-  --panel-accent-hover: rgba(124, 58, 237, 0.32);
+  --panel-accent: #A78BFA;
+  --panel-accent-light: rgba(167, 139, 250, 0.18);
+  --panel-accent-hover: rgba(167, 139, 250, 0.30);
 }
 
 [data-theme="dark"] body[data-workspace="office"],
 [data-theme="dark"] body.ws-office {
-  --panel-accent: #14B8A6;
-  --panel-accent-light: rgba(13, 148, 136, 0.2);
-  --panel-accent-hover: rgba(13, 148, 136, 0.32);
+  --panel-accent: #2DD4BF;
+  --panel-accent-light: rgba(45, 212, 191, 0.18);
+  --panel-accent-hover: rgba(45, 212, 191, 0.30);
 }
 
 [data-theme="dark"] body[data-workspace="office-admin"],
 [data-theme="dark"] body.ws-office-admin {
   --panel-accent: #FB923C;
-  --panel-accent-light: rgba(249, 115, 22, 0.2);
-  --panel-accent-hover: rgba(249, 115, 22, 0.32);
+  --panel-accent-light: rgba(251, 146, 60, 0.18);
+  --panel-accent-hover: rgba(251, 146, 60, 0.30);
 }
 
 [data-theme="dark"] body[data-workspace="office-config"],
 [data-theme="dark"] body.ws-office-config {
   --panel-accent: #FB923C;
-  --panel-accent-light: rgba(249, 115, 22, 0.2);
-  --panel-accent-hover: rgba(249, 115, 22, 0.32);
+  --panel-accent-light: rgba(251, 146, 60, 0.18);
+  --panel-accent-hover: rgba(251, 146, 60, 0.30);
+}
+
+/* Clean Enterprise Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }

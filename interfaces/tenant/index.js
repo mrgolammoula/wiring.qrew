@@ -46,6 +46,9 @@
               <span class="nav-icon">${QrewUI.getIcon('overview')}</span>
               <span class="nav-label">Overview</span>
             </a>
+
+            <div class="nav-divider"></div>
+
             <a class="nav-item ${view === 'offices' ? 'active' : ''}" href="#tenant/offices?id=${tenantId}">
               <span class="nav-icon">${QrewUI.getIcon('offices')}</span>
               <span class="nav-label">Offices</span>
@@ -64,7 +67,7 @@
           </div>
         `,
         footerHtml: `
-          <a class="footer-action-link" href="#tenant-super-admin/plan-and-entitlement?id=${tenantId}" onclick="Qrew.actions.confirmSwitchToTenantSuperAdmin(event, '${tenantId}')" title="Tenant Super Admin" data-tooltip="Tenant Super Admin">
+          <a class="footer-action-link" href="#tenant-super-admin/overview?id=${tenantId}" onclick="Qrew.actions.confirmSwitchToTenantSuperAdmin(event, '${tenantId}')" title="Tenant Super Admin" data-tooltip="Tenant Super Admin">
             <span class="footer-action-icon">${QrewUI.getIcon('shield')}</span>
             <span class="footer-action-label">Tenant Super Admin &rarr;</span>
           </a>

@@ -6,50 +6,56 @@
     'platform': {
       name: 'Platform Admin Panel',
       primaryAccent: '#2563EB',
+      darkAccent: '#60A5FA',
       lightAccent: '#EFF6FF',
       hoverAccent: '#DBEAFE',
-      darkLightAccent: 'rgba(37, 99, 235, 0.2)',
-      darkHoverAccent: 'rgba(37, 99, 235, 0.32)'
+      darkLightAccent: 'rgba(96, 165, 250, 0.18)',
+      darkHoverAccent: 'rgba(96, 165, 250, 0.30)'
     },
     'super-admin': {
       name: 'Super Admin',
       primaryAccent: '#2563EB',
+      darkAccent: '#60A5FA',
       lightAccent: '#EFF6FF',
       hoverAccent: '#DBEAFE',
-      darkLightAccent: 'rgba(37, 99, 235, 0.2)',
-      darkHoverAccent: 'rgba(37, 99, 235, 0.32)'
+      darkLightAccent: 'rgba(96, 165, 250, 0.18)',
+      darkHoverAccent: 'rgba(96, 165, 250, 0.30)'
     },
     'tenant': {
       name: 'Tenant Workspace',
       primaryAccent: '#7C3AED',
+      darkAccent: '#A78BFA',
       lightAccent: '#F5F3FF',
       hoverAccent: '#EDE9FE',
-      darkLightAccent: 'rgba(124, 58, 237, 0.2)',
-      darkHoverAccent: 'rgba(124, 58, 237, 0.32)'
+      darkLightAccent: 'rgba(167, 139, 250, 0.18)',
+      darkHoverAccent: 'rgba(167, 139, 250, 0.30)'
     },
     'office': {
       name: 'Office Workspace',
-      primaryAccent: '#0D9488',
+      primaryAccent: '#0F766E',
+      darkAccent: '#2DD4BF',
       lightAccent: '#F0FDFA',
       hoverAccent: '#CCFBF1',
-      darkLightAccent: 'rgba(13, 148, 136, 0.2)',
-      darkHoverAccent: 'rgba(13, 148, 136, 0.32)'
+      darkLightAccent: 'rgba(45, 212, 191, 0.18)',
+      darkHoverAccent: 'rgba(45, 212, 191, 0.30)'
     },
     'office-admin': {
       name: 'Office Admin Panel',
-      primaryAccent: '#F97316',
+      primaryAccent: '#EA580C',
+      darkAccent: '#FB923C',
       lightAccent: '#FFF7ED',
       hoverAccent: '#FFEDD5',
-      darkLightAccent: 'rgba(249, 115, 22, 0.2)',
-      darkHoverAccent: 'rgba(249, 115, 22, 0.32)'
+      darkLightAccent: 'rgba(251, 146, 60, 0.18)',
+      darkHoverAccent: 'rgba(251, 146, 60, 0.30)'
     },
     'office-config': {
       name: 'Office Config',
-      primaryAccent: '#F97316',
+      primaryAccent: '#EA580C',
+      darkAccent: '#FB923C',
       lightAccent: '#FFF7ED',
       hoverAccent: '#FFEDD5',
-      darkLightAccent: 'rgba(249, 115, 22, 0.2)',
-      darkHoverAccent: 'rgba(249, 115, 22, 0.32)'
+      darkLightAccent: 'rgba(251, 146, 60, 0.18)',
+      darkHoverAccent: 'rgba(251, 146, 60, 0.30)'
     }
   };
 
@@ -121,6 +127,50 @@
       return isMongla ? 'sst.mgl.com' : 'sst.ctg.com';
     },
 
+    hexToRgb(hex) {
+      if (!hex || typeof hex !== 'string') return '37, 99, 235';
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      const num = parseInt(c, 16);
+      if (isNaN(num)) return '37, 99, 235';
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      return `${r}, ${g}, ${b}`;
+    },
+
+    getAccentHover(hex, isDark) {
+      const ACCENT_HOVER_MAP = {
+        '#2563EB': { light: '#1D4ED8', dark: '#3B82F6' },
+        '#60A5FA': { light: '#2563EB', dark: '#93C5FD' },
+        '#7C3AED': { light: '#6D28D9', dark: '#8B5CF6' },
+        '#A78BFA': { light: '#7C3AED', dark: '#C4B5FD' },
+        '#0F766E': { light: '#115E59', dark: '#14B8A6' },
+        '#0D9488': { light: '#0F766E', dark: '#14B8A6' },
+        '#2DD4BF': { light: '#0F766E', dark: '#5EEAD4' },
+        '#EA580C': { light: '#C2410C', dark: '#FB923C' },
+        '#F97316': { light: '#EA580C', dark: '#FB923C' },
+        '#FB923C': { light: '#EA580C', dark: '#FDBA74' },
+        '#059669': { light: '#047857', dark: '#10B981' }
+      };
+      if (!hex || typeof hex !== 'string') return isDark ? '#3B82F6' : '#1D4ED8';
+      const upper = hex.toUpperCase();
+      for (const [key, val] of Object.entries(ACCENT_HOVER_MAP)) {
+        if (key.toUpperCase() === upper) {
+          return isDark ? val.dark : val.light;
+        }
+      }
+      let c = hex.replace('#', '');
+      if (c.length === 3) c = c.split('').map(x => x + x).join('');
+      let num = parseInt(c, 16);
+      if (isNaN(num)) return isDark ? '#3B82F6' : '#1D4ED8';
+      let factor = isDark ? 28 : -28;
+      let r = Math.min(255, Math.max(0, ((num >> 16) & 255) + factor));
+      let g = Math.min(255, Math.max(0, ((num >> 8) & 255) + factor));
+      let b = Math.min(255, Math.max(0, (num & 255) + factor));
+      return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+    },
+
     applyPanelTheme(workspace) {
       const theme = PANEL_THEMES[workspace] || PANEL_THEMES['platform'];
       document.body.setAttribute('data-workspace', workspace);
@@ -128,13 +178,34 @@
       document.body.classList.add(`ws-${workspace}`);
 
       const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const light = isDark ? (theme.darkLightAccent || 'rgba(37, 99, 235, 0.2)') : theme.lightAccent;
-      const hover = isDark ? (theme.darkHoverAccent || 'rgba(37, 99, 235, 0.32)') : theme.hoverAccent;
+      const secondaryCustom = localStorage.getItem('qrew_ui_secondary') || localStorage.getItem('qrew_ui_accent');
 
       if (document.documentElement && document.documentElement.style && document.documentElement.style.setProperty) {
-        document.documentElement.style.setProperty('--panel-accent', theme.primaryAccent);
-        document.documentElement.style.setProperty('--panel-accent-light', light);
-        document.documentElement.style.setProperty('--panel-accent-hover', hover);
+        if (secondaryCustom && secondaryCustom !== 'default') {
+          const rgb = this.hexToRgb(secondaryCustom);
+          const lightTint = isDark ? `rgba(${rgb}, 0.2)` : `rgba(${rgb}, 0.12)`;
+          const hoverTint = isDark ? `rgba(${rgb}, 0.32)` : `rgba(${rgb}, 0.2)`;
+          const accentHover = this.getAccentHover(secondaryCustom, isDark);
+
+          document.documentElement.style.setProperty('--color-secondary', secondaryCustom);
+          document.documentElement.style.setProperty('--panel-accent', secondaryCustom);
+          document.documentElement.style.setProperty('--panel-accent-light', lightTint);
+          document.documentElement.style.setProperty('--panel-accent-hover', hoverTint);
+          document.documentElement.style.setProperty('--color-accent', secondaryCustom);
+          document.documentElement.style.setProperty('--color-accent-hover', accentHover);
+        } else {
+          const effectiveAccent = isDark ? (theme.darkAccent || theme.primaryAccent) : theme.primaryAccent;
+          const light = isDark ? (theme.darkLightAccent || 'rgba(96, 165, 250, 0.18)') : theme.lightAccent;
+          const hover = isDark ? (theme.darkHoverAccent || 'rgba(96, 165, 250, 0.30)') : theme.hoverAccent;
+          const accentHover = this.getAccentHover(effectiveAccent, isDark);
+
+          document.documentElement.style.removeProperty('--color-secondary');
+          document.documentElement.style.setProperty('--panel-accent', effectiveAccent);
+          document.documentElement.style.setProperty('--panel-accent-light', light);
+          document.documentElement.style.setProperty('--panel-accent-hover', hover);
+          document.documentElement.style.setProperty('--color-accent', effectiveAccent);
+          document.documentElement.style.setProperty('--color-accent-hover', accentHover);
+        }
       }
     },
 

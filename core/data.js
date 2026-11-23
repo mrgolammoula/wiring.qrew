@@ -3,7 +3,7 @@
  * Hierarchical Multi-Tenant Access Control: Platform -> Tenants -> Offices -> Office Members
  */
 
-const STORAGE_KEY = 'qrew_platform_state_v4';
+const STORAGE_KEY = 'qrew_platform_state_v5';
 
 const DEFAULT_DATA = {
   currentUser: {
@@ -19,8 +19,9 @@ const DEFAULT_DATA = {
     { id: 'usr_jack', name: 'Jack Rahman', email: 'jack@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-09-01' },
     { id: 'usr_fahim', name: 'Fahim Karim', email: 'fahim@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-09-10' },
     { id: 'usr_nusrat', name: 'Nusrat Jahan', email: 'nusrat@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-09-22' },
-    { id: 'usr_rafiq', name: 'Rafiqul Islam', email: 'rafiq@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-10-02' },
-    { id: 'usr_tanvir', name: 'Tanvir Hasan', email: 'tanvir@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-10-18' }
+    { id: 'usr_rafiq', name: 'Rafiqul Islam', email: 'rafiq@qrew.io', phone: '+880 1711-234567', platformRole: 'Platform User', status: 'Active', createdAt: '2026-10-02' },
+    { id: 'usr_tanvir', name: 'Tanvir Hasan', email: 'tanvir@qrew.io', platformRole: 'Platform User', status: 'Active', createdAt: '2026-10-18' },
+    { id: 'usr_tariq', name: 'Tariqul Alam', email: 'tariq@apex.com', phone: '+880 1712-987654', platformRole: 'Platform User', status: 'Active', createdAt: '2026-10-01' }
   ],
   tenants: [
     {
@@ -28,9 +29,22 @@ const DEFAULT_DATA = {
       name: 'SST',
       ownerName: 'Rafiqul Islam',
       ownerEmail: 'rafiq@sst.com',
+      phone: '+880 1711-234567',
+      address: 'Port Access Road, Agrabad C/A, Chittagong',
       status: 'Active',
       plan: 'Enterprise',
       createdAt: '2026-09-12'
+    },
+    {
+      id: 'ten_apex',
+      name: 'Apex Logistics',
+      ownerName: 'Tariqul Alam',
+      ownerEmail: 'tariq@apex.com',
+      phone: '+880 1712-987654',
+      address: 'Gulshan Center Point, Road 90, Gulshan-2, Dhaka',
+      status: 'Active',
+      plan: 'Professional',
+      createdAt: '2026-10-01'
     }
   ],
   offices: [
@@ -49,6 +63,22 @@ const DEFAULT_DATA = {
       location: 'Mongla Port Area, Bagerhat, Khulna',
       status: 'Active',
       createdAt: '2026-09-18'
+    },
+    {
+      id: 'off_dhk_corp',
+      tenantId: 'ten_apex',
+      name: 'Dhaka Corporate Office',
+      location: 'Gulshan-2, Dhaka',
+      status: 'Active',
+      createdAt: '2026-10-05'
+    },
+    {
+      id: 'off_syl_depot',
+      tenantId: 'ten_apex',
+      name: 'Sylhet Regional Depot',
+      location: 'Airport Road, Subidbazar, Sylhet',
+      status: 'Active',
+      createdAt: '2026-10-12'
     }
   ],
   tenantMembers: [
@@ -57,26 +87,36 @@ const DEFAULT_DATA = {
     { id: 'tm_3', tenantId: 'ten_sst', userId: 'usr_nusrat', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-09-25' },
     { id: 'tm_4', tenantId: 'ten_sst', userId: 'usr_tanvir', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-05' },
     { id: 'tm_5', tenantId: 'ten_sst', userId: 'usr_mina', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-10' },
-    { id: 'tm_6', tenantId: 'ten_sst', userId: 'usr_fahim', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-12' }
+    { id: 'tm_6', tenantId: 'ten_sst', userId: 'usr_fahim', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-12' },
+    { id: 'tm_7', tenantId: 'ten_apex', userId: 'usr_tariq', tenantRole: 'Tenant Admin', status: 'Active', joinedAt: '2026-10-01' },
+    { id: 'tm_8', tenantId: 'ten_apex', userId: 'usr_fahim', tenantRole: 'Tenant Manager', status: 'Active', joinedAt: '2026-10-05' },
+    { id: 'tm_9', tenantId: 'ten_apex', userId: 'usr_mina', tenantRole: 'Tenant Member', status: 'Active', joinedAt: '2026-10-08' }
   ],
   officeStaff: [
     { id: 'os_1', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_rafiq', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-09-15' },
     { id: 'os_2', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_jack', officeRole: 'Office Supervisor', status: 'Active', assignedAt: '2026-09-16' },
     { id: 'os_3', officeId: 'off_ctg_port', tenantId: 'ten_sst', userId: 'usr_nusrat', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-09-26' },
-    { id: 'os_4', officeId: 'off_mgl_port', tenantId: 'ten_sst', userId: 'usr_tanvir', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-10-06' }
+    { id: 'os_4', officeId: 'off_mgl_port', tenantId: 'ten_sst', userId: 'usr_tanvir', officeRole: 'Office Staff', status: 'Active', assignedAt: '2026-10-06' },
+    { id: 'os_5', officeId: 'off_dhk_corp', tenantId: 'ten_apex', userId: 'usr_tariq', officeRole: 'Office Manager', status: 'Active', assignedAt: '2026-10-05' },
+    { id: 'os_6', officeId: 'off_dhk_corp', tenantId: 'ten_apex', userId: 'usr_fahim', officeRole: 'Operations Lead', status: 'Active', assignedAt: '2026-10-06' },
+    { id: 'os_7', officeId: 'off_syl_depot', tenantId: 'ten_apex', userId: 'usr_mina', officeRole: 'Depot Supervisor', status: 'Active', assignedAt: '2026-10-12' }
   ],
   departments: [
     { id: 'dept_ctg_ops', officeId: 'off_ctg_port', name: 'Port Operations', code: 'OPS', leadName: 'Rafiqul Islam', capacity: 15, status: 'Active', description: 'Container terminal dispatch, berths, and vessel clearance' },
     { id: 'dept_ctg_log', officeId: 'off_ctg_port', name: 'Fleet & Logistics', code: 'LOG', leadName: 'Jack Rahman', capacity: 10, status: 'Active', description: 'Heavy transport logistics, truck fleets, and freight forwarding' },
     { id: 'dept_ctg_sec', officeId: 'off_ctg_port', name: 'Facility Security', code: 'SEC', leadName: 'Nusrat Jahan', capacity: 8, status: 'Active', description: 'CCTV surveillance, entry-exit gate control, and safety protocols' },
     { id: 'dept_ctg_cust', officeId: 'off_ctg_port', name: 'Customs & Compliance', code: 'CST', leadName: 'Tanvir Hasan', capacity: 6, status: 'Active', description: 'Tariff verification, regulatory filings, and inspection oversight' },
-    { id: 'dept_mgl_ops', officeId: 'off_mgl_port', name: 'Maritime Cargo & Dispatch', code: 'MCD', leadName: 'Tanvir Hasan', capacity: 12, status: 'Active', description: 'Mongla jetty cargo operations, lighter vessel coordination, and customs handling' }
+    { id: 'dept_mgl_ops', officeId: 'off_mgl_port', name: 'Maritime Cargo & Dispatch', code: 'MCD', leadName: 'Tanvir Hasan', capacity: 12, status: 'Active', description: 'Mongla jetty cargo operations, lighter vessel coordination, and customs handling' },
+    { id: 'dept_dhk_ops', officeId: 'off_dhk_corp', name: 'Central Logistics Dispatch', code: 'CLD', leadName: 'Tariqul Alam', capacity: 20, status: 'Active', description: 'National freight scheduling, supply chain routing, and vendor management' },
+    { id: 'dept_syl_ops', officeId: 'off_syl_depot', name: 'Regional Cargo & Transit', code: 'RCT', leadName: 'Mina Chowdhury', capacity: 10, status: 'Active', description: 'Northeast zone warehousing, tea and agro cargo logistics' }
   ],
   departmentMembers: [
     { id: 'dm_1', deptId: 'dept_ctg_ops', userId: 'usr_rafiq', deptRole: 'Department Lead', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' },
     { id: 'dm_2', deptId: 'dept_ctg_ops', userId: 'usr_nusrat', deptRole: 'Operations Specialist', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' },
     { id: 'dm_3', deptId: 'dept_ctg_log', userId: 'usr_jack', deptRole: 'Logistics Supervisor', shift: 'Evening (14:00 - 22:00)', status: 'Upcoming' },
-    { id: 'dm_4', deptId: 'dept_ctg_sec', userId: 'usr_tanvir', deptRole: 'Security Officer', shift: 'Night (22:00 - 06:00)', status: 'Off Duty' }
+    { id: 'dm_4', deptId: 'dept_ctg_sec', userId: 'usr_tanvir', deptRole: 'Security Officer', shift: 'Night (22:00 - 06:00)', status: 'Off Duty' },
+    { id: 'dm_5', deptId: 'dept_dhk_ops', userId: 'usr_tariq', deptRole: 'Department Lead', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' },
+    { id: 'dm_6', deptId: 'dept_syl_ops', userId: 'usr_mina', deptRole: 'Department Lead', shift: 'Morning (08:00 - 16:00)', status: 'On Duty' }
   ],
   officeConfigs: {
     'off_ctg_port': {
@@ -102,6 +142,30 @@ const DEFAULT_DATA = {
       shifts: ['Morning (08:00 - 16:00)', 'Evening (14:00 - 22:00)'],
       checkInGrace: '15 mins',
       accessControlMode: 'Biometric Smart Access'
+    },
+    'off_dhk_corp': {
+      code: 'DHK-CORP-01',
+      tier: 'Tier 1 Headquarters',
+      floorArea: '14,000 sq ft',
+      maxOccupancy: 90,
+      operatingHours: '08:00 - 20:00 (2 Shifts)',
+      primaryContact: '+880 2 9880001',
+      emergencyContact: '+880 2 9880009',
+      shifts: ['Morning (08:00 - 16:00)', 'Evening (14:00 - 22:00)'],
+      checkInGrace: '15 mins',
+      accessControlMode: 'Smart Card Access'
+    },
+    'off_syl_depot': {
+      code: 'SYL-DEP-02',
+      tier: 'Tier 2 Regional Facility',
+      floorArea: '9,500 sq ft',
+      maxOccupancy: 45,
+      operatingHours: '24/7 Continuous Operations',
+      primaryContact: '+880 821 710001',
+      emergencyContact: '+880 821 710009',
+      shifts: ['Morning (08:00 - 16:00)', 'Night (22:00 - 06:00)'],
+      checkInGrace: '15 mins',
+      accessControlMode: 'Biometric Access'
     }
   },
   memberTasks: [

@@ -31,7 +31,7 @@
                   <h3 class="role-card-title">${QrewUI.escapeHtml(role.name)}</h3>
                   <div style="margin-top:4px;">${QrewUI.roleBadge(role.name, 'tenant')}</div>
                 </div>
-                <div style="font-size:11px;font-weight:600;color:var(--color-accent);">
+                <div style="font-size:11px;font-weight:600;color:var(--panel-accent, var(--color-accent));">
                   ${role.permissions.length} perms
                 </div>
               </div>

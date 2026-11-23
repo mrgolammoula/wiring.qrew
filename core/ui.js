@@ -26,6 +26,9 @@ const QrewUI = (() => {
     info: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
     alert: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
     power: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>`,
+    pause: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`,
+    play: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+    phone: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
     check: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
     refresh: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`,
     settings: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
@@ -46,7 +49,8 @@ const QrewUI = (() => {
     expand: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" x2="14" y1="3" y2="10"/><line x1="3" x2="10" y1="21" y2="14"/></svg>`,
     collapse: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" x2="21" y1="10" y2="3"/><line x1="3" x2="10" y1="21" y2="14"/></svg>`,
     moreHorizontal: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>`,
-    moreVertical: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`
+    moreVertical: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`,
+    archive: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>`
   };
 
   const getIcon = (name) => ICONS[name] || '';
@@ -180,8 +184,18 @@ const QrewUI = (() => {
     confirmStyle = '',
     icon = 'alert',
     iconColor = 'var(--color-danger)',
+    showDoNotAskAgain = true,
+    doNotAskAgainKey = null,
     onConfirm
   }) => {
+    const key = doNotAskAgainKey || (title ? `qrew_skip_confirm_${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}` : null);
+
+    // If preference is saved to skip confirmation, directly execute onConfirm
+    if (key && typeof localStorage !== 'undefined' && localStorage.getItem(key) === 'true') {
+      if (onConfirm) onConfirm();
+      return;
+    }
+
     openModal({
       title: title || 'Confirm Action',
       bodyHtml: `
@@ -193,19 +207,48 @@ const QrewUI = (() => {
         </div>
       `,
       footerHtml: `
-        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
-        <button class="btn ${confirmClass}" ${confirmStyle ? `style="${confirmStyle}"` : ''} id="confirm-dialog-btn">${escapeHtml(confirmText)}</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;">
+          ${showDoNotAskAgain ? `
+            <label class="confirm-do-not-ask">
+              <input type="checkbox" id="confirm-dialog-do-not-ask" />
+              <span>Do not ask again</span>
+            </label>
+          ` : '<div></div>'}
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
+            <button class="btn ${confirmClass}" ${confirmStyle ? `style="${confirmStyle}"` : ''} id="confirm-dialog-btn">${escapeHtml(confirmText)}</button>
+          </div>
+        </div>
       `,
       onOpen: (modalEl) => {
         const btn = modalEl.querySelector('#confirm-dialog-btn');
+        const doNotAskCheckbox = modalEl.querySelector('#confirm-dialog-do-not-ask');
+
         if (btn) {
           btn.onclick = () => {
+            if (key && doNotAskCheckbox && doNotAskCheckbox.checked) {
+              try {
+                localStorage.setItem(key, 'true');
+              } catch (e) {
+                console.warn('Could not save do not ask again preference', e);
+              }
+            }
             closeModal();
             if (onConfirm) onConfirm();
           };
         }
       }
     });
+  };
+
+  const resetConfirmPreferences = () => {
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('qrew_skip_confirm_')) {
+          localStorage.removeItem(k);
+        }
+      });
+    } catch (e) {}
   };
 
   // Empty State
@@ -240,6 +283,7 @@ const QrewUI = (() => {
     openModal,
     closeModal,
     confirmDialog,
+    resetConfirmPreferences,
     emptyState,
     escapeHtml
   };
