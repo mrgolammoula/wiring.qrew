@@ -4,10 +4,16 @@
    Reference: Reusable Document Indexing, File Details Header, Docked Token Pool
    ========================================================================== */
 
-:root {
+body[data-workspace="office-config"],
+body.ws-office-config {
   --panel-accent: #78618A;
   --panel-accent-light: #F0EBF4;
-  --color-surface-white: #FFFFFF;
+}
+
+[data-theme="dark"] body[data-workspace="office-config"],
+[data-theme="dark"] body.ws-office-config {
+  --panel-accent: #A78BFA;
+  --panel-accent-light: rgba(167, 139, 250, 0.18);
 }
 
 /* --------------------------------------------------------------------------
