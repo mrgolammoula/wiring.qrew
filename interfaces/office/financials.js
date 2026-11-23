@@ -1,6 +1,8 @@
 /**
- * Interface: Office Workspace — Financials Operations Hub
- * Comprehensive financial dashboard, invoice management, cash flow ledger, and analytics.
+ * Interface: Office Workspace — Financials Dashboard
+ * Matches Reference UI (qrew-six.vercel.app/dashboard/financials)
+ * Implements Expenses, Requisitions, and Wallets with exact column order:
+ * 'File / Project' -> 'Spent By' -> 'Category' -> 'Description' -> 'Date' -> 'Amount'
  */
 (() => {
   const Qrew = window.Qrew;
@@ -9,31 +11,12 @@
     Qrew.views.office = {};
   }
 
-  // Module local state
+  // Module state
   const state = {
-    activeTab: 'invoices', // 'invoices' | 'ledger' | 'analytics'
-    invoiceSearch: '',
-    statusFilter: 'all', // 'all' | 'Paid' | 'Pending' | 'Overdue' | 'Draft'
-    ledgerFilter: 'all', // 'all' | 'Credit' | 'Debit'
+    activeTab: 'expenses', // 'expenses' | 'requisitions' | 'wallets'
+    searchTerm: '',
     currentOfficeId: null,
     currentTenantId: null
-  };
-
-  /**
-   * Status badge helper for financial invoices
-   */
-  const getInvoiceBadge = (status) => {
-    const s = (status || 'Pending').toLowerCase();
-    if (s === 'paid') {
-      return `<span class="badge badge-active"><span class="badge-dot"></span>Paid</span>`;
-    } else if (s === 'pending') {
-      return `<span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>`;
-    } else if (s === 'overdue') {
-      return `<span class="badge badge-expired"><span class="badge-dot"></span>Overdue</span>`;
-    } else if (s === 'draft') {
-      return `<span class="badge badge-suspended"><span class="badge-dot"></span>Draft</span>`;
-    }
-    return `<span class="badge badge-pending">${QrewUI.escapeHtml(status)}</span>`;
   };
 
   /**
@@ -44,6 +27,21 @@
   };
 
   /**
+   * Status badge helper for requisitions
+   */
+  const getRequisitionBadge = (status) => {
+    const s = (status || 'Pending').toLowerCase();
+    if (s === 'approved' || s === 'disbursed') {
+      return `<span class="badge badge-active"><span class="badge-dot"></span>${QrewUI.escapeHtml(status)}</span>`;
+    } else if (s === 'pending') {
+      return `<span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>`;
+    } else if (s === 'rejected') {
+      return `<span class="badge badge-expired"><span class="badge-dot"></span>Rejected</span>`;
+    }
+    return `<span class="badge badge-pending">${QrewUI.escapeHtml(status)}</span>`;
+  };
+
+  /**
    * Main Financials View Renderer
    */
   Qrew.views.office.renderFinancials = (officeId, tenantId) => {
@@ -51,247 +49,133 @@
     state.currentTenantId = tenantId || Qrew.state.currentTenantId || 'ten_sst';
 
     const office = QrewStore.getOfficeById(state.currentOfficeId);
-    const tenant = QrewStore.getTenantById(state.currentTenantId);
+    const expenses = QrewStore.getOfficeExpenses(state.currentOfficeId);
+    const requisitions = QrewStore.getOfficeRequisitions(state.currentOfficeId);
+    const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
 
-    const invoices = QrewStore.getOfficeInvoices(state.currentOfficeId);
-    const transactions = QrewStore.getOfficeTransactions(state.currentOfficeId);
-
-    // Calculate Financial KPIs
-    const totalBilled = invoices.reduce((acc, inv) => acc + (Number(inv.amount) || 0), 0);
-    const paidInvoices = invoices.filter(inv => inv.status === 'Paid');
-    const totalCollected = paidInvoices.reduce((acc, inv) => acc + (Number(inv.amount) || 0), 0);
-
-    const pendingInvoices = invoices.filter(inv => inv.status === 'Pending');
-    const totalPending = pendingInvoices.reduce((acc, inv) => acc + (Number(inv.amount) || 0), 0);
-
-    const overdueInvoices = invoices.filter(inv => inv.status === 'Overdue');
-    const totalOverdue = overdueInvoices.reduce((acc, inv) => acc + (Number(inv.amount) || 0), 0);
-
-    const totalDebits = transactions
-      .filter(t => t.type === 'Debit')
-      .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
-
-    const netMargin = totalCollected - totalDebits;
-    const marginPercent = totalCollected > 0 ? Math.round((netMargin / totalCollected) * 100) : 0;
-
-    // Filter Invoices
-    const filteredInvoices = invoices.filter(inv => {
-      const matchesSearch = !state.invoiceSearch ||
-        inv.invoiceNo.toLowerCase().includes(state.invoiceSearch.toLowerCase()) ||
-        inv.clientName.toLowerCase().includes(state.invoiceSearch.toLowerCase()) ||
-        (inv.vessel && inv.vessel.toLowerCase().includes(state.invoiceSearch.toLowerCase()));
-
-      const matchesStatus = state.statusFilter === 'all' || inv.status === state.statusFilter;
-      return matchesSearch && matchesStatus;
+    // Filter expenses by search if present
+    const filteredExpenses = expenses.filter(exp => {
+      if (!state.searchTerm) return true;
+      const q = state.searchTerm.toLowerCase();
+      return (exp.fileProject && exp.fileProject.toLowerCase().includes(q)) ||
+        (exp.spentBy && exp.spentBy.toLowerCase().includes(q)) ||
+        (exp.category && exp.category.toLowerCase().includes(q)) ||
+        (exp.description && exp.description.toLowerCase().includes(q));
     });
 
-    // Filter Transactions
-    const filteredTransactions = transactions.filter(t => {
-      if (state.ledgerFilter === 'all') return true;
-      return t.type === state.ledgerFilter;
-    });
-
-    // Render HTML shell
+    // Render HTML shell matching the reference image layout
     Qrew.dom.mainContent.innerHTML = `
-      <div class="financials-hub-container">
-        <!-- Header Card -->
-        <div class="detail-header-card" style="margin-bottom:20px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
-            <div>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                <h1 class="page-title" style="margin:0;font-size:24px;font-weight:700;">Financials & Billing</h1>
-                <span class="id-badge">${office ? QrewUI.escapeHtml(office.name) : 'Chittagong Port Office'}</span>
-              </div>
-              <p style="margin:0;font-size:13px;color:var(--color-text-muted);">
-                Centralized financial management, disbursement accounts, client invoicing, and cash flow ledger.
-              </p>
-            </div>
+      <div class="financials-dashboard" style="max-width: 1200px; margin: 0 auto; padding: 4px 0 32px 0;">
+        
+        <!-- Header Section -->
+        <div class="financials-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h1 class="page-title" style="font-size: 26px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 6px 0;">
+              Financials Dashboard
+            </h1>
+            <p style="font-size: 14px; color: var(--color-text-muted); margin: 0;">
+              Manage organizational expenses and fund requisitions.
+            </p>
+          </div>
 
-            <div class="page-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" id="btn-create-invoice">
-                ${QrewUI.getIcon('plus')} New Invoice
-              </button>
-              <button class="btn btn-secondary" id="btn-record-transaction">
-                ${QrewUI.getIcon('dollar')} Record Transaction
-              </button>
-              <button class="btn btn-outline" id="btn-export-financials" title="Export CSV Report">
-                ${QrewUI.getIcon('file')} Export CSV
-              </button>
-              <a href="#office-config/overview?tenantId=${state.currentTenantId}&officeId=${state.currentOfficeId}" class="btn btn-outline" style="text-decoration:none;" title="Open Spreadsheet Invoice Template Studio">
-                ${QrewUI.getIcon('invoice')} Template Studio &rarr;
-              </a>
-            </div>
+          <!-- Top-right Action Buttons -->
+          <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+            <button class="btn btn-secondary" id="btn-request-funds" style="padding: 8px 16px; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Request Funds
+            </button>
+            <button class="btn" id="btn-log-expense" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow-xs);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Log Expense
+            </button>
           </div>
         </div>
 
-        <!-- Metric KPI Cards -->
-        <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:16px; margin-bottom:24px;">
-          <!-- Total Billed -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-label">Total Billed Revenue</span>
-              <div class="metric-icon-wrap" style="color:var(--color-accent);">${QrewUI.getIcon('dollar')}</div>
-            </div>
-            <div class="metric-value-row">
-              <div class="metric-value">${formatMoney(totalBilled)}</div>
-              <div class="metric-subtext" style="color:var(--color-success);font-weight:600;">+14.2% vs last month</div>
-            </div>
-          </div>
-
-          <!-- Total Collected -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-label">Paid / Collected</span>
-              <div class="metric-icon-wrap" style="color:var(--color-success);">${QrewUI.getIcon('check')}</div>
-            </div>
-            <div class="metric-value-row">
-              <div class="metric-value">${formatMoney(totalCollected)}</div>
-              <div class="metric-subtext">${paidInvoices.length} invoices settled (${totalBilled > 0 ? Math.round((totalCollected/totalBilled)*100) : 0}%)</div>
-            </div>
-          </div>
-
-          <!-- Outstanding / Pending -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-label">Outstanding Balance</span>
-              <div class="metric-icon-wrap" style="color:var(--color-warning);">${QrewUI.getIcon('activity')}</div>
-            </div>
-            <div class="metric-value-row">
-              <div class="metric-value">${formatMoney(totalPending)}</div>
-              <div class="metric-subtext">${pendingInvoices.length} pending settlement</div>
-            </div>
-          </div>
-
-          <!-- Overdue -->
-          <div class="metric-card" style="${totalOverdue > 0 ? 'border-color:var(--color-danger);' : ''}">
-            <div class="metric-header">
-              <span class="metric-label">Overdue Invoices</span>
-              <div class="metric-icon-wrap" style="color:var(--color-danger);">${QrewUI.getIcon('alert')}</div>
-            </div>
-            <div class="metric-value-row">
-              <div class="metric-value" style="${totalOverdue > 0 ? 'color:var(--color-danger);' : ''}">${formatMoney(totalOverdue)}</div>
-              <div class="metric-subtext" style="${totalOverdue > 0 ? 'color:var(--color-danger);font-weight:600;' : ''}">${overdueInvoices.length} past grace period</div>
-            </div>
-          </div>
-
-          <!-- Net Margin -->
-          <div class="metric-card">
-            <div class="metric-header">
-              <span class="metric-label">Operating Net Margin</span>
-              <div class="metric-icon-wrap" style="color:var(--color-secondary);">${QrewUI.getIcon('overview')}</div>
-            </div>
-            <div class="metric-value-row">
-              <div class="metric-value">${formatMoney(netMargin)}</div>
-              <div class="metric-subtext" style="color:var(--color-success);">${marginPercent}% operational profit</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation Tabs -->
-        <div class="financial-tabs" style="display:flex;gap:8px;border-bottom:1px solid var(--color-border);margin-bottom:20px;">
-          <button class="tab-btn ${state.activeTab === 'invoices' ? 'active' : ''}" id="tab-invoices" style="padding:10px 18px;font-size:14px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${state.activeTab === 'invoices' ? 'var(--panel-accent, var(--color-accent))' : 'transparent'};color:${state.activeTab === 'invoices' ? 'var(--color-text-primary)' : 'var(--color-text-muted)'};">
-            ${QrewUI.getIcon('invoice')} Invoices & Billing (${invoices.length})
+        <!-- Sub-navigation Tabs (Pill style matching reference image) -->
+        <div class="tabs-container" style="display: inline-flex; background: var(--color-surface, #F1F5F9); padding: 4px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--color-border-subtle, #E2E8F0);">
+          <button class="tab-pill ${state.activeTab === 'expenses' ? 'active' : ''}" id="tab-expenses" style="padding: 6px 16px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; border-radius: 6px; transition: all 0.15s ease; ${state.activeTab === 'expenses' ? 'background: #FFFFFF; color: var(--color-text-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : 'background: transparent; color: var(--color-text-muted);'}">
+            Expenses
           </button>
-          <button class="tab-btn ${state.activeTab === 'ledger' ? 'active' : ''}" id="tab-ledger" style="padding:10px 18px;font-size:14px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${state.activeTab === 'ledger' ? 'var(--panel-accent, var(--color-accent))' : 'transparent'};color:${state.activeTab === 'ledger' ? 'var(--color-text-primary)' : 'var(--color-text-muted)'};">
-            ${QrewUI.getIcon('dollar')} Cash Flow Ledger (${transactions.length})
+          <button class="tab-pill ${state.activeTab === 'requisitions' ? 'active' : ''}" id="tab-requisitions" style="padding: 6px 16px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; border-radius: 6px; transition: all 0.15s ease; ${state.activeTab === 'requisitions' ? 'background: #FFFFFF; color: var(--color-text-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : 'background: transparent; color: var(--color-text-muted);'}">
+            Requisitions
           </button>
-          <button class="tab-btn ${state.activeTab === 'analytics' ? 'active' : ''}" id="tab-analytics" style="padding:10px 18px;font-size:14px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid ${state.activeTab === 'analytics' ? 'var(--panel-accent, var(--color-accent))' : 'transparent'};color:${state.activeTab === 'analytics' ? 'var(--color-text-primary)' : 'var(--color-text-muted)'};">
-            ${QrewUI.getIcon('activity')} Financial Analytics
+          <button class="tab-pill ${state.activeTab === 'wallets' ? 'active' : ''}" id="tab-wallets" style="padding: 6px 16px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; border-radius: 6px; transition: all 0.15s ease; ${state.activeTab === 'wallets' ? 'background: #FFFFFF; color: var(--color-text-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08);' : 'background: transparent; color: var(--color-text-muted);'}">
+            Wallets
           </button>
         </div>
 
-        <!-- TAB CONTENT 1: INVOICES & BILLING -->
-        <div id="content-tab-invoices" style="${state.activeTab === 'invoices' ? 'display:block;' : 'display:none;'}">
-          <div class="card" style="padding:20px;">
-            <!-- Filter & Search Bar -->
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-              <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:240px;max-width:380px;">
-                <div style="position:relative;width:100%;">
-                  <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--color-text-muted);">${QrewUI.getIcon('search')}</span>
-                  <input type="text" id="financial-search-input" class="form-input" style="padding-left:34px;width:100%;font-size:13px;" placeholder="Search invoice, client, vessel..." value="${QrewUI.escapeHtml(state.invoiceSearch)}">
-                </div>
-              </div>
-
-              <!-- Status Pills -->
-              <div class="status-pills" style="display:flex;gap:6px;flex-wrap:wrap;">
-                ${['all', 'Paid', 'Pending', 'Overdue', 'Draft'].map(status => {
-                  const count = status === 'all' ? invoices.length : invoices.filter(i => i.status === status).length;
-                  const isSelected = state.statusFilter === status;
-                  return `
-                    <button class="btn ${isSelected ? 'btn-primary' : 'btn-secondary'} btn-filter-status" data-status="${status}" style="font-size:12px;padding:6px 12px;border-radius:16px;">
-                      ${status === 'all' ? 'All' : status} (${count})
-                    </button>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Invoices Table -->
-            ${filteredInvoices.length === 0 ? `
-              <div style="text-align:center;padding:48px 20px;color:var(--color-text-muted);">
-                <div style="margin-bottom:12px;">${QrewUI.getIcon('invoice')}</div>
-                <h3 style="font-size:16px;font-weight:600;margin-bottom:4px;color:var(--color-text-primary);">No invoices found</h3>
-                <p style="font-size:13px;margin:0 0 16px 0;">No billing records match your search or filter criteria.</p>
-                <button class="btn btn-secondary" onclick="document.getElementById('financial-search-input').value='';document.querySelector('[data-status=all]').click();">
-                  Reset Filters
-                </button>
+        <!-- TAB 1: EXPENSES TABLE -->
+        <div id="content-expenses" style="${state.activeTab === 'expenses' ? 'display:block;' : 'display:none;'}">
+          <div class="card" style="background: var(--color-surface-white, #FFFFFF); border: 1px solid var(--color-border, #E2E8F0); border-radius: var(--radius-md, 8px); overflow: hidden; box-shadow: var(--shadow-xs);">
+            
+            ${filteredExpenses.length === 0 ? `
+              <!-- Empty state matching reference image -->
+              <div style="padding: 80px 20px; text-align: center; color: var(--color-text-muted);">
+                <p style="font-size: 14px; margin: 0; color: var(--color-text-muted);">No expenses found.</p>
               </div>
             ` : `
-              <div class="table-responsive" style="overflow-x:auto;">
-                <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+              <div class="table-responsive" style="overflow-x: auto;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                   <thead>
-                    <tr style="border-bottom:1px solid var(--color-border);text-align:left;color:var(--color-text-muted);font-weight:600;">
-                      <th style="padding:10px 12px;">Invoice No</th>
-                      <th style="padding:10px 12px;">Client / Partner</th>
-                      <th style="padding:10px 12px;">Vessel / Service</th>
-                      <th style="padding:10px 12px;">Issue Date</th>
-                      <th style="padding:10px 12px;">Due Date</th>
-                      <th style="padding:10px 12px;text-align:right;">Amount</th>
-                      <th style="padding:10px 12px;text-align:center;">Status</th>
-                      <th style="padding:10px 12px;text-align:right;">Actions</th>
+                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); text-align: left; color: var(--color-text-muted); font-size: 12px; font-weight: 600;">
+                      <th style="padding: 14px 18px; width: 22%;">File / Project</th>
+                      <th style="padding: 14px 18px; width: 15%;">Spent By</th>
+                      <th style="padding: 14px 18px; width: 16%;">Category</th>
+                      <th style="padding: 14px 18px; width: 25%;">Description</th>
+                      <th style="padding: 14px 18px; width: 11%;">Date</th>
+                      <th style="padding: 14px 18px; width: 11%; text-align: right;">Amount</th>
+                      <th style="padding: 14px 14px; width: 5%; text-align: center;"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    ${filteredInvoices.map(inv => `
-                      <tr style="border-bottom:1px solid var(--color-border-subtle);transition:background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
-                        <td style="padding:12px;">
-                          <span class="id-badge" style="font-weight:700;cursor:pointer;" onclick="Qrew.views.office.openInvoicePreview('${inv.id}')" title="Click to view details">
-                            ${QrewUI.escapeHtml(inv.invoiceNo)}
+                    ${filteredExpenses.map(exp => `
+                      <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
+                        
+                        <!-- 1. File / Project -->
+                        <td style="padding: 14px 18px; font-weight: 600; color: var(--color-text-primary);">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: var(--panel-accent, var(--color-accent));">${QrewUI.getIcon('folder')}</span>
+                            <span>${QrewUI.escapeHtml(exp.fileProject)}</span>
+                          </div>
+                        </td>
+
+                        <!-- 2. Spent By -->
+                        <td style="padding: 14px 18px; color: var(--color-text-primary);">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary);">
+                              ${exp.spentBy ? exp.spentBy.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span style="font-weight: 500;">${QrewUI.escapeHtml(exp.spentBy)}</span>
+                          </div>
+                        </td>
+
+                        <!-- 3. Category -->
+                        <td style="padding: 14px 18px;">
+                          <span class="badge-role office" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border);">
+                            ${QrewUI.escapeHtml(exp.category)}
                           </span>
                         </td>
-                        <td style="padding:12px;">
-                          <div style="font-weight:600;color:var(--color-text-primary);">${QrewUI.escapeHtml(inv.clientName)}</div>
-                          <div style="font-size:11px;color:var(--color-text-muted);">${QrewUI.escapeHtml(inv.clientCode || '')}</div>
+
+                        <!-- 4. Description -->
+                        <td style="padding: 14px 18px; color: var(--color-text-secondary); line-height: 1.4;">
+                          ${QrewUI.escapeHtml(exp.description)}
                         </td>
-                        <td style="padding:12px;">
-                          <div style="color:var(--color-text-primary);">${QrewUI.escapeHtml(inv.vessel || 'General Call')}</div>
-                          <div style="font-size:11px;color:var(--color-text-muted);">${QrewUI.escapeHtml(inv.voyageNo || '')}</div>
+
+                        <!-- 5. Date -->
+                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+                          ${exp.date}
                         </td>
-                        <td style="padding:12px;color:var(--color-text-muted);">${inv.issueDate}</td>
-                        <td style="padding:12px;color:var(--color-text-muted);">${inv.dueDate}</td>
-                        <td style="padding:12px;text-align:right;font-weight:700;color:var(--color-text-primary);">
-                          ${formatMoney(inv.amount, inv.currencySymbol || '$')}
+
+                        <!-- 6. Amount -->
+                        <td style="padding: 14px 18px; text-align: right; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
+                          ${formatMoney(exp.amount, '$')}
                         </td>
-                        <td style="padding:12px;text-align:center;">
-                          ${getInvoiceBadge(inv.status)}
-                        </td>
-                        <td style="padding:12px;text-align:right;">
-                          <div style="display:inline-flex;gap:6px;align-items:center;">
-                            <button class="btn btn-secondary btn-icon" style="padding:5px 8px;font-size:11px;" onclick="Qrew.views.office.openInvoicePreview('${inv.id}')" title="Preview / Print Invoice">
-                              ${QrewUI.getIcon('file')} View
-                            </button>
-                            ${inv.status !== 'Paid' ? `
-                              <button class="btn btn-secondary btn-icon" style="padding:5px 8px;font-size:11px;color:var(--color-success);" onclick="Qrew.views.office.quickMarkPaid('${inv.id}')" title="Mark as Paid">
-                                ${QrewUI.getIcon('check')} Settle
-                              </button>
-                              <button class="btn btn-secondary btn-icon" style="padding:5px 8px;font-size:11px;" onclick="QrewUI.showToast('Payment reminder dispatched to ${QrewUI.escapeHtml(inv.clientName)}', 'info')" title="Send Reminder">
-                                ${QrewUI.getIcon('bell')}
-                              </button>
-                            ` : ''}
-                            <button class="btn btn-secondary btn-icon btn-danger-light" style="padding:5px 8px;font-size:11px;" onclick="Qrew.views.office.deleteInvoicePrompt('${inv.id}')" title="Delete Invoice">
-                              ${QrewUI.getIcon('trash')}
-                            </button>
-                          </div>
+
+                        <!-- Action / Delete -->
+                        <td style="padding: 14px 14px; text-align: center;">
+                          <button class="btn btn-secondary btn-icon btn-danger-light" style="padding: 4px 6px; font-size: 11px; border: none;" onclick="Qrew.views.office.deleteExpensePrompt('${exp.id}')" title="Delete Expense">
+                            ${QrewUI.getIcon('trash')}
+                          </button>
                         </td>
                       </tr>
                     `).join('')}
@@ -302,272 +186,243 @@
           </div>
         </div>
 
-        <!-- TAB CONTENT 2: CASH FLOW LEDGER -->
-        <div id="content-tab-ledger" style="${state.activeTab === 'ledger' ? 'display:block;' : 'display:none;'}">
-          <div class="card" style="padding:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;">
-              <div>
-                <h3 style="margin:0 0 4px 0;font-size:16px;font-weight:700;">Operational Cash Flow & Disbursements</h3>
-                <span style="font-size:12px;color:var(--color-text-muted);">Real-time audit log of incoming settlements and port disbursements.</span>
+        <!-- TAB 2: REQUISITIONS TABLE -->
+        <div id="content-requisitions" style="${state.activeTab === 'requisitions' ? 'display:block;' : 'display:none;'}">
+          <div class="card" style="background: var(--color-surface-white, #FFFFFF); border: 1px solid var(--color-border, #E2E8F0); border-radius: var(--radius-md, 8px); overflow: hidden; box-shadow: var(--shadow-xs);">
+            ${requisitions.length === 0 ? `
+              <div style="padding: 80px 20px; text-align: center; color: var(--color-text-muted);">
+                <p style="font-size: 14px; margin: 0; color: var(--color-text-muted);">No requisitions found.</p>
               </div>
-              <div style="display:flex;gap:6px;">
-                <button class="btn ${state.ledgerFilter === 'all' ? 'btn-primary' : 'btn-secondary'} btn-filter-ledger" data-type="all" style="font-size:12px;padding:6px 12px;border-radius:16px;">All</button>
-                <button class="btn ${state.ledgerFilter === 'Credit' ? 'btn-primary' : 'btn-secondary'} btn-filter-ledger" data-type="Credit" style="font-size:12px;padding:6px 12px;border-radius:16px;">Credits (Inflows)</button>
-                <button class="btn ${state.ledgerFilter === 'Debit' ? 'btn-primary' : 'btn-secondary'} btn-filter-ledger" data-type="Debit" style="font-size:12px;padding:6px 12px;border-radius:16px;">Debits (Outflows)</button>
-              </div>
-            </div>
-
-            <div class="table-responsive" style="overflow-x:auto;">
-              <table class="data-table" style="width:100%;border-collapse:collapse;font-size:13px;">
-                <thead>
-                  <tr style="border-bottom:1px solid var(--color-border);text-align:left;color:var(--color-text-muted);font-weight:600;">
-                    <th style="padding:10px 12px;">Date</th>
-                    <th style="padding:10px 12px;">Ref No</th>
-                    <th style="padding:10px 12px;">Type</th>
-                    <th style="padding:10px 12px;">Category</th>
-                    <th style="padding:10px 12px;">Description</th>
-                    <th style="padding:10px 12px;">Method</th>
-                    <th style="padding:10px 12px;text-align:right;">Amount</th>
-                    <th style="padding:10px 12px;text-align:center;">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${filteredTransactions.map(txn => `
-                    <tr style="border-bottom:1px solid var(--color-border-subtle);">
-                      <td style="padding:12px;color:var(--color-text-muted);">${txn.date}</td>
-                      <td style="padding:12px;"><span class="id-badge">${QrewUI.escapeHtml(txn.reference)}</span></td>
-                      <td style="padding:12px;">
-                        ${txn.type === 'Credit'
-                          ? `<span class="badge badge-active" style="color:var(--color-success);font-weight:700;">+ Credit</span>`
-                          : `<span class="badge badge-expired" style="color:var(--color-danger);font-weight:700;">- Debit</span>`}
-                      </td>
-                      <td style="padding:12px;font-weight:600;">${QrewUI.escapeHtml(txn.category)}</td>
-                      <td style="padding:12px;color:var(--color-text-muted);">${QrewUI.escapeHtml(txn.description)}</td>
-                      <td style="padding:12px;"><span class="badge-role office">${QrewUI.escapeHtml(txn.method)}</span></td>
-                      <td style="padding:12px;text-align:right;font-weight:700;${txn.type === 'Credit' ? 'color:var(--color-success);' : 'color:var(--color-danger);'}">
-                        ${txn.type === 'Credit' ? '+' : '-'}${formatMoney(txn.amount)}
-                      </td>
-                      <td style="padding:12px;text-align:center;">
-                        <span class="badge badge-active"><span class="badge-dot"></span>Completed</span>
-                      </td>
+            ` : `
+              <div class="table-responsive" style="overflow-x: auto;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); text-align: left; color: var(--color-text-muted); font-size: 12px; font-weight: 600;">
+                      <th style="padding: 14px 18px;">Requisition #</th>
+                      <th style="padding: 14px 18px;">Requested By</th>
+                      <th style="padding: 14px 18px;">Category</th>
+                      <th style="padding: 14px 18px;">Purpose / Reason</th>
+                      <th style="padding: 14px 18px;">Date</th>
+                      <th style="padding: 14px 18px; text-align: right;">Amount</th>
+                      <th style="padding: 14px 18px; text-align: center;">Status</th>
+                      <th style="padding: 14px 18px; text-align: right;">Actions</th>
                     </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    ${requisitions.map(req => `
+                      <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9);">
+                        <td style="padding: 14px 18px; font-weight: 700;">
+                          <span class="id-badge">${QrewUI.escapeHtml(req.requisitionNo)}</span>
+                        </td>
+                        <td style="padding: 14px 18px; font-weight: 500;">${QrewUI.escapeHtml(req.requestedBy)}</td>
+                        <td style="padding: 14px 18px;"><span class="badge-role office">${QrewUI.escapeHtml(req.category)}</span></td>
+                        <td style="padding: 14px 18px; color: var(--color-text-secondary);">${QrewUI.escapeHtml(req.purpose)}</td>
+                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px;">${req.date}</td>
+                        <td style="padding: 14px 18px; text-align: right; font-weight: 700; color: var(--color-text-primary);">${formatMoney(req.amount)}</td>
+                        <td style="padding: 14px 18px; text-align: center;">${getRequisitionBadge(req.status)}</td>
+                        <td style="padding: 14px 18px; text-align: right;">
+                          ${req.status === 'Pending' ? `
+                            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px; color: var(--color-success);" onclick="Qrew.views.office.approveRequisition('${req.id}')">
+                              Approve
+                            </button>
+                          ` : `
+                            <span style="font-size: 12px; color: var(--color-text-muted);">Reconciled</span>
+                          `}
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `}
           </div>
         </div>
 
-        <!-- TAB CONTENT 3: FINANCIAL ANALYTICS -->
-        <div id="content-tab-analytics" style="${state.activeTab === 'analytics' ? 'display:block;' : 'display:none;'}">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;">
-            <!-- Revenue by Client Partner -->
-            <div class="card" style="padding:20px;">
-              <h3 style="margin:0 0 16px 0;font-size:16px;font-weight:700;">Revenue by Client Account</h3>
-              <div style="display:flex;flex-direction:column;gap:14px;">
-                ${[
-                  { name: 'Apex Shipping Lines Ltd.', amount: 48500, percent: 34, color: '#3B82F6' },
-                  { name: 'Maersk Bangladesh Ltd.', amount: 36200, percent: 25, color: '#10B981' },
-                  { name: 'Cosco Shipping Lines', amount: 28900, percent: 20, color: '#8B5CF6' },
-                  { name: 'Hapag-Lloyd Maritime', amount: 14850, percent: 11, color: '#F59E0B' },
-                  { name: 'Evergreen Marine Corp', amount: 14400, percent: 10, color: '#EC4899' }
-                ].map(item => `
-                  <div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-                      <span style="font-weight:600;color:var(--color-text-primary);">${item.name}</span>
-                      <span style="font-weight:700;">${formatMoney(item.amount)} (${item.percent}%)</span>
-                    </div>
-                    <div style="width:100%;height:8px;background:var(--color-border);border-radius:4px;overflow:hidden;">
-                      <div style="width:${item.percent}%;height:100%;background:${item.color};border-radius:4px;"></div>
+        <!-- TAB 3: WALLETS -->
+        <div id="content-wallets" style="${state.activeTab === 'wallets' ? 'display:block;' : 'display:none;'}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
+            ${wallets.map(w => {
+              const percent = w.monthlyLimit > 0 ? Math.min(100, Math.round((w.spentThisMonth / w.monthlyLimit) * 100)) : 0;
+              return `
+                <div class="card" style="background: var(--color-surface-white, #FFFFFF); border: 1px solid var(--color-border, #E2E8F0); border-radius: var(--radius-md, 8px); padding: 20px; box-shadow: var(--shadow-xs);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <div style="font-weight: 700; font-size: 15px; color: var(--color-text-primary);">${QrewUI.escapeHtml(w.name)}</div>
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: ${w.color}15; color: ${w.color}; display: flex; align-items: center; justify-content: center;">
+                      ${QrewUI.getIcon(w.icon || 'dollar')}
                     </div>
                   </div>
-                `).join('')}
-              </div>
-            </div>
 
-            <!-- Operational Expense Breakdown -->
-            <div class="card" style="padding:20px;">
-              <h3 style="margin:0 0 16px 0;font-size:16px;font-weight:700;">Disbursement Categories</h3>
-              <div style="display:flex;flex-direction:column;gap:14px;">
-                ${[
-                  { name: 'Port Authority Tariffs & Berthage', amount: 14200, percent: 49, color: '#EF4444' },
-                  { name: 'Harbor Tug & Towage Assistance', amount: 5600, percent: 20, color: '#F97316' },
-                  { name: 'Stevedoring & Heavy Lift Rental', amount: 3800, percent: 13, color: '#EAB308' },
-                  { name: 'Customs & Regulatory Clearances', amount: 1950, percent: 7, color: '#6366F1' },
-                  { name: 'Terminal Facility Retainers', amount: 3200, percent: 11, color: '#64748B' }
-                ].map(item => `
-                  <div>
-                    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
-                      <span style="font-weight:600;color:var(--color-text-primary);">${item.name}</span>
-                      <span style="font-weight:700;">${formatMoney(item.amount)} (${item.percent}%)</span>
-                    </div>
-                    <div style="width:100%;height:8px;background:var(--color-border);border-radius:4px;overflow:hidden;">
-                      <div style="width:${item.percent}%;height:100%;background:${item.color};border-radius:4px;"></div>
+                  <div style="margin-bottom: 16px;">
+                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-muted); font-weight: 600;">Available Balance</span>
+                    <div style="font-size: 26px; font-weight: 800; color: var(--color-text-primary); margin-top: 2px;">
+                      ${formatMoney(w.balance)}
                     </div>
                   </div>
-                `).join('')}
-              </div>
-            </div>
+
+                  <div style="border-top: 1px solid var(--color-border-subtle); padding-top: 14px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px;">
+                      <span style="color: var(--color-text-muted);">Monthly Spent</span>
+                      <span style="font-weight: 600;">${formatMoney(w.spentThisMonth)} / ${formatMoney(w.monthlyLimit)}</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: var(--color-border); border-radius: 3px; overflow: hidden;">
+                      <div style="width: ${percent}%; height: 100%; background: ${w.color}; border-radius: 3px;"></div>
+                    </div>
+                  </div>
+
+                  <button class="btn btn-secondary" style="width: 100%; font-size: 12px; padding: 7px 12px;" onclick="Qrew.views.office.topUpWalletPrompt('${w.id}', '${QrewUI.escapeHtml(w.name)}')">
+                    ${QrewUI.getIcon('plus')} Top Up Balance
+                  </button>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
+
       </div>
     `;
 
-    // Attach Event Listeners
-    setupEventListeners();
+    // Attach Event Handlers
+    attachHandlers();
   };
 
   /**
-   * DOM Listeners attachment
+   * DOM Event Listeners
    */
-  const setupEventListeners = () => {
+  const attachHandlers = () => {
     // Tab switching
-    const tabInvoices = document.getElementById('tab-invoices');
-    const tabLedger = document.getElementById('tab-ledger');
-    const tabAnalytics = document.getElementById('tab-analytics');
+    const tabExpenses = document.getElementById('tab-expenses');
+    const tabRequisitions = document.getElementById('tab-requisitions');
+    const tabWallets = document.getElementById('tab-wallets');
 
-    if (tabInvoices) {
-      tabInvoices.onclick = () => {
-        state.activeTab = 'invoices';
+    if (tabExpenses) {
+      tabExpenses.onclick = () => {
+        state.activeTab = 'expenses';
         Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
       };
     }
-    if (tabLedger) {
-      tabLedger.onclick = () => {
-        state.activeTab = 'ledger';
+    if (tabRequisitions) {
+      tabRequisitions.onclick = () => {
+        state.activeTab = 'requisitions';
         Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
       };
     }
-    if (tabAnalytics) {
-      tabAnalytics.onclick = () => {
-        state.activeTab = 'analytics';
+    if (tabWallets) {
+      tabWallets.onclick = () => {
+        state.activeTab = 'wallets';
         Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
       };
     }
 
-    // Search input
-    const searchInput = document.getElementById('financial-search-input');
-    if (searchInput) {
-      searchInput.oninput = (e) => {
-        state.invoiceSearch = e.target.value;
-        Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
-        const inputNow = document.getElementById('financial-search-input');
-        if (inputNow) {
-          inputNow.focus();
-          inputNow.selectionStart = inputNow.selectionEnd = inputNow.value.length;
-        }
-      };
+    // Top action buttons
+    const logExpenseBtn = document.getElementById('btn-log-expense');
+    if (logExpenseBtn) {
+      logExpenseBtn.onclick = () => openLogExpenseModal();
     }
 
-    // Status filter pills
-    document.querySelectorAll('.btn-filter-status').forEach(btn => {
-      btn.onclick = (e) => {
-        state.statusFilter = btn.getAttribute('data-status');
-        Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
-      };
-    });
-
-    // Ledger filter buttons
-    document.querySelectorAll('.btn-filter-ledger').forEach(btn => {
-      btn.onclick = (e) => {
-        state.ledgerFilter = btn.getAttribute('data-type');
-        Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
-      };
-    });
-
-    // Action button: Create Invoice
-    const createBtn = document.getElementById('btn-create-invoice');
-    if (createBtn) {
-      createBtn.onclick = () => openCreateInvoiceModal();
-    }
-
-    // Action button: Record Transaction
-    const recordBtn = document.getElementById('btn-record-transaction');
-    if (recordBtn) {
-      recordBtn.onclick = () => openRecordTransactionModal();
-    }
-
-    // Action button: Export CSV
-    const exportBtn = document.getElementById('btn-export-financials');
-    if (exportBtn) {
-      exportBtn.onclick = () => exportFinancialsCSV();
+    const requestFundsBtn = document.getElementById('btn-request-funds');
+    if (requestFundsBtn) {
+      requestFundsBtn.onclick = () => openRequestFundsModal();
     }
   };
 
   /**
-   * Modal: Create Invoice
+   * Modal: Log Expense
+   * Fields correspond to the table columns:
+   * 'File / Project', 'Spent By', 'Category', 'Description', 'Date', 'Amount'
    */
-  const openCreateInvoiceModal = () => {
-    const templates = QrewStore.getInvoiceTemplates(state.currentOfficeId);
-    const clients = [
-      { name: 'Apex Shipping Lines Ltd.', code: 'APEX-SHP' },
-      { name: 'Maersk Bangladesh Ltd.', code: 'MAERSK-BD' },
-      { name: 'Hapag-Lloyd Maritime', code: 'HL-MAR' },
-      { name: 'Cosco Shipping Lines', code: 'COSCO-BD' },
-      { name: 'Evergreen Marine Corp', code: 'EMC-LINE' },
-      { name: 'MSC Mediterranean Shipping', code: 'MSC-MAR' }
+  const openLogExpenseModal = () => {
+    const operationalFiles = QrewStore.getOperationalFiles(state.currentOfficeId);
+    const officeStaff = QrewStore.getOfficeStaff(state.currentOfficeId);
+    const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
+
+    const categories = [
+      'Port Authority Tariffs',
+      'Towage & Harbor Pilotage',
+      'Logistics & Transport',
+      'Customs & Regulatory',
+      'Stevedoring & Heavy Lift',
+      'Office & Facilities',
+      'Fuel & Bunker',
+      'Meals & Operations Welfare'
     ];
 
     QrewUI.openModal({
-      title: 'Generate New Office Invoice',
+      title: 'Log New Expense',
       bodyHtml: `
-        <form id="create-invoice-form" style="display:flex;flex-direction:column;gap:14px;">
+        <form id="log-expense-form" style="display: flex; flex-direction: column; gap: 14px;">
+          
+          <!-- File / Project -->
+          <div class="form-group">
+            <label class="form-label" for="exp-file-project">File / Project *</label>
+            <input list="projects-list" id="exp-file-project" class="form-input" placeholder="Select or type file / project (e.g. PRJ-CTG-0042)" required>
+            <datalist id="projects-list">
+              ${operationalFiles.map(f => `<option value="${f.fileCode} (${f.title})">`).join('')}
+              <option value="General Operations">
+              <option value="PRJ-CTG-0042 (MV Meghna Harmony)">
+              <option value="PRJ-CTG-0041 (MV Northern Diamond)">
+              <option value="PRJ-CTG-0039 (MV Ocean Voyager)">
+              <option value="PRJ-CTG-0038 (MV Banglar Samriddhi)">
+            </datalist>
+          </div>
+
           <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-client">Client / Shipping Partner *</label>
-              <select id="inv-client" class="form-input" required>
-                ${clients.map(c => `<option value="${c.name}" data-code="${c.code}">${c.name} (${c.code})</option>`).join('')}
+            <!-- Spent By -->
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="exp-spent-by">Spent By *</label>
+              <input list="staff-list" id="exp-spent-by" class="form-input" placeholder="Person who spent" required>
+              <datalist id="staff-list">
+                ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
+                <option value="Rafiqul Islam">
+                <option value="Jack Rahman">
+                <option value="Nusrat Jahan">
+              </datalist>
+            </div>
+
+            <!-- Category -->
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="exp-category">Category *</label>
+              <select id="exp-category" class="form-input" required>
+                ${categories.map(c => `<option value="${c}">${c}</option>`).join('')}
               </select>
             </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-template">Linked Invoice Template</label>
-              <select id="inv-template" class="form-input">
-                <option value="">Standard Maritime Invoice</option>
-                ${templates.map(t => `<option value="${t.id}">${QrewUI.escapeHtml(t.name)} (${t.code})</option>`).join('')}
-              </select>
-            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label" for="exp-desc">Description *</label>
+            <input type="text" id="exp-desc" class="form-input" placeholder="What was the expenditure for?" required>
           </div>
 
           <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-vessel">Vessel / Project Name *</label>
-              <input type="text" id="inv-vessel" class="form-input" placeholder="e.g. MV Banglar Protik" required>
+            <!-- Date -->
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="exp-date">Date *</label>
+              <input type="date" id="exp-date" class="form-input" value="${new Date().toISOString().split('T')[0]}" required>
             </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-voyage">Voyage / Call Reference</label>
-              <input type="text" id="inv-voyage" class="form-input" placeholder="e.g. V-2026-14" value="V-2026-${Math.floor(10 + Math.random()*90)}">
+
+            <!-- Amount -->
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="exp-amount">Amount ($ USD) *</label>
+              <input type="number" step="0.01" min="0.01" id="exp-amount" class="form-input" placeholder="0.00" required>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-amount">Total Billed Amount ($ USD) *</label>
-              <input type="number" step="0.01" min="1" id="inv-amount" class="form-input" placeholder="e.g. 25000.00" required>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="inv-due">Payment Due Date *</label>
-              <input type="date" id="inv-due" class="form-input" value="${new Date(Date.now() + 30*86400000).toISOString().split('T')[0]}" required>
-            </div>
-          </div>
-
+          <!-- Wallet Source -->
           <div class="form-group">
-            <label class="form-label" for="inv-desc">Primary Deliverable / Scope of Service</label>
-            <input type="text" id="inv-desc" class="form-input" placeholder="e.g. Harbor Towage, Berth Hire & Port Clearance Dues" value="Maritime Port Agency, Berthing & Pilotage Assistance">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="inv-notes">Disbursement Notes</label>
-            <textarea id="inv-notes" class="form-input" rows="2" placeholder="Payment terms, bank details, or master sign-off notes..."></textarea>
+            <label class="form-label" for="exp-wallet">Deduct From Wallet</label>
+            <select id="exp-wallet" class="form-input">
+              ${wallets.map(w => `<option value="${w.name}">${w.name} (Balance: $${w.balance.toLocaleString()})</option>`).join('')}
+            </select>
           </div>
         </form>
       `,
       footerHtml: `
         <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="btn-submit-create-invoice">Issue Invoice</button>
+        <button class="btn" id="btn-submit-log-expense" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; font-weight: 600;">Save Expense</button>
       `,
       onOpen: (modalEl) => {
-        const form = modalEl.querySelector('#create-invoice-form');
-        const submitBtn = modalEl.querySelector('#btn-submit-create-invoice');
+        const form = modalEl.querySelector('#log-expense-form');
+        const submitBtn = modalEl.querySelector('#btn-submit-log-expense');
 
         submitBtn.onclick = () => {
           if (!form.checkValidity()) {
@@ -575,30 +430,27 @@
             return;
           }
 
-          const clientSelect = document.getElementById('inv-client');
-          const clientName = clientSelect.value;
-          const clientCode = clientSelect.options[clientSelect.selectedIndex].getAttribute('data-code');
-          const vessel = document.getElementById('inv-vessel').value.trim();
-          const voyageNo = document.getElementById('inv-voyage').value.trim();
-          const amount = parseFloat(document.getElementById('inv-amount').value);
-          const dueDate = document.getElementById('inv-due').value;
-          const description = document.getElementById('inv-desc').value.trim();
-          const notes = document.getElementById('inv-notes').value.trim();
+          const fileProject = document.getElementById('exp-file-project').value.trim();
+          const spentBy = document.getElementById('exp-spent-by').value.trim();
+          const category = document.getElementById('exp-category').value;
+          const description = document.getElementById('exp-desc').value.trim();
+          const date = document.getElementById('exp-date').value;
+          const amount = parseFloat(document.getElementById('exp-amount').value);
+          const wallet = document.getElementById('exp-wallet').value;
 
-          const newInv = QrewStore.createOfficeInvoice(state.currentOfficeId, {
-            clientName,
-            clientCode,
-            vessel,
-            voyageNo,
-            amount,
-            dueDate,
+          QrewStore.createOfficeExpense(state.currentOfficeId, {
+            fileProject,
+            spentBy,
+            category,
             description,
-            notes,
-            status: 'Pending'
+            date,
+            amount,
+            wallet
           });
 
           QrewUI.closeModal();
-          QrewUI.showToast(`Invoice ${newInv.invoiceNo} successfully generated for ${clientName}`, 'success');
+          QrewUI.showToast(`Expense of $${amount.toFixed(2)} recorded for "${fileProject}"`, 'success');
+          state.activeTab = 'expenses';
           Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
         };
       }
@@ -606,64 +458,64 @@
   };
 
   /**
-   * Modal: Record Transaction (Payment / Disbursement)
+   * Modal: Request Funds
    */
-  const openRecordTransactionModal = () => {
+  const openRequestFundsModal = () => {
+    const officeStaff = QrewStore.getOfficeStaff(state.currentOfficeId);
+    const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
+
     QrewUI.openModal({
-      title: 'Record Financial Transaction',
+      title: 'Request Operational Funds',
       bodyHtml: `
-        <form id="record-txn-form" style="display:flex;flex-direction:column;gap:14px;">
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="txn-type">Transaction Type *</label>
-              <select id="txn-type" class="form-input" required>
-                <option value="Credit">Credit (Client Settlement Inflow)</option>
-                <option value="Debit">Debit (Disbursement / Port Expense Outflow)</option>
-              </select>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="txn-amount">Amount ($ USD) *</label>
-              <input type="number" step="0.01" min="1" id="txn-amount" class="form-input" placeholder="e.g. 15000.00" required>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="txn-category">Category *</label>
-              <select id="txn-category" class="form-input">
-                <option value="Client Settlement">Client Settlement</option>
-                <option value="Port Authority Tariff">Port Authority Tariff</option>
-                <option value="Towage & Marine Service">Towage & Marine Service</option>
-                <option value="Stevedoring & Equipment">Stevedoring & Equipment</option>
-                <option value="Customs & Regulatory">Customs & Regulatory</option>
-                <option value="Operational Petty Cash">Operational Petty Cash</option>
-              </select>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label" for="txn-method">Payment Method *</label>
-              <select id="txn-method" class="form-input">
-                <option value="SWIFT Wire">SWIFT Wire Transfer</option>
-                <option value="Bank Draft">Bank Draft / Cheque</option>
-                <option value="Letter of Credit">Letter of Credit (LC)</option>
-                <option value="Pay Order">Pay Order</option>
-                <option value="Cash Disbursement">Cash Disbursement</option>
-              </select>
-            </div>
-          </div>
-
+        <form id="request-funds-form" style="display: flex; flex-direction: column; gap: 14px;">
           <div class="form-group">
-            <label class="form-label" for="txn-desc">Transaction Description *</label>
-            <input type="text" id="txn-desc" class="form-input" placeholder="e.g. Chittagong Port Authority Berthing tariff for NCT Berth 4" required>
+            <label class="form-label" for="req-purpose">Purpose / Requisition Reason *</label>
+            <input type="text" id="req-purpose" class="form-input" placeholder="e.g. Harbor tugboat fuel advance for vessel berthing" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="req-amount">Amount Requested ($ USD) *</label>
+              <input type="number" step="0.01" min="1" id="req-amount" class="form-input" placeholder="0.00" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="req-category">Category *</label>
+              <select id="req-category" class="form-input">
+                <option value="Port Operations">Port Operations</option>
+                <option value="Customs Clearance">Customs Clearance</option>
+                <option value="Petty Cash">Petty Cash Replenishment</option>
+                <option value="Emergency Disbursal">Emergency Disbursal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="req-by">Requested By *</label>
+              <input list="req-staff-list" id="req-by" class="form-input" placeholder="Staff Name" required>
+              <datalist id="req-staff-list">
+                ${officeStaff.map(s => `<option value="${s.user.name}">`).join('')}
+                <option value="Jack Rahman">
+                <option value="Rafiqul Islam">
+                <option value="Nusrat Jahan">
+              </datalist>
+            </div>
+            <div class="form-group" style="flex: 1;">
+              <label class="form-label" for="req-wallet">Target Wallet</label>
+              <select id="req-wallet" class="form-input">
+                ${wallets.map(w => `<option value="${w.name}">${w.name}</option>`).join('')}
+              </select>
+            </div>
           </div>
         </form>
       `,
       footerHtml: `
         <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="btn-submit-record-txn">Record Transaction</button>
+        <button class="btn btn-primary" id="btn-submit-req-funds">Submit Requisition</button>
       `,
       onOpen: (modalEl) => {
-        const form = modalEl.querySelector('#record-txn-form');
-        const submitBtn = modalEl.querySelector('#btn-submit-record-txn');
+        const form = modalEl.querySelector('#request-funds-form');
+        const submitBtn = modalEl.querySelector('#btn-submit-req-funds');
 
         submitBtn.onclick = () => {
           if (!form.checkValidity()) {
@@ -671,22 +523,23 @@
             return;
           }
 
-          const type = document.getElementById('txn-type').value;
-          const amount = parseFloat(document.getElementById('txn-amount').value);
-          const category = document.getElementById('txn-category').value;
-          const method = document.getElementById('txn-method').value;
-          const description = document.getElementById('txn-desc').value.trim();
+          const purpose = document.getElementById('req-purpose').value.trim();
+          const amount = parseFloat(document.getElementById('req-amount').value);
+          const category = document.getElementById('req-category').value;
+          const requestedBy = document.getElementById('req-by').value.trim();
+          const wallet = document.getElementById('req-wallet').value;
 
-          const txn = QrewStore.createOfficeTransaction(state.currentOfficeId, {
-            type,
+          const req = QrewStore.createOfficeRequisition(state.currentOfficeId, {
+            purpose,
             amount,
             category,
-            method,
-            description
+            requestedBy,
+            wallet
           });
 
           QrewUI.closeModal();
-          QrewUI.showToast(`Transaction ${txn.reference} logged successfully (${type}: $${amount.toLocaleString()})`, 'success');
+          QrewUI.showToast(`Fund requisition ${req.requisitionNo} submitted for approval`, 'success');
+          state.activeTab = 'requisitions';
           Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
         };
       }
@@ -694,188 +547,61 @@
   };
 
   /**
-   * Modal: Full Invoice Details & Print Preview
+   * Action: Delete Expense Prompt
    */
-  Qrew.views.office.openInvoicePreview = (invoiceId) => {
-    const inv = QrewStore.getOfficeInvoiceById(invoiceId);
-    if (!inv) return;
-
-    const office = QrewStore.getOfficeById(inv.officeId);
-    const tenant = QrewStore.getTenantById(inv.tenantId);
-
-    const subtotal = inv.items.reduce((acc, it) => acc + (Number(it.amount) || 0), 0);
-    const tax = subtotal * 0.15; // 15% VAT
-    const grandTotal = subtotal + tax;
-
-    QrewUI.openModal({
-      title: `Invoice Details — ${inv.invoiceNo}`,
-      bodyHtml: `
-        <div id="printable-invoice" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:24px;font-family:inherit;">
-          <!-- Invoice Header -->
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--color-border);padding-bottom:16px;margin-bottom:18px;">
-            <div>
-              <div style="font-size:22px;font-weight:800;color:var(--panel-accent, var(--color-accent));">${tenant ? QrewUI.escapeHtml(tenant.name) : 'SST Port Agency'}</div>
-              <div style="font-size:13px;font-weight:600;color:var(--color-text-primary);margin-top:2px;">${office ? QrewUI.escapeHtml(office.name) : 'Chittagong Port Office'}</div>
-              <div style="font-size:12px;color:var(--color-text-muted);">${office ? QrewUI.escapeHtml(office.location) : 'Agrabad C/A, Chittagong, Bangladesh'}</div>
-              <div style="font-size:12px;color:var(--color-text-muted);">Email: agency@sst.com | Tel: +880 1711-234567</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:20px;font-weight:800;letter-spacing:1px;color:var(--color-text-primary);">COMMERCIAL INVOICE</div>
-              <div style="font-size:14px;font-weight:700;color:var(--color-accent);">${QrewUI.escapeHtml(inv.invoiceNo)}</div>
-              <div style="font-size:12px;margin-top:4px;">${getInvoiceBadge(inv.status)}</div>
-            </div>
-          </div>
-
-          <!-- Vessel & Client Metadata Grid -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:12px;background:var(--color-surface-white);border:1px solid var(--color-border);border-radius:var(--radius-sm);margin-bottom:20px;font-size:12px;">
-            <div>
-              <div style="color:var(--color-text-muted);text-transform:uppercase;font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">Billed To (Client):</div>
-              <div style="font-weight:700;font-size:13px;color:var(--color-text-primary);">${QrewUI.escapeHtml(inv.clientName)}</div>
-              <div style="color:var(--color-text-muted);">${QrewUI.escapeHtml(inv.clientCode || 'Verified Account')}</div>
-            </div>
-            <div style="text-align:right;">
-              <div><strong>Vessel:</strong> ${QrewUI.escapeHtml(inv.vessel || 'N/A')}</div>
-              <div><strong>Voyage No:</strong> ${QrewUI.escapeHtml(inv.voyageNo || 'N/A')}</div>
-              <div><strong>Date of Issue:</strong> ${inv.issueDate}</div>
-              <div><strong>Payment Due:</strong> ${inv.dueDate}</div>
-            </div>
-          </div>
-
-          <!-- Line Items Table -->
-          <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:20px;">
-            <thead>
-              <tr style="border-bottom:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);font-weight:700;">
-                <th style="padding:8px 12px;text-align:left;">#</th>
-                <th style="padding:8px 12px;text-align:left;">Deliverable / Service Particulars</th>
-                <th style="padding:8px 12px;text-align:right;">Amount (USD)</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${inv.items.map((it, idx) => `
-                <tr style="border-bottom:1px solid var(--color-border-subtle);">
-                  <td style="padding:10px 12px;color:var(--color-text-muted);">${idx + 1}</td>
-                  <td style="padding:10px 12px;font-weight:500;">${QrewUI.escapeHtml(it.name)}</td>
-                  <td style="padding:10px 12px;text-align:right;font-weight:600;">$${Number(it.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-
-          <!-- Financial Calculation Totals -->
-          <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
-            <div style="width:260px;font-size:13px;">
-              <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--color-text-muted);">
-                <span>Subtotal:</span>
-                <span style="font-weight:600;color:var(--color-text-primary);">$${subtotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;padding:4px 0;color:var(--color-text-muted);">
-                <span>Port & Govt VAT (15%):</span>
-                <span style="font-weight:600;color:var(--color-text-primary);">$${tax.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:2px solid var(--color-border);font-size:15px;font-weight:800;color:var(--panel-accent, var(--color-accent));">
-                <span>Grand Total:</span>
-                <span>$${grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notes -->
-          ${inv.notes ? `
-            <div style="font-size:12px;color:var(--color-text-muted);background:var(--color-surface-white);padding:10px;border-radius:var(--radius-sm);border:1px solid var(--color-border);">
-              <strong>Remarks:</strong> ${QrewUI.escapeHtml(inv.notes)}
-            </div>
-          ` : ''}
-        </div>
-      `,
-      footerHtml: `
-        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Close</button>
-        <button class="btn btn-outline" onclick="window.print()">
-          ${QrewUI.getIcon('file')} Print Invoice
-        </button>
-        ${inv.status !== 'Paid' ? `
-          <button class="btn btn-primary" onclick="Qrew.views.office.quickMarkPaid('${inv.id}')">
-            ${QrewUI.getIcon('check')} Mark as Paid
-          </button>
-        ` : ''}
-      `
+  Qrew.views.office.deleteExpensePrompt = (id) => {
+    QrewUI.confirmDialog({
+      title: 'Delete Expense Record?',
+      message: 'Are you sure you want to delete this expense record? This will remove the voucher from the financial records.',
+      confirmLabel: 'Delete Expense',
+      confirmVariant: 'danger',
+      onConfirm: () => {
+        QrewStore.deleteOfficeExpense(id);
+        QrewUI.showToast('Expense record deleted.', 'info');
+        Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
+      }
     });
   };
 
   /**
-   * Action: Quick Mark Paid
+   * Action: Approve Requisition
    */
-  Qrew.views.office.quickMarkPaid = (invoiceId) => {
-    const inv = QrewStore.getOfficeInvoiceById(invoiceId);
-    if (!inv) return;
-
-    QrewStore.updateOfficeInvoiceStatus(invoiceId, 'Paid');
-
-    // Automatically record corresponding credit transaction in ledger
-    QrewStore.createOfficeTransaction(inv.officeId, {
-      type: 'Credit',
-      amount: inv.amount,
-      category: 'Client Settlement',
-      method: 'SWIFT Wire',
-      description: `Settlement received for ${inv.invoiceNo} (${inv.clientName})`
-    });
-
-    QrewUI.closeModal();
-    QrewUI.showToast(`Invoice ${inv.invoiceNo} marked as Paid. Transaction credited to cash flow.`, 'success');
+  Qrew.views.office.approveRequisition = (id) => {
+    QrewStore.updateOfficeRequisitionStatus(id, 'Approved');
+    QrewUI.showToast('Requisition approved and scheduled for disbursement.', 'success');
     Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
   };
 
   /**
-   * Action: Delete Invoice Prompt
+   * Action: Top Up Wallet
    */
-  Qrew.views.office.deleteInvoicePrompt = (invoiceId) => {
-    const inv = QrewStore.getOfficeInvoiceById(invoiceId);
-    if (!inv) return;
-
-    QrewUI.confirmDialog({
-      title: 'Delete Invoice?',
-      message: `Are you sure you want to permanently delete invoice "${inv.invoiceNo}" for ${inv.clientName}? This action is irreversible.`,
-      confirmLabel: 'Delete Invoice',
-      confirmVariant: 'danger',
-      onConfirm: () => {
-        QrewStore.deleteOfficeInvoice(invoiceId);
-        QrewUI.showToast(`Invoice ${inv.invoiceNo} was deleted.`, 'info');
-        Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
+  Qrew.views.office.topUpWalletPrompt = (id, name) => {
+    QrewUI.openModal({
+      title: `Top Up ${name}`,
+      bodyHtml: `
+        <div style="margin-bottom: 12px; font-size: 13px; color: var(--color-text-muted);">
+          Allocate additional operating budget to this wallet.
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="topup-amount">Top Up Amount ($ USD) *</label>
+          <input type="number" step="100" min="50" id="topup-amount" class="form-input" value="1000" required>
+        </div>
+      `,
+      footerHtml: `
+        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-topup">Add Funds</button>
+      `,
+      onOpen: (modalEl) => {
+        const confirmBtn = modalEl.querySelector('#btn-confirm-topup');
+        confirmBtn.onclick = () => {
+          const amt = parseFloat(document.getElementById('topup-amount').value);
+          if (!amt || amt <= 0) return;
+          QrewStore.topUpOfficeWallet(id, amt);
+          QrewUI.closeModal();
+          QrewUI.showToast(`$${amt.toLocaleString()} added to ${name}`, 'success');
+          Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
+        };
       }
     });
-  };
-
-  /**
-   * Action: Export Financials to CSV
-   */
-  const exportFinancialsCSV = () => {
-    const invoices = QrewStore.getOfficeInvoices(state.currentOfficeId);
-    if (!invoices || !invoices.length) {
-      QrewUI.showToast('No invoices to export.', 'warning');
-      return;
-    }
-
-    const headers = ['Invoice No', 'Client Name', 'Client Code', 'Vessel', 'Voyage', 'Issue Date', 'Due Date', 'Amount (USD)', 'Status'];
-    const rows = invoices.map(i => [
-      `"${i.invoiceNo}"`,
-      `"${i.clientName}"`,
-      `"${i.clientCode || ''}"`,
-      `"${i.vessel || ''}"`,
-      `"${i.voyageNo || ''}"`,
-      `"${i.issueDate}"`,
-      `"${i.dueDate}"`,
-      i.amount,
-      `"${i.status}"`
-    ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Office_Financials_Report_${state.currentOfficeId}_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    QrewUI.showToast('Financial CSV report downloaded.', 'success');
   };
 })();

@@ -900,6 +900,149 @@ const DEFAULT_DATA = {
       method: 'Treasury Challan',
       status: 'Completed'
     }
+  ],
+  officeExpenses: [
+    {
+      id: 'exp_1',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      fileProject: 'PRJ-CTG-0042 (MV Meghna Harmony)',
+      spentBy: 'Rafiqul Islam',
+      category: 'Port Authority Tariffs',
+      description: 'Emergency berthing line handlers overtime fee at NCT Berth 4',
+      date: '2026-11-22',
+      amount: 1250.00,
+      currency: 'USD',
+      wallet: 'Operations Petty Cash'
+    },
+    {
+      id: 'exp_2',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      fileProject: 'PRJ-CTG-0041 (MV Northern Diamond)',
+      spentBy: 'Jack Rahman',
+      category: 'Logistics & Transport',
+      description: 'Container yard transfer shuttle and pilot escort van rental',
+      date: '2026-11-20',
+      amount: 480.00,
+      currency: 'USD',
+      wallet: 'Operations Petty Cash'
+    },
+    {
+      id: 'exp_3',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      fileProject: 'PRJ-CTG-0039 (MV Ocean Voyager)',
+      spentBy: 'Nusrat Jahan',
+      category: 'Customs & Regulatory',
+      description: 'Dangerous goods documentation clearance stamp duty & filing fees',
+      date: '2026-11-18',
+      amount: 650.00,
+      currency: 'USD',
+      wallet: 'Port Authority Escrow'
+    },
+    {
+      id: 'exp_4',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      fileProject: 'PRJ-CTG-0038 (MV Banglar Samriddhi)',
+      spentBy: 'Jack Rahman',
+      category: 'Towage & Harbor Pilotage',
+      description: 'Harbor tugboat fuel surcharge dispatch reimbursement',
+      date: '2026-11-15',
+      amount: 2200.00,
+      currency: 'USD',
+      wallet: 'Towage & Berthing Reserve'
+    },
+    {
+      id: 'exp_5',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      fileProject: 'General Operations',
+      spentBy: 'Rafiqul Islam',
+      category: 'Office & Facilities',
+      description: 'Port communication VHF radio maintenance and dock batteries',
+      date: '2026-11-12',
+      amount: 320.00,
+      currency: 'USD',
+      wallet: 'Operations Petty Cash'
+    }
+  ],
+  officeRequisitions: [
+    {
+      id: 'req_1',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      requisitionNo: 'REQ-2026-031',
+      requestedBy: 'Jack Rahman',
+      category: 'Port Operations',
+      amount: 3500.00,
+      purpose: 'Harbor tugboat advance fund for upcoming Maersk container call',
+      date: '2026-11-23',
+      status: 'Pending',
+      wallet: 'Towage & Berthing Reserve'
+    },
+    {
+      id: 'req_2',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      requisitionNo: 'REQ-2026-030',
+      requestedBy: 'Nusrat Jahan',
+      category: 'Customs Clearance',
+      amount: 1800.00,
+      purpose: 'Advance treasury challan deposit for customs manifest filing',
+      date: '2026-11-21',
+      status: 'Approved',
+      wallet: 'Port Authority Escrow'
+    },
+    {
+      id: 'req_3',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      requisitionNo: 'REQ-2026-029',
+      requestedBy: 'Rafiqul Islam',
+      category: 'Petty Cash',
+      amount: 2000.00,
+      purpose: 'Monthly office operational petty cash replenishment',
+      date: '2026-11-15',
+      status: 'Disbursed',
+      wallet: 'Operations Petty Cash'
+    }
+  ],
+  officeWallets: [
+    {
+      id: 'wlt_1',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'Operations Petty Cash',
+      balance: 4250.00,
+      monthlyLimit: 10000.00,
+      spentThisMonth: 2050.00,
+      color: '#10B981',
+      icon: 'dollar'
+    },
+    {
+      id: 'wlt_2',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'Port Authority Escrow',
+      balance: 18500.00,
+      monthlyLimit: 50000.00,
+      spentThisMonth: 14850.00,
+      color: '#3B82F6',
+      icon: 'shield'
+    },
+    {
+      id: 'wlt_3',
+      officeId: 'off_ctg_port',
+      tenantId: 'ten_sst',
+      name: 'Towage & Berthing Reserve',
+      balance: 9400.00,
+      monthlyLimit: 25000.00,
+      spentThisMonth: 7800.00,
+      color: '#8B5CF6',
+      icon: 'activity'
+    }
   ]
 };
 
@@ -933,6 +1076,9 @@ class DataStore {
         if (!parsed.invoiceTemplates || parsed.invoiceTemplates.length === 0) parsed.invoiceTemplates = JSON.parse(JSON.stringify(DEFAULT_DATA.invoiceTemplates || []));
         if (!parsed.officeInvoices || parsed.officeInvoices.length === 0) parsed.officeInvoices = JSON.parse(JSON.stringify(DEFAULT_DATA.officeInvoices || []));
         if (!parsed.officeTransactions || parsed.officeTransactions.length === 0) parsed.officeTransactions = JSON.parse(JSON.stringify(DEFAULT_DATA.officeTransactions || []));
+        if (!parsed.officeExpenses || parsed.officeExpenses.length === 0) parsed.officeExpenses = JSON.parse(JSON.stringify(DEFAULT_DATA.officeExpenses || []));
+        if (!parsed.officeRequisitions || parsed.officeRequisitions.length === 0) parsed.officeRequisitions = JSON.parse(JSON.stringify(DEFAULT_DATA.officeRequisitions || []));
+        if (!parsed.officeWallets || parsed.officeWallets.length === 0) parsed.officeWallets = JSON.parse(JSON.stringify(DEFAULT_DATA.officeWallets || []));
         return parsed;
       }
     } catch (e) {
@@ -2376,6 +2522,155 @@ class DataStore {
     );
     this.save();
     return JSON.parse(JSON.stringify(newTxn));
+  }
+
+  // Office Expenses
+  getOfficeExpenses(officeId = null) {
+    if (!this.data.officeExpenses) this.data.officeExpenses = [];
+    let list = this.data.officeExpenses;
+    if (officeId) {
+      list = list.filter(e => e.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  createOfficeExpense(officeId, data) {
+    if (!this.data.officeExpenses) this.data.officeExpenses = [];
+    const office = this.getOfficeById(officeId);
+    const tenantId = office ? office.tenantId : 'ten_sst';
+    const id = 'exp_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+
+    const newExpense = {
+      id,
+      officeId,
+      tenantId,
+      fileProject: data.fileProject || 'General Operations',
+      spentBy: data.spentBy || 'Office Staff',
+      category: data.category || 'General Operational',
+      description: data.description || 'Disbursement expense',
+      date: data.date || new Date().toISOString().split('T')[0],
+      amount: parseFloat(data.amount) || 0,
+      currency: data.currency || 'USD',
+      wallet: data.wallet || 'Operations Petty Cash'
+    };
+
+    this.data.officeExpenses.unshift(newExpense);
+
+    // Also deduct or record in transactions ledger
+    this.createOfficeTransaction(officeId, {
+      type: 'Debit',
+      amount: newExpense.amount,
+      category: newExpense.category,
+      method: 'Expense Voucher',
+      description: `Expense: ${newExpense.description} (${newExpense.fileProject})`
+    });
+
+    this.addAuditLog(
+      'LOG_EXPENSE',
+      'Office Expense',
+      newExpense.id,
+      `Logged expense of $${newExpense.amount.toLocaleString()} by ${newExpense.spentBy} for ${newExpense.fileProject}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(newExpense));
+  }
+
+  deleteOfficeExpense(id) {
+    if (!this.data.officeExpenses) this.data.officeExpenses = [];
+    const idx = this.data.officeExpenses.findIndex(e => e.id === id);
+    if (idx === -1) return false;
+    const removed = this.data.officeExpenses.splice(idx, 1)[0];
+    this.addAuditLog(
+      'DELETE_EXPENSE',
+      'Office Expense',
+      id,
+      `Deleted expense of $${removed.amount} (${removed.description})`
+    );
+    this.save();
+    return true;
+  }
+
+  // Office Requisitions
+  getOfficeRequisitions(officeId = null) {
+    if (!this.data.officeRequisitions) this.data.officeRequisitions = [];
+    let list = this.data.officeRequisitions;
+    if (officeId) {
+      list = list.filter(r => r.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  createOfficeRequisition(officeId, data) {
+    if (!this.data.officeRequisitions) this.data.officeRequisitions = [];
+    const office = this.getOfficeById(officeId);
+    const tenantId = office ? office.tenantId : 'ten_sst';
+    const id = 'req_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 4);
+    const count = this.data.officeRequisitions.length + 1;
+    const requisitionNo = data.requisitionNo || `REQ-2026-${String(count).padStart(3, '0')}`;
+
+    const newReq = {
+      id,
+      officeId,
+      tenantId,
+      requisitionNo,
+      requestedBy: data.requestedBy || 'Office Staff',
+      category: data.category || 'General Operational',
+      amount: parseFloat(data.amount) || 0,
+      purpose: data.purpose || 'Operational fund requisition',
+      date: data.date || new Date().toISOString().split('T')[0],
+      status: 'Pending',
+      wallet: data.wallet || 'Operations Petty Cash'
+    };
+
+    this.data.officeRequisitions.unshift(newReq);
+    this.addAuditLog(
+      'CREATE_REQUISITION',
+      'Fund Requisition',
+      newReq.id,
+      `Created requisition "${newReq.requisitionNo}" for $${newReq.amount.toLocaleString()} by ${newReq.requestedBy}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(newReq));
+  }
+
+  updateOfficeRequisitionStatus(id, status) {
+    if (!this.data.officeRequisitions) this.data.officeRequisitions = [];
+    const idx = this.data.officeRequisitions.findIndex(r => r.id === id);
+    if (idx === -1) return null;
+    this.data.officeRequisitions[idx].status = status;
+    this.addAuditLog(
+      'UPDATE_REQUISITION',
+      'Fund Requisition',
+      id,
+      `Updated requisition "${this.data.officeRequisitions[idx].requisitionNo}" status to ${status}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(this.data.officeRequisitions[idx]));
+  }
+
+  // Office Wallets
+  getOfficeWallets(officeId = null) {
+    if (!this.data.officeWallets) this.data.officeWallets = [];
+    let list = this.data.officeWallets;
+    if (officeId) {
+      list = list.filter(w => w.officeId === officeId);
+    }
+    return JSON.parse(JSON.stringify(list));
+  }
+
+  topUpOfficeWallet(id, amount) {
+    if (!this.data.officeWallets) return null;
+    const found = this.data.officeWallets.find(w => w.id === id);
+    if (!found) return null;
+    found.balance = (parseFloat(found.balance) || 0) + parseFloat(amount);
+    this.addAuditLog(
+      'TOPUP_WALLET',
+      'Office Wallet',
+      id,
+      `Added $${amount} to wallet "${found.name}". New balance: $${found.balance}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(found));
   }
 }
 
