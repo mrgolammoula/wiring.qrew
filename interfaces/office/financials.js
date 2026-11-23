@@ -1,8 +1,9 @@
 /**
  * Interface: Office Workspace — Financials Dashboard
  * Matches Reference UI (qrew-six.vercel.app/dashboard/financials)
- * Implements Expenses, Requisitions, and Wallets with exact column order:
- * 'File / Project' -> 'Spent By' -> 'Category' -> 'Description' -> 'Date' -> 'Amount'
+ * - Expenses Tab Columns: 'File / Project' -> 'Spent By' -> 'Category' -> 'Description' -> 'Date' -> 'Amount'
+ * - Requisitions Tab Columns: 'Requested By' -> 'Amount' -> 'Date' -> 'File / Project' -> 'Status' -> 'Actions'
+ * - Actions Column: 'Action' & 'Action & Disburse' (with Overwrite Amount, Live Preview, and Final Approve)
  */
 (() => {
   const Qrew = window.Qrew;
@@ -13,7 +14,7 @@
 
   // Module state
   const state = {
-    activeTab: 'expenses', // 'expenses' | 'requisitions' | 'wallets'
+    activeTab: 'requisitions', // Default to requisitions or maintain current tab
     searchTerm: '',
     currentOfficeId: null,
     currentTenantId: null
@@ -31,8 +32,10 @@
    */
   const getRequisitionBadge = (status) => {
     const s = (status || 'Pending').toLowerCase();
-    if (s === 'approved' || s === 'disbursed') {
-      return `<span class="badge badge-active"><span class="badge-dot"></span>${QrewUI.escapeHtml(status)}</span>`;
+    if (s === 'disbursed') {
+      return `<span class="badge badge-active" style="color:var(--color-success);font-weight:700;"><span class="badge-dot"></span>Disbursed</span>`;
+    } else if (s === 'approved') {
+      return `<span class="badge badge-active"><span class="badge-dot"></span>Approved</span>`;
     } else if (s === 'pending') {
       return `<span class="badge badge-pending"><span class="badge-dot"></span>Pending</span>`;
     } else if (s === 'rejected') {
@@ -105,11 +108,10 @@
         </div>
 
         <!-- TAB 1: EXPENSES TABLE -->
+        <!-- Titles order: 'File / Project' -> 'Spent By' -> 'Category' -> 'Description' -> 'Date' -> 'Amount' -->
         <div id="content-expenses" style="${state.activeTab === 'expenses' ? 'display:block;' : 'display:none;'}">
           <div class="card" style="background: var(--color-surface-white, #FFFFFF); border: 1px solid var(--color-border, #E2E8F0); border-radius: var(--radius-md, 8px); overflow: hidden; box-shadow: var(--shadow-xs);">
-            
             ${filteredExpenses.length === 0 ? `
-              <!-- Empty state matching reference image -->
               <div style="padding: 80px 20px; text-align: center; color: var(--color-text-muted);">
                 <p style="font-size: 14px; margin: 0; color: var(--color-text-muted);">No expenses found.</p>
               </div>
@@ -130,16 +132,12 @@
                   <tbody>
                     ${filteredExpenses.map(exp => `
                       <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
-                        
-                        <!-- 1. File / Project -->
                         <td style="padding: 14px 18px; font-weight: 600; color: var(--color-text-primary);">
                           <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="color: var(--panel-accent, var(--color-accent));">${QrewUI.getIcon('folder')}</span>
                             <span>${QrewUI.escapeHtml(exp.fileProject)}</span>
                           </div>
                         </td>
-
-                        <!-- 2. Spent By -->
                         <td style="padding: 14px 18px; color: var(--color-text-primary);">
                           <div style="display: flex; align-items: center; gap: 8px;">
                             <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary);">
@@ -148,30 +146,20 @@
                             <span style="font-weight: 500;">${QrewUI.escapeHtml(exp.spentBy)}</span>
                           </div>
                         </td>
-
-                        <!-- 3. Category -->
                         <td style="padding: 14px 18px;">
                           <span class="badge-role office" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border);">
                             ${QrewUI.escapeHtml(exp.category)}
                           </span>
                         </td>
-
-                        <!-- 4. Description -->
                         <td style="padding: 14px 18px; color: var(--color-text-secondary); line-height: 1.4;">
                           ${QrewUI.escapeHtml(exp.description)}
                         </td>
-
-                        <!-- 5. Date -->
                         <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
                           ${exp.date}
                         </td>
-
-                        <!-- 6. Amount -->
                         <td style="padding: 14px 18px; text-align: right; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
                           ${formatMoney(exp.amount, '$')}
                         </td>
-
-                        <!-- Action / Delete -->
                         <td style="padding: 14px 14px; text-align: center;">
                           <button class="btn btn-secondary btn-icon btn-danger-light" style="padding: 4px 6px; font-size: 11px; border: none;" onclick="Qrew.views.office.deleteExpensePrompt('${exp.id}')" title="Delete Expense">
                             ${QrewUI.getIcon('trash')}
@@ -187,6 +175,7 @@
         </div>
 
         <!-- TAB 2: REQUISITIONS TABLE -->
+        <!-- Titles order matching screenshot: 'Requested By' -> 'Amount' -> 'Date' -> 'File / Project' -> 'Status' -> 'Actions' -->
         <div id="content-requisitions" style="${state.activeTab === 'requisitions' ? 'display:block;' : 'display:none;'}">
           <div class="card" style="background: var(--color-surface-white, #FFFFFF); border: 1px solid var(--color-border, #E2E8F0); border-radius: var(--radius-md, 8px); overflow: hidden; box-shadow: var(--shadow-xs);">
             ${requisitions.length === 0 ? `
@@ -198,36 +187,80 @@
                 <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                   <thead>
                     <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); text-align: left; color: var(--color-text-muted); font-size: 12px; font-weight: 600;">
-                      <th style="padding: 14px 18px;">Requisition #</th>
-                      <th style="padding: 14px 18px;">Requested By</th>
-                      <th style="padding: 14px 18px;">Category</th>
-                      <th style="padding: 14px 18px;">Purpose / Reason</th>
-                      <th style="padding: 14px 18px;">Date</th>
-                      <th style="padding: 14px 18px; text-align: right;">Amount</th>
-                      <th style="padding: 14px 18px; text-align: center;">Status</th>
-                      <th style="padding: 14px 18px; text-align: right;">Actions</th>
+                      <th style="padding: 14px 18px; width: 18%;">Requested By</th>
+                      <th style="padding: 14px 18px; width: 12%; text-align: left;">Amount</th>
+                      <th style="padding: 14px 18px; width: 12%;">Date</th>
+                      <th style="padding: 14px 18px; width: 24%;">File / Project</th>
+                      <th style="padding: 14px 18px; width: 12%; text-align: center;">Status</th>
+                      <th style="padding: 14px 18px; width: 22%; text-align: right;">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${requisitions.map(req => `
-                      <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9);">
-                        <td style="padding: 14px 18px; font-weight: 700;">
-                          <span class="id-badge">${QrewUI.escapeHtml(req.requisitionNo)}</span>
+                      <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
+                        
+                        <!-- 1. Requested By -->
+                        <td style="padding: 14px 18px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary);">
+                              ${req.requestedBy ? req.requestedBy.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                              <div style="font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(req.requestedBy)}</div>
+                              <div style="font-size: 11px; color: var(--color-text-muted);">${QrewUI.escapeHtml(req.requisitionNo)}</div>
+                            </div>
+                          </div>
                         </td>
-                        <td style="padding: 14px 18px; font-weight: 500;">${QrewUI.escapeHtml(req.requestedBy)}</td>
-                        <td style="padding: 14px 18px;"><span class="badge-role office">${QrewUI.escapeHtml(req.category)}</span></td>
-                        <td style="padding: 14px 18px; color: var(--color-text-secondary);">${QrewUI.escapeHtml(req.purpose)}</td>
-                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px;">${req.date}</td>
-                        <td style="padding: 14px 18px; text-align: right; font-weight: 700; color: var(--color-text-primary);">${formatMoney(req.amount)}</td>
-                        <td style="padding: 14px 18px; text-align: center;">${getRequisitionBadge(req.status)}</td>
+
+                        <!-- 2. Amount -->
+                        <td style="padding: 14px 18px; font-weight: 700; color: var(--color-text-primary); font-size: 14px;">
+                          ${formatMoney(req.amount)}
+                          ${req.originalAmount && req.originalAmount !== req.amount ? `
+                            <div style="font-size: 10px; color: var(--color-text-muted); text-decoration: line-through; font-weight: 400;">
+                              orig: ${formatMoney(req.originalAmount)}
+                            </div>
+                          ` : ''}
+                        </td>
+
+                        <!-- 3. Date -->
+                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+                          ${req.date}
+                        </td>
+
+                        <!-- 4. File / Project -->
+                        <td style="padding: 14px 18px;">
+                          <div style="font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(req.fileProject || 'General Operations')}</div>
+                          <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">${QrewUI.escapeHtml(req.purpose || req.category)}</div>
+                        </td>
+
+                        <!-- 5. Status -->
+                        <td style="padding: 14px 18px; text-align: center;">
+                          ${getRequisitionBadge(req.status)}
+                        </td>
+
+                        <!-- 6. Actions (Two Sections: 'Action' and 'Action & Disburse') -->
                         <td style="padding: 14px 18px; text-align: right;">
-                          ${req.status === 'Pending' ? `
-                            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px; color: var(--color-success);" onclick="Qrew.views.office.approveRequisition('${req.id}')">
-                              Approve
+                          <div style="display: inline-flex; align-items: center; gap: 8px;">
+                            
+                            <!-- Section 1: Standard Action Button / Menu -->
+                            <button class="btn btn-secondary btn-action-preview" style="padding: 6px 11px; font-size: 12px; font-weight: 500;" onclick="Qrew.views.office.openActionModal('${req.id}')" title="Preview Requisition Details">
+                              Action
                             </button>
-                          ` : `
-                            <span style="font-size: 12px; color: var(--color-text-muted);">Reconciled</span>
-                          `}
+
+                            <!-- Section 2: Action & Disburse Button (with amount override & approval) -->
+                            ${req.status !== 'Disbursed' ? `
+                              <button class="btn btn-action-disburse" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px; box-shadow: var(--shadow-xs);" onclick="Qrew.views.office.openActionDisburseModal('${req.id}')" title="Review, Overwrite Amount, Preview, and Final Approve">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+                                Action & Disburse
+                              </button>
+                            ` : `
+                              <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; color: var(--color-success); font-weight: 600;" onclick="Qrew.views.office.openActionModal('${req.id}')">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Disbursed
+                              </button>
+                            `}
+
+                          </div>
                         </td>
                       </tr>
                     `).join('')}
@@ -326,9 +359,286 @@
   };
 
   /**
+   * Action Section 1: Standard "Action" Modal
+   * Displays full Requisition particulars, audit log, and reject/cancel option.
+   */
+  Qrew.views.office.openActionModal = (reqId) => {
+    const requisitions = QrewStore.getOfficeRequisitions(state.currentOfficeId);
+    const req = requisitions.find(r => r.id === reqId);
+    if (!req) return;
+
+    QrewUI.openModal({
+      title: `Requisition Action — ${req.requisitionNo}`,
+      bodyHtml: `
+        <div style="font-size: 13px;">
+          <!-- Meta Grid -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: var(--color-surface); padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); margin-bottom: 16px;">
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">Requested By</span>
+              <div style="font-weight: 700; font-size: 14px; margin-top: 2px;">${QrewUI.escapeHtml(req.requestedBy)}</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">Status</span>
+              <div style="margin-top: 2px;">${getRequisitionBadge(req.status)}</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">File / Project</span>
+              <div style="font-weight: 600; margin-top: 2px;">${QrewUI.escapeHtml(req.fileProject || 'General Operations')}</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">Requisition Date</span>
+              <div style="font-weight: 600; margin-top: 2px;">${req.date}</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">Amount</span>
+              <div style="font-size: 18px; font-weight: 800; color: var(--color-text-primary); margin-top: 2px;">${formatMoney(req.amount)}</div>
+            </div>
+            <div>
+              <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; font-weight: 600;">Assigned Wallet</span>
+              <div style="font-weight: 600; margin-top: 2px;">${QrewUI.escapeHtml(req.wallet || 'Operations Petty Cash')}</div>
+            </div>
+          </div>
+
+          <!-- Purpose / Notes -->
+          <div style="margin-bottom: 16px;">
+            <label class="form-label">Purpose & Justification</label>
+            <div style="background: var(--color-surface-white); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-sm); color: var(--color-text-secondary); line-height: 1.5;">
+              ${QrewUI.escapeHtml(req.purpose || 'No description provided.')}
+            </div>
+          </div>
+
+          ${req.disbursementRemarks ? `
+            <div style="margin-bottom: 16px;">
+              <label class="form-label">Disbursement Remarks</label>
+              <div style="background: #ECFDF5; border: 1px solid #A7F3D0; padding: 10px; border-radius: var(--radius-sm); color: #065F46; font-size: 12px;">
+                ${QrewUI.escapeHtml(req.disbursementRemarks)}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `,
+      footerHtml: `
+        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Close</button>
+        ${req.status === 'Pending' ? `
+          <button class="btn btn-danger-light" onclick="Qrew.views.office.rejectRequisitionPrompt('${req.id}')">
+            Reject Requisition
+          </button>
+          <button class="btn" style="background-color: #059669; color: #FFFFFF; font-weight: 600;" onclick="QrewUI.closeModal(); Qrew.views.office.openActionDisburseModal('${req.id}')">
+            Proceed to Action & Disburse &rarr;
+          </button>
+        ` : ''}
+      `
+    });
+  };
+
+  /**
+   * Action Section 2: "Action & Disburse" Modal
+   * Contains the two options requested:
+   * 1. Overwrite the Amount (Admin can edit / overwrite the disbursement amount)
+   * 2. Live Preview then Final Approve (Shows preview voucher, wallet impact, and triggers final approval)
+   */
+  Qrew.views.office.openActionDisburseModal = (reqId) => {
+    const requisitions = QrewStore.getOfficeRequisitions(state.currentOfficeId);
+    const req = requisitions.find(r => r.id === reqId);
+    if (!req) return;
+
+    const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
+    let selectedWalletName = req.wallet || (wallets.length ? wallets[0].name : 'Operations Petty Cash');
+    let currentDisburseAmount = req.amount;
+
+    QrewUI.openModal({
+      title: `Action & Disburse — ${req.requisitionNo}`,
+      bodyHtml: `
+        <div class="action-disburse-container" style="font-size: 13px; display: flex; flex-direction: column; gap: 16px;">
+          
+          <!-- Banner: Requisition Details summary -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: var(--color-surface); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+            <div>
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600;">Requisition For</span>
+              <div style="font-weight: 700; font-size: 14px;">${QrewUI.escapeHtml(req.requestedBy)}</div>
+              <div style="font-size: 12px; color: var(--color-text-muted);">${QrewUI.escapeHtml(req.fileProject || 'General Operations')}</div>
+            </div>
+            <div style="text-align: right;">
+              <span style="font-size: 11px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600;">Original Requested</span>
+              <div style="font-size: 16px; font-weight: 700; color: var(--color-text-primary);">${formatMoney(req.amount)}</div>
+              <div style="font-size: 11px; color: var(--color-text-muted);">${req.date}</div>
+            </div>
+          </div>
+
+          <!-- OPTION 1: ADMIN AMOUNT OVERWRITE SECTION -->
+          <div class="option-card" style="border: 1px solid #CBD5E1; border-radius: var(--radius-md); padding: 16px; background: #F8FAFC;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <label class="form-label" style="font-weight: 700; margin: 0; color: #0F172A; display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Option 1: Overwrite Disbursed Amount
+              </label>
+              <span class="badge" style="background: #E0E7FF; color: #3730A3; font-weight: 600; font-size: 11px;">Admin Control</span>
+            </div>
+            <p style="font-size: 12px; color: var(--color-text-muted); margin: 0 0 12px 0;">
+              You can adjust or overwrite the approved amount to be disbursed from the budget.
+            </p>
+
+            <div class="form-row" style="margin-bottom: 0;">
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label" for="disburse-amount-input">Approved Disbursement Amount ($ USD) *</label>
+                <div style="position: relative;">
+                  <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--color-text-muted);">$</span>
+                  <input type="number" step="0.01" min="0.01" id="disburse-amount-input" class="form-input" style="padding-left: 24px; font-size: 15px; font-weight: 700; color: var(--color-text-primary);" value="${req.amount}" required>
+                </div>
+                <div id="overwrite-notice" style="font-size: 11px; color: var(--color-text-muted); margin-top: 4px;">
+                  Original requested: ${formatMoney(req.amount)} (Unchanged)
+                </div>
+              </div>
+
+              <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                <label class="form-label" for="disburse-wallet-select">Source Wallet</label>
+                <select id="disburse-wallet-select" class="form-input" style="font-size: 13px;">
+                  ${wallets.map(w => `
+                    <option value="${w.name}" data-balance="${w.balance}" ${w.name === selectedWalletName ? 'selected' : ''}>
+                      ${w.name} ($${w.balance.toLocaleString()} available)
+                    </option>
+                  `).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- OPTION 2: LIVE PREVIEW & FINAL APPROVAL VOUCHER -->
+          <div class="option-card" style="border: 1px solid #A7F3D0; border-radius: var(--radius-md); padding: 16px; background: #F0FDF4;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <label class="form-label" style="font-weight: 700; margin: 0; color: #065F46; display: flex; align-items: center; gap: 6px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16l3-1.5 3 1.5 3-1.5 3 1.5 3-1.5 3 1.5V4a2 2 0 0 0-2-2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg>
+                Option 2: Live Disbursement Preview & Final Approve
+              </label>
+              <span class="badge badge-active" style="font-weight: 700; font-size: 11px;">Preview Ready</span>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="disburse-voucher-preview" style="background: #FFFFFF; border: 1px solid #D1FAE5; border-radius: 6px; padding: 14px; font-size: 12px;">
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 10px;">
+                <div>
+                  <div style="font-weight: 700; color: #0F172A; font-size: 13px;">DISBURSEMENT VOUCHER</div>
+                  <div style="color: var(--color-text-muted);">Ref: ${req.requisitionNo}</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 11px; color: var(--color-text-muted);">Authorization Date</div>
+                  <div style="font-weight: 600;">${new Date().toISOString().split('T')[0]}</div>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                <div><strong>Payee:</strong> ${QrewUI.escapeHtml(req.requestedBy)}</div>
+                <div><strong>File/Project:</strong> ${QrewUI.escapeHtml(req.fileProject || 'General')}</div>
+                <div><strong>Source Wallet:</strong> <span id="preview-wallet-name">${selectedWalletName}</span></div>
+                <div><strong>Category:</strong> ${QrewUI.escapeHtml(req.category)}</div>
+              </div>
+
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 4px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 700; color: #1E293B;">Final Payable Amount:</span>
+                <span id="preview-final-amount" style="font-size: 16px; font-weight: 800; color: #059669;">${formatMoney(req.amount)}</span>
+              </div>
+            </div>
+
+            <!-- Remarks input -->
+            <div style="margin-top: 12px;">
+              <label class="form-label" for="disburse-remarks" style="font-size: 12px;">Approval & Disbursal Remarks (Optional)</label>
+              <input type="text" id="disburse-remarks" class="form-input" style="font-size: 12px;" placeholder="e.g. Approved and authorized by Office Administration" value="Authorized for immediate disbursement.">
+            </div>
+          </div>
+
+        </div>
+      `,
+      footerHtml: `
+        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
+        <button class="btn" id="btn-final-approve-disburse" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; font-weight: 700; padding: 8px 18px; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          Final Approve & Disburse
+        </button>
+      `,
+      onOpen: (modalEl) => {
+        const amountInput = modalEl.querySelector('#disburse-amount-input');
+        const walletSelect = modalEl.querySelector('#disburse-wallet-select');
+        const previewWalletName = modalEl.querySelector('#preview-wallet-name');
+        const previewFinalAmount = modalEl.querySelector('#preview-final-amount');
+        const overwriteNotice = modalEl.querySelector('#overwrite-notice');
+        const finalApproveBtn = modalEl.querySelector('#btn-final-approve-disburse');
+
+        // Dynamic update as admin overwrites amount
+        amountInput.oninput = () => {
+          const val = parseFloat(amountInput.value) || 0;
+          currentDisburseAmount = val;
+          previewFinalAmount.textContent = formatMoney(val);
+
+          if (val !== req.amount) {
+            overwriteNotice.innerHTML = `<span style="color:#D97706;font-weight:600;">Overwritten!</span> Original: ${formatMoney(req.amount)} &rarr; New: ${formatMoney(val)}`;
+          } else {
+            overwriteNotice.innerHTML = `Original requested: ${formatMoney(req.amount)} (Unchanged)`;
+          }
+        };
+
+        // Dynamic update as admin changes wallet
+        walletSelect.onchange = () => {
+          selectedWalletName = walletSelect.value;
+          previewWalletName.textContent = selectedWalletName;
+        };
+
+        // Final Approve & Disburse Trigger
+        finalApproveBtn.onclick = () => {
+          const finalVal = parseFloat(amountInput.value);
+          if (isNaN(finalVal) || finalVal <= 0) {
+            alert('Please enter a valid disbursement amount greater than 0.');
+            return;
+          }
+
+          const remarks = modalEl.querySelector('#disburse-remarks').value.trim();
+
+          // Execute Disburse in DataStore
+          QrewStore.disburseOfficeRequisition(req.id, finalVal, selectedWalletName, remarks);
+
+          QrewUI.closeModal();
+          QrewUI.showToast(`Requisition ${req.requisitionNo} disbursed ($${finalVal.toLocaleString()}) via ${selectedWalletName}`, 'success');
+          state.activeTab = 'requisitions';
+          Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
+        };
+      }
+    });
+  };
+
+  /**
+   * Action: Reject Prompt
+   */
+  Qrew.views.office.rejectRequisitionPrompt = (reqId) => {
+    QrewUI.openModal({
+      title: 'Reject Requisition',
+      bodyHtml: `
+        <div style="font-size: 13px; margin-bottom: 14px;">
+          Please state the reason for rejecting this fund requisition.
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reject-reason">Rejection Reason *</label>
+          <input type="text" id="reject-reason" class="form-input" placeholder="e.g. Budget ceiling reached / insufficient documentation" required>
+        </div>
+      `,
+      footerHtml: `
+        <button class="btn btn-secondary" onclick="QrewUI.closeModal()">Cancel</button>
+        <button class="btn btn-danger" id="btn-confirm-reject">Reject Request</button>
+      `,
+      onOpen: (modalEl) => {
+        const confirmBtn = modalEl.querySelector('#btn-confirm-reject');
+        confirmBtn.onclick = () => {
+          const reason = modalEl.querySelector('#reject-reason').value.trim();
+          if (!reason) return;
+          QrewStore.rejectOfficeRequisition(reqId, reason);
+          QrewUI.closeModal();
+          QrewUI.showToast('Requisition rejected.', 'info');
+          Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
+        };
+      }
+    });
+  };
+
+  /**
    * Modal: Log Expense
-   * Fields correspond to the table columns:
-   * 'File / Project', 'Spent By', 'Category', 'Description', 'Date', 'Amount'
    */
   const openLogExpenseModal = () => {
     const operationalFiles = QrewStore.getOperationalFiles(state.currentOfficeId);
@@ -461,6 +771,7 @@
    * Modal: Request Funds
    */
   const openRequestFundsModal = () => {
+    const operationalFiles = QrewStore.getOperationalFiles(state.currentOfficeId);
     const officeStaff = QrewStore.getOfficeStaff(state.currentOfficeId);
     const wallets = QrewStore.getOfficeWallets(state.currentOfficeId);
 
@@ -468,6 +779,20 @@
       title: 'Request Operational Funds',
       bodyHtml: `
         <form id="request-funds-form" style="display: flex; flex-direction: column; gap: 14px;">
+          
+          <div class="form-group">
+            <label class="form-label" for="req-file-project">File / Project *</label>
+            <input list="req-projects-list" id="req-file-project" class="form-input" placeholder="Select or type file / project (e.g. PRJ-CTG-0042)" required>
+            <datalist id="req-projects-list">
+              ${operationalFiles.map(f => `<option value="${f.fileCode} (${f.title})">`).join('')}
+              <option value="General Operations">
+              <option value="PRJ-CTG-0042 (MV Meghna Harmony)">
+              <option value="PRJ-CTG-0041 (MV Northern Diamond)">
+              <option value="PRJ-CTG-0039 (MV Ocean Voyager)">
+              <option value="PRJ-CTG-0038 (MV Banglar Samriddhi)">
+            </datalist>
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="req-purpose">Purpose / Requisition Reason *</label>
             <input type="text" id="req-purpose" class="form-input" placeholder="e.g. Harbor tugboat fuel advance for vessel berthing" required>
@@ -523,6 +848,7 @@
             return;
           }
 
+          const fileProject = document.getElementById('req-file-project').value.trim();
           const purpose = document.getElementById('req-purpose').value.trim();
           const amount = parseFloat(document.getElementById('req-amount').value);
           const category = document.getElementById('req-category').value;
@@ -530,6 +856,7 @@
           const wallet = document.getElementById('req-wallet').value;
 
           const req = QrewStore.createOfficeRequisition(state.currentOfficeId, {
+            fileProject,
             purpose,
             amount,
             category,
@@ -561,15 +888,6 @@
         Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
       }
     });
-  };
-
-  /**
-   * Action: Approve Requisition
-   */
-  Qrew.views.office.approveRequisition = (id) => {
-    QrewStore.updateOfficeRequisitionStatus(id, 'Approved');
-    QrewUI.showToast('Requisition approved and scheduled for disbursement.', 'success');
-    Qrew.views.office.renderFinancials(state.currentOfficeId, state.currentTenantId);
   };
 
   /**

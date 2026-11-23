@@ -975,6 +975,7 @@ const DEFAULT_DATA = {
       tenantId: 'ten_sst',
       requisitionNo: 'REQ-2026-031',
       requestedBy: 'Jack Rahman',
+      fileProject: 'PRJ-CTG-0042 (MV Meghna Harmony)',
       category: 'Port Operations',
       amount: 3500.00,
       purpose: 'Harbor tugboat advance fund for upcoming Maersk container call',
@@ -988,6 +989,7 @@ const DEFAULT_DATA = {
       tenantId: 'ten_sst',
       requisitionNo: 'REQ-2026-030',
       requestedBy: 'Nusrat Jahan',
+      fileProject: 'PRJ-CTG-0039 (MV Ocean Voyager)',
       category: 'Customs Clearance',
       amount: 1800.00,
       purpose: 'Advance treasury challan deposit for customs manifest filing',
@@ -1001,6 +1003,7 @@ const DEFAULT_DATA = {
       tenantId: 'ten_sst',
       requisitionNo: 'REQ-2026-029',
       requestedBy: 'Rafiqul Islam',
+      fileProject: 'General Operations',
       category: 'Petty Cash',
       amount: 2000.00,
       purpose: 'Monthly office operational petty cash replenishment',
@@ -2614,6 +2617,7 @@ class DataStore {
       tenantId,
       requisitionNo,
       requestedBy: data.requestedBy || 'Office Staff',
+      fileProject: data.fileProject || 'General Operations',
       category: data.category || 'General Operational',
       amount: parseFloat(data.amount) || 0,
       purpose: data.purpose || 'Operational fund requisition',
@@ -2631,6 +2635,69 @@ class DataStore {
     );
     this.save();
     return JSON.parse(JSON.stringify(newReq));
+  }
+
+  disburseOfficeRequisition(id, disbursedAmount, walletName, remarks = '') {
+    if (!this.data.officeRequisitions) this.data.officeRequisitions = [];
+    const idx = this.data.officeRequisitions.findIndex(r => r.id === id);
+    if (idx === -1) throw new Error(`Requisition ${id} not found.`);
+
+    const req = this.data.officeRequisitions[idx];
+    const finalAmount = parseFloat(disbursedAmount) || req.amount;
+    const originalAmount = req.amount;
+    const wallet = walletName || req.wallet || 'Operations Petty Cash';
+
+    req.status = 'Disbursed';
+    req.originalAmount = originalAmount;
+    req.disbursedAmount = finalAmount;
+    req.amount = finalAmount; // Overwritten amount
+    req.wallet = wallet;
+    req.disbursedAt = new Date().toISOString().split('T')[0];
+    req.disbursementRemarks = remarks;
+
+    // Deduct from wallet balance if wallet exists
+    if (this.data.officeWallets) {
+      const wlt = this.data.officeWallets.find(w => w.officeId === req.officeId && w.name === wallet);
+      if (wlt) {
+        wlt.balance = Math.max(0, (parseFloat(wlt.balance) || 0) - finalAmount);
+        wlt.spentThisMonth = (parseFloat(wlt.spentThisMonth) || 0) + finalAmount;
+      }
+    }
+
+    // Record Debit in officeTransactions
+    this.createOfficeTransaction(req.officeId, {
+      type: 'Debit',
+      amount: finalAmount,
+      category: req.category,
+      method: 'Fund Disbursal',
+      description: `Disbursed for ${req.requisitionNo} (${req.purpose}) [File: ${req.fileProject || 'N/A'}]`
+    });
+
+    const overrideNotice = (finalAmount !== originalAmount) ? ` (Overwritten from $${originalAmount.toLocaleString()} to $${finalAmount.toLocaleString()})` : '';
+    this.addAuditLog(
+      'DISBURSE_REQUISITION',
+      'Fund Requisition',
+      id,
+      `Approved and disbursed $${finalAmount.toLocaleString()} for ${req.requisitionNo} via ${wallet}${overrideNotice}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(req));
+  }
+
+  rejectOfficeRequisition(id, reason = '') {
+    if (!this.data.officeRequisitions) this.data.officeRequisitions = [];
+    const idx = this.data.officeRequisitions.findIndex(r => r.id === id);
+    if (idx === -1) return null;
+    this.data.officeRequisitions[idx].status = 'Rejected';
+    this.data.officeRequisitions[idx].rejectionReason = reason;
+    this.addAuditLog(
+      'REJECT_REQUISITION',
+      'Fund Requisition',
+      id,
+      `Rejected requisition ${this.data.officeRequisitions[idx].requisitionNo}. Reason: ${reason || 'Administrative review'}`
+    );
+    this.save();
+    return JSON.parse(JSON.stringify(this.data.officeRequisitions[idx]));
   }
 
   updateOfficeRequisitionStatus(id, status) {
