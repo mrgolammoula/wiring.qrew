@@ -116,52 +116,70 @@
                 <p style="font-size: 14px; margin: 0; color: var(--color-text-muted);">No expenses found.</p>
               </div>
             ` : `
-              <div class="table-responsive" style="overflow-x: auto;">
-                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 980px;">
                   <thead>
-                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); text-align: left; color: var(--color-text-muted); font-size: 12px; font-weight: 600;">
-                      <th style="padding: 14px 18px; width: 22%;">File / Project</th>
-                      <th style="padding: 14px 18px; width: 15%;">Spent By</th>
-                      <th style="padding: 14px 18px; width: 16%;">Category</th>
-                      <th style="padding: 14px 18px; width: 25%;">Description</th>
-                      <th style="padding: 14px 18px; width: 11%;">Date</th>
-                      <th style="padding: 14px 18px; width: 11%; text-align: right;">Amount</th>
-                      <th style="padding: 14px 14px; width: 5%; text-align: center;"></th>
+                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); background: var(--color-surface, #F8FAFC); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--color-text-muted);">
+                      <th style="padding: 12px 16px; width: 24%; text-align: left;">File / Project</th>
+                      <th style="padding: 12px 16px; width: 15%; text-align: left;">Spent By</th>
+                      <th style="padding: 12px 16px; width: 19%; text-align: left;">Category</th>
+                      <th style="padding: 12px 16px; width: 22%; text-align: left;">Description</th>
+                      <th style="padding: 12px 16px; width: 10%; text-align: left;">Date</th>
+                      <th style="padding: 12px 16px; width: 6%; text-align: right;">Amount</th>
+                      <th style="padding: 12px 10px; width: 4%; text-align: center;"></th>
                     </tr>
                   </thead>
                   <tbody>
                     ${filteredExpenses.map(exp => `
                       <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
-                        <td style="padding: 14px 18px; font-weight: 600; color: var(--color-text-primary);">
-                          <div style="display: flex; align-items: center; gap: 8px;">
-                            <span style="color: var(--panel-accent, var(--color-accent));">${QrewUI.getIcon('folder')}</span>
-                            <span>${QrewUI.escapeHtml(exp.fileProject)}</span>
+                        
+                        <!-- 1. File / Project -->
+                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden;">
+                          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+                            <span style="color: var(--panel-accent, var(--color-accent)); flex-shrink: 0;">${QrewUI.getIcon('folder')}</span>
+                            <span style="font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(exp.fileProject)}">
+                              ${QrewUI.escapeHtml(exp.fileProject)}
+                            </span>
                           </div>
                         </td>
-                        <td style="padding: 14px 18px; color: var(--color-text-primary);">
+
+                        <!-- 2. Spent By -->
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
                           <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary);">
+                            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary); flex-shrink: 0;">
                               ${exp.spentBy ? exp.spentBy.charAt(0).toUpperCase() : 'U'}
                             </div>
-                            <span style="font-weight: 500;">${QrewUI.escapeHtml(exp.spentBy)}</span>
+                            <span style="font-weight: 500; color: var(--color-text-primary);">${QrewUI.escapeHtml(exp.spentBy)}</span>
                           </div>
                         </td>
-                        <td style="padding: 14px 18px;">
-                          <span class="badge-role office" style="font-size: 11px; padding: 3px 8px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border);">
+
+                        <!-- 3. Category -->
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
+                          <span class="badge-role office" style="font-size: 11px; padding: 4px 10px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border); white-space: nowrap; display: inline-block;">
                             ${QrewUI.escapeHtml(exp.category)}
                           </span>
                         </td>
-                        <td style="padding: 14px 18px; color: var(--color-text-secondary); line-height: 1.4;">
-                          ${QrewUI.escapeHtml(exp.description)}
+
+                        <!-- 4. Description -->
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-secondary); line-height: 1.4; overflow: hidden;">
+                          <div style="overflow: hidden; text-overflow: ellipsis; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;" title="${QrewUI.escapeHtml(exp.description)}">
+                            ${QrewUI.escapeHtml(exp.description)}
+                          </div>
                         </td>
-                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+
+                        <!-- 5. Date -->
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
                           ${exp.date}
                         </td>
-                        <td style="padding: 14px 18px; text-align: right; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
+
+                        <!-- 6. Amount -->
+                        <td style="padding: 14px 16px; vertical-align: middle; text-align: right; font-weight: 700; color: var(--color-text-primary); font-size: 13px; white-space: nowrap;">
                           ${formatMoney(exp.amount, '$')}
                         </td>
-                        <td style="padding: 14px 14px; text-align: center;">
-                          <button class="btn btn-secondary btn-icon btn-danger-light" style="padding: 4px 6px; font-size: 11px; border: none;" onclick="Qrew.views.office.deleteExpensePrompt('${exp.id}')" title="Delete Expense">
+
+                        <!-- 7. Action / Delete -->
+                        <td style="padding: 14px 10px; vertical-align: middle; text-align: center;">
+                          <button class="btn btn-secondary btn-icon btn-danger-light" style="padding: 5px 7px; font-size: 11px; border: none; cursor: pointer; border-radius: 4px;" onclick="Qrew.views.office.deleteExpensePrompt('${exp.id}')" title="Delete Expense">
                             ${QrewUI.getIcon('trash')}
                           </button>
                         </td>
@@ -183,16 +201,16 @@
                 <p style="font-size: 14px; margin: 0; color: var(--color-text-muted);">No requisitions found.</p>
               </div>
             ` : `
-              <div class="table-responsive" style="overflow-x: auto;">
-                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+                <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; min-width: 980px;">
                   <thead>
-                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); text-align: left; color: var(--color-text-muted); font-size: 12px; font-weight: 600;">
-                      <th style="padding: 14px 18px; width: 18%;">Requested By</th>
-                      <th style="padding: 14px 18px; width: 12%; text-align: left;">Amount</th>
-                      <th style="padding: 14px 18px; width: 12%;">Date</th>
-                      <th style="padding: 14px 18px; width: 24%;">File / Project</th>
-                      <th style="padding: 14px 18px; width: 12%; text-align: center;">Status</th>
-                      <th style="padding: 14px 18px; width: 22%; text-align: right;">Actions</th>
+                    <tr style="border-bottom: 1px solid var(--color-border, #E2E8F0); background: var(--color-surface, #F8FAFC); font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: var(--color-text-muted);">
+                      <th style="padding: 12px 16px; width: 18%; text-align: left;">Requested By</th>
+                      <th style="padding: 12px 16px; width: 11%; text-align: left;">Amount</th>
+                      <th style="padding: 12px 16px; width: 10%; text-align: left;">Date</th>
+                      <th style="padding: 12px 16px; width: 26%; text-align: left;">File / Project</th>
+                      <th style="padding: 12px 16px; width: 11%; text-align: center;">Status</th>
+                      <th style="padding: 12px 16px; width: 24%; text-align: right;">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -200,20 +218,20 @@
                       <tr style="border-bottom: 1px solid var(--color-border-subtle, #F1F5F9); transition: background 0.15s ease;" onmouseover="this.style.backgroundColor='var(--color-surface)'" onmouseout="this.style.backgroundColor='transparent'">
                         
                         <!-- 1. Requested By -->
-                        <td style="padding: 14px 18px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; white-space: nowrap;">
                           <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="width: 26px; height: 26px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary);">
+                            <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--color-text-primary); flex-shrink: 0;">
                               ${req.requestedBy ? req.requestedBy.charAt(0).toUpperCase() : 'U'}
                             </div>
                             <div>
-                              <div style="font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(req.requestedBy)}</div>
-                              <div style="font-size: 11px; color: var(--color-text-muted);">${QrewUI.escapeHtml(req.requisitionNo)}</div>
+                              <div style="font-weight: 600; color: var(--color-text-primary); font-size: 13px;">${QrewUI.escapeHtml(req.requestedBy)}</div>
+                              <div style="font-size: 11px; color: var(--color-text-muted); font-family: monospace;">${QrewUI.escapeHtml(req.requisitionNo)}</div>
                             </div>
                           </div>
                         </td>
 
                         <!-- 2. Amount -->
-                        <td style="padding: 14px 18px; font-weight: 700; color: var(--color-text-primary); font-size: 14px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; font-weight: 700; color: var(--color-text-primary); font-size: 14px; white-space: nowrap;">
                           ${formatMoney(req.amount)}
                           ${req.originalAmount && req.originalAmount !== req.amount ? `
                             <div style="font-size: 10px; color: var(--color-text-muted); text-decoration: line-through; font-weight: 400;">
@@ -223,38 +241,42 @@
                         </td>
 
                         <!-- 3. Date -->
-                        <td style="padding: 14px 18px; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
+                        <td style="padding: 14px 16px; vertical-align: middle; color: var(--color-text-muted); font-size: 12px; white-space: nowrap;">
                           ${req.date}
                         </td>
 
                         <!-- 4. File / Project -->
-                        <td style="padding: 14px 18px;">
-                          <div style="font-weight: 600; color: var(--color-text-primary);">${QrewUI.escapeHtml(req.fileProject || 'General Operations')}</div>
-                          <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3;">${QrewUI.escapeHtml(req.purpose || req.category)}</div>
+                        <td style="padding: 14px 16px; vertical-align: middle; overflow: hidden;">
+                          <div style="font-weight: 600; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(req.fileProject || 'General Operations')}">
+                            ${QrewUI.escapeHtml(req.fileProject || 'General Operations')}
+                          </div>
+                          <div style="font-size: 11px; color: var(--color-text-muted); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${QrewUI.escapeHtml(req.purpose || req.category)}">
+                            ${QrewUI.escapeHtml(req.purpose || req.category)}
+                          </div>
                         </td>
 
                         <!-- 5. Status -->
-                        <td style="padding: 14px 18px; text-align: center;">
+                        <td style="padding: 14px 16px; vertical-align: middle; text-align: center; white-space: nowrap;">
                           ${getRequisitionBadge(req.status)}
                         </td>
 
                         <!-- 6. Actions (Two Sections: 'Action' and 'Action & Disburse') -->
-                        <td style="padding: 14px 18px; text-align: right;">
-                          <div style="display: inline-flex; align-items: center; gap: 8px;">
+                        <td style="padding: 14px 16px; vertical-align: middle; text-align: right; white-space: nowrap;">
+                          <div style="display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px;">
                             
                             <!-- Section 1: Standard Action Button / Menu -->
-                            <button class="btn btn-secondary btn-action-preview" style="padding: 6px 11px; font-size: 12px; font-weight: 500;" onclick="Qrew.views.office.openActionModal('${req.id}')" title="Preview Requisition Details">
+                            <button class="btn btn-secondary btn-action-preview" style="padding: 6px 12px; font-size: 12px; font-weight: 500;" onclick="Qrew.views.office.openActionModal('${req.id}')" title="Preview Requisition Details">
                               Action
                             </button>
 
                             <!-- Section 2: Action & Disburse Button (with amount override & approval) -->
                             ${req.status !== 'Disbursed' ? `
-                              <button class="btn btn-action-disburse" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px; box-shadow: var(--shadow-xs);" onclick="Qrew.views.office.openActionDisburseModal('${req.id}')" title="Review, Overwrite Amount, Preview, and Final Approve">
+                              <button class="btn btn-action-disburse" style="background-color: #059669; color: #FFFFFF; border: 1px solid #059669; padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px; box-shadow: var(--shadow-xs); white-space: nowrap;" onclick="Qrew.views.office.openActionDisburseModal('${req.id}')" title="Review, Overwrite Amount, Preview, and Final Approve">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
                                 Action & Disburse
                               </button>
                             ` : `
-                              <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; color: var(--color-success); font-weight: 600;" onclick="Qrew.views.office.openActionModal('${req.id}')">
+                              <button class="btn btn-secondary" style="padding: 6px 10px; font-size: 11px; color: var(--color-success); font-weight: 600; white-space: nowrap;" onclick="Qrew.views.office.openActionModal('${req.id}')">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                                 Disbursed
                               </button>
